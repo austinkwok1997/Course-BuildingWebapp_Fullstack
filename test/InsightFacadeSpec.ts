@@ -25,9 +25,12 @@ describe("InsightFacadeSpec", function() {
     it("addDataset test FEW json file in zip", function() {
 
         zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
-        facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
-            var t=JSON.parse(InF.body.toString());
-            console.log(InF.code+": "+t["text"]);
+        return facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
+            //var t=JSON.parse(InF.body.toString());
+            console.log(InF.code);
+        }).catch(function(err:any){
+            console.log(err);
+            expect.fail();
         });
     });
 
@@ -35,10 +38,14 @@ describe("InsightFacadeSpec", function() {
         zipContent = fs.readFileSync("oneJsonTest.zip").toString("base64");
         facade.addDataset("oneJsonTest", zipContent).then(function(InF:InsightResponse){
             console.log(InF.code+": "+InF.body);
+        }).catch(function(err:any){
+            console.log(err);
+            expect.fail();
         });
 
         //   zipContent = fs.readFileSync("courses.zip").toString("base64");
         //   facade.addDataset("courses",zipContent);
+
     });
  //   it("addDataset test", function() {
  //       zipContent = fs.readFileSync("courses.zip").toString("base64");

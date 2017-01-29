@@ -11,18 +11,38 @@ describe("InsightFacadeSpec", function() {
     let facade: any = null;
     let zipContent: any;
     before(function() {
-        zipContent = fs.readFileSync("courses.zip").toString("base64");
+        //zipContent = fs.readFileSync("courses.zip").toString("base64");
     });
     beforeEach(function() {
-        facade = null;
         facade = new InsightFacade();
     });
     afterEach(function() {
        facade = null;
     });
 
-    it("addDataset", function() {
-        facade.addDataset("courses",zipContent);
+
+
+    it("addDataset test FEW json file in zip", function() {
+
+        zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
+        facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
+            var t=JSON.parse(InF.body.toString());
+            console.log(InF.code+": "+t["text"]);
+        });
     });
+
+    it("addDataset test 1 json file in zip", function() {
+        zipContent = fs.readFileSync("oneJsonTest.zip").toString("base64");
+        facade.addDataset("oneJsonTest", zipContent).then(function(InF:InsightResponse){
+            console.log(InF.code+": "+InF.body);
+        });
+
+        //   zipContent = fs.readFileSync("courses.zip").toString("base64");
+        //   facade.addDataset("courses",zipContent);
+    });
+ //   it("addDataset test", function() {
+ //       zipContent = fs.readFileSync("courses.zip").toString("base64");
+ //       facade.addDataset("courses",zipContent);
+ //   });
 
 });

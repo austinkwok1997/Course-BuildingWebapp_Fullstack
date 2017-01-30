@@ -4,8 +4,9 @@
 import {IInsightFacade, InsightResponse, QueryRequest} from "./IInsightFacade";
 
 import Log from "../Util";
-var dataStructure: any = {};
 
+
+var dataStructure: any = new Object();
 export default class InsightFacade implements IInsightFacade {
 
 
@@ -22,7 +23,7 @@ export default class InsightFacade implements IInsightFacade {
             var JSZip = require("jszip");
             dataStructure[id]={};
 
-            var keyArray: String[] = [];
+            var keyArray: string[] = [];
             var promises: Promise<String>[]=[];
 
             // loads the data
@@ -62,17 +63,18 @@ export default class InsightFacade implements IInsightFacade {
                 });
 
                 Promise.all(promises).then(function(arrayFileData:any){
-                    console.log("#5...; in promiseAll with: "+arrayFileData)
-
+                    console.log("#5...; in promiseAll with: "+arrayFileData);
+                    var keyIndex = 0;
                     arrayFileData.forEach(function(fileData:any){
                         if(fileData!=null && fileData != '') {
                             var obj = JSON.parse(fileData);
-                            console.log("#5...;  object is :" + obj); //should print json: [Object object]
 
-                            //TODO: START HERE ...obj["key"]...-> to dataStructure
+                            dataStructure[id][keyArray[keyIndex]] = obj;
+
                         }
-                    })
-
+                        keyIndex++;
+                    });
+                    console.log(dataStructure);
                     let success:InsightResponse= {code:200,body:{"text":"the operation was successful and the id was new (not added in this session or was previously cached)."}};
                     fulfill(success);
 
@@ -88,12 +90,14 @@ export default class InsightFacade implements IInsightFacade {
 
             console.log("#0.1; outside iterating through keys: "+id);
 
-
         });
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
-        return null;
+        // TODO: finish this to return InsightResponse
+        return new Promise (function (fulfill, reject) {
+            delete dataStructure[id];
+        });
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {

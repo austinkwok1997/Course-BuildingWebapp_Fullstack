@@ -33,10 +33,13 @@ describe("InsightFacadeSpec", function() {
             expect.fail();
         });
     });
+    it("remove the first dataset", function() {
+        facade.removeDataset("coursesFewJson");
+    });
 
     it("addDataset test 1 json file in zip", function() {
         zipContent = fs.readFileSync("oneJsonTest.zip").toString("base64");
-        facade.addDataset("oneJsonTest", zipContent).then(function(InF:InsightResponse){
+        return facade.addDataset("oneJsonTest", zipContent).then(function(InF:InsightResponse){
             console.log(InF.code+": "+InF.body);
         }).catch(function(err:any){
             console.log(err);

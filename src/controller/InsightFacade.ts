@@ -2,11 +2,11 @@
  * This is the main programmatic entry point for the project.
  */
 import {IInsightFacade, InsightResponse, QueryRequest} from "./IInsightFacade";
-
 import Log from "../Util";
+import {courses} from "./courses";
 
 
-var dataStructure: any = new Object();
+var dataStructure: any = []
 export default class InsightFacade implements IInsightFacade {
 
 
@@ -64,17 +64,51 @@ export default class InsightFacade implements IInsightFacade {
 
                 Promise.all(promises).then(function(arrayFileData:any){
                     console.log("#5...; in promiseAll with: "+arrayFileData);
-                    var keyIndex = 0;
                     arrayFileData.forEach(function(fileData:any){
                         if(fileData!=null && fileData != '') {
                             var obj = JSON.parse(fileData);
 
-                            dataStructure[id][keyArray[keyIndex]] = obj;
+                            for (var course of obj["result"]){
+                                // creates new course for each course in Array
+                                // and puts it in dataStructure
+                                console.log("adding new course");
+                                var newCourse = new courses(id);
+                                let key = Object.keys(course);
+                                if (key.includes("Subject")){
+                                    newCourse.setDept(course["Subject"]);
+                                }
+                                if (key.includes("Course")){
+                                    newCourse.setCourseId(course["Course"]);
+                                }
+                                if (key.includes("Avg")){
+                                    newCourse.setAvg(course["Avg"]);
+                                }
+                                if (key.includes("Professor")){
+                                    newCourse.setInstructor(course["Instructor"]);
+                                }
+                                if (key.includes("Title")){
+                                    newCourse.setTitle(course["Title"]);
+                                }
+                                if (key.includes("Pass")){
+                                    newCourse.setPass(course["Pass"]);
+                                }
+                                if (key.includes("Fail")){
+                                    newCourse.setFail(course["Fail"]);
+                                }
+                                if (key.includes("Audit")){
+                                    newCourse.setAudit(course["Audit"]);
+                                }
+                                // TODO: I'm confused where to find uuid
+                                dataStructure.push(newCourse);
+                            }
+
+
 
                         }
-                        keyIndex++;
                     });
-                    console.log(dataStructure);
+                    for (let course of dataStructure){
+                        console.log(course.getDept());
+                    }
                     let success:InsightResponse= {code:200,body:{"text":"the operation was successful and the id was new (not added in this session or was previously cached)."}};
                     fulfill(success);
 

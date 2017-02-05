@@ -15,7 +15,7 @@ class dStructure {
 class rObject{
     [propName:string]:any;
 }
-//var dataStructure=new dStructure();
+var dataStructure=new dStructure();
 
 //class QueryRequest implements QueryRequest{
 //    [propName:string]:any;
@@ -23,7 +23,7 @@ class rObject{
 
 export default class InsightFacade implements IInsightFacade {
 
-    dataStructure:{[propName:string]:any;};
+    //dataStructure:{[propName:string]:any;};
 
     constructor() {
         Log.trace('InsightFacadeImpl::init()');
@@ -32,90 +32,134 @@ export default class InsightFacade implements IInsightFacade {
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
-        let dataStructure=new dStructure();//************************************
-        let that=this;
+        //let dataStructure=new dStructure();//************************************
+        //let that=this;
+        if(!dataStructure.hasOwnProperty(id)) {
+            return new Promise(function (fulfill, reject) {
+                var JSZip = require("jszip");
+                dataStructure[id] = {};
 
-        return new Promise (function (fulfill, reject) {
-            var JSZip = require("jszip");
-            dataStructure[id]={};
+                var keyArray: string[] = [];
+                var promises: Promise<String>[] = [];
 
-            var keyArray: string[] = [];
-            var promises: Promise<String>[]=[];
+                // loads the data
+                JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
 
-            // loads the data
-            JSZip.loadAsync(content, {base64: true}).then(function(zipFile: any) {
-
-                //console.log("#1; in load Async of: " + id);
+                    //console.log("#1; in load Async of: " + id);
 
 //TODO CALL THE ASYNC?
-                Object.keys(zipFile.files).forEach(function (key: any) {
+                    Object.keys(zipFile.files).forEach(function (key: any) {
 
-                 //   console.log("#2...; in the keys function " + key);
-                    keyArray.push(key);
-                });
+                        //   console.log("#2...; in the keys function " + key);
+                        keyArray.push(key);
+                    });
 
-                return zipFile;
+                    return zipFile;
 
-            }).then(function(zipFile:any){
-                keyArray.forEach(function(key:any) {
-                 //   console.log("#4...; inside array loop for key: " + key);
-                    //need new promise each time so we can call promise all at the end:
-                    var newPromise = new Promise( function(resolve) {
-                        zipFile.files[key].async('string').then(function (fileData: any) {
+                }).then(function (zipFile: any) {
+                    keyArray.forEach(function (key: any) {
+                        //   console.log("#4...; inside array loop for key: " + key);
+                        //need new promise each time so we can call promise all at the end:
+                        var newPromise = new Promise(function (resolve) {
+                            zipFile.files[key].async('string').then(function (fileData: any) {
 
-                  //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
-                            resolve(fileData);
+                                //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
+                                resolve(fileData);
+                            });
                         });
+
+                        promises.push(newPromise);
                     });
 
-                    promises.push(newPromise);
-                });
+                    Promise.all(promises).then(function (arrayFileData: any) {
+                        // console.log("#5...; in promiseAll with: "+arrayFileData);
+                        var keyIndex = 0;
+                        arrayFileData.forEach(function (fileData: any) {
+                            if (fileData != null && fileData != '') {
+                                var obj = JSON.parse(fileData); //parses JSON string to Json object
 
-                Promise.all(promises).then(function(arrayFileData:any){
-                    // console.log("#5...; in promiseAll with: "+arrayFileData);
-                    var keyIndex = 0;
-                    arrayFileData.forEach(function(fileData:any){
-                        if(fileData!=null && fileData != '') {
-                            var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                dataStructure[id][keyArray[keyIndex]] = obj;
+                            }
+                            keyIndex++;
+                        });
+                        //console.log("this is the cached as an object right now: "+dataStructure);
+                        // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
+                        //console.log(dataArray);
+                        ///that.dataStructure=dataStructure;
+                        let success: InsightResponse = {
+                            code: 200,
+                            body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
+                        };
+                        fulfill(success);
 
-                            dataStructure[id][keyArray[keyIndex]] = obj;
-                        }
-                        keyIndex++;
+                    }).catch(function (error) {
+                        console.log("JSON parse error: " + error);
+                        reject(error);
                     });
-                    //console.log("this is the cached as an object right now: "+dataStructure);
-                    // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
-                    //console.log(dataArray);
-                    that.dataStructure=dataStructure;
-                    let success:InsightResponse= {code:200,body:{"text":"the operation was successful and the id was new (not added in this session or was previously cached)."}};
-                    fulfill(success);
 
-                }).catch(function(error){
-                    console.log("JSON parse error: " +error);
-                    reject(error);
+                }).catch(function (err: any) {
+
+                    let errorInsResp: InsightResponse = {
+                        code: 400,
+                        body: {"text": "error" + ": fs could not read file: " + err}
+                    };
+                    reject(errorInsResp);
+
+                    console.log("#-0; async fail: " + err);
                 });
 
-            }).catch(function(err:any){
+                console.log("#0.1; outside iterating through id: " + id);
 
-                let errorInsResp:InsightResponse= {code:400,body:{"text": "error"+": fs could not read file: "+ err}};
-                reject(errorInsResp);
-
-                console.log("#-0; async fail: "+err);
             });
-
-            console.log("#0.1; outside iterating through id: "+id);
-
-        });
+        }else{
+            let alreadyHasInsResp: InsightResponse = {
+                code: 204,
+                body: {"text": "the operation was successful and the id already existed (was added in this session or was previously cached)."}
+            };
+            return new Promise(function(resolve, reject){
+                resolve(alreadyHasInsResp);
+            });
+        }
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
-        // TODO: finish this to return InsightResponse
-        let that=this;
 
         return new Promise (function (fulfill, reject) {
-            delete that.dataStructure[id];
+            if(dataStructure.hasOwnProperty(id)) {
+                delete dataStructure[id];
+                let deleteDoneInsResp: InsightResponse = {
+                    code: 201,
+                    body: {"text": "the operation was successful."}
+                };
+                fulfill(deleteDoneInsResp);
+            }else{
+                let deleteDoneInsResp: InsightResponse = {
+                    code: 404,
+                    body: {"text": "the operation was unsuccessful because the delete was for a resource that was not previously added."}
+                };
+                reject(deleteDoneInsResp);
+            }
         });
     }
 
+    removeAllDataset(){
+        var promises:Promise<rObject>[]=[];
+
+        return new Promise(function(fulfill,reject) {
+            for (var key in dataStructure) {
+                let newPromise=new Promise(function(fulfill){
+                    this.removeDataset(key);
+                });
+                promises.push(newPromise);
+            }
+            Promise.all(promises).then(function(arrayObject:any){
+                console.log("all dataset should be deleted");
+                fulfill(true);
+            })
+        }).catch(function(err){
+            console.log(err);
+        })
+    }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
 
@@ -149,9 +193,9 @@ export default class InsightFacade implements IInsightFacade {
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
             var promisesForEachCourse:Promise<Boolean>[]=[];
 
-            for (var id in that.dataStructure) {
+            for (var id in dataStructure) {
 
-                    let setOfCourses = that.dataStructure[id];
+                    let setOfCourses = dataStructure[id];
                     for (var course in setOfCourses) {
                         var newPromiseForEachCourse = new Promise(function (resolve) {
                             let resultArray: Array<Object> = [];
@@ -196,40 +240,46 @@ export default class InsightFacade implements IInsightFacade {
                     fulfill(response);
                 });
             });
-            //return new Promise(function(fulfill,reject) {fulfill(response)});
+
         }).catch(function(err){
             console.log("ERROR: "+err);
         });
         return mainPromise;
     }
 
+    getDataStructure():Object{
+        return dataStructure;
+    }
+
     //takes in the filter and a course term returns if info shold be added or not
-    filterManager(filter:JSON,toCompare: Object):Boolean{ //recursive function for "WHERE"; base case in
+    filterManager(filter:Object,toCompare: Object):boolean{ //recursive function for "WHERE"; base case in
         let that=this;
 
         var filterObject=JSON.parse(JSON.stringify(filter));
-        var toCompareObject=JSON.parse(JSON.stringify(toCompare));
 
         //LOGICCOMPARISON => recursive calls
         if(filterObject.hasOwnProperty('OR')){
             let filterArray=filterObject['OR'];
-            filterArray.forEach(function(filt:any) {
-                    if (that.filterManager(filt, toCompare)) {
-                        return true;
-                    }
-            });
-            return false;
+            let resultBool:boolean=false;
+            for(let filt=0;filt<filterArray.length;filt++){
+                resultBool=that.filterManager(filterArray[filt], toCompare);
+                //console.log("OR loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
+                if (resultBool===true) {
+                    break;
+                }
+            }
+            return resultBool;
         }else if(filterObject.hasOwnProperty('AND')){
             let filterArray=filterObject['AND'];
-            filterArray.forEach(function(filt:any){
-                //for(var filt in object) {
-                    let resultBool=that.filterManager(filt, toCompare);
-                    if (!resultBool) {
-                        return false;
+            let resultBool=true;
+            for(let filt=0;filt<filterArray.length;filt++){
+                    resultBool=that.filterManager(filterArray[filt], toCompare);
+                    //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
+                    if (resultBool===false) {
+                        break;
                     }
-               // }
-            });
-            return true;
+            };
+            return resultBool;
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //MCOMPARISON =>terminal base cases
@@ -260,7 +310,7 @@ export default class InsightFacade implements IInsightFacade {
         }
         else if(filterObject.hasOwnProperty('LT')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var key in filterObject.GT){
+            for(var key in filterObject.LT){
 
                 if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
                     let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
@@ -280,7 +330,7 @@ export default class InsightFacade implements IInsightFacade {
             for(var key in filterObject.IS){
                 if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
                     let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
-                    if(!that.sComparison(filterObject.IS[key],val)) {//checks for false Scomparison conditions
+                    if(that.sComparison(filterObject.IS[key],val)===false) {//checks for false Scomparison conditions
                         return false;
                     }
                 }
@@ -367,4 +417,3 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 }
-

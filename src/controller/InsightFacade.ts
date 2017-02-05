@@ -9,24 +9,35 @@ import {stringify} from "querystring";
 import {type} from "os";
 //import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
-var dataStructure: Object = {};
+class dStructure {
+    [propName:string]:any;
+};
+class rObject{
+    [propName:string]:any;
+}
+//var dataStructure=new dStructure();
+
+//class QueryRequest implements QueryRequest{
+//    [propName:string]:any;
+//}
 
 export default class InsightFacade implements IInsightFacade {
 
-
+    dataStructure:{[propName:string]:any;};
 
     constructor() {
         Log.trace('InsightFacadeImpl::init()');
+
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
-        //****INTENDED ORDER OF EXECUTION IN ACCORDANCE TO NUMBERS IN CONSOLE LOG**********
+        let dataStructure=new dStructure();//************************************
+        let that=this;
 
         return new Promise (function (fulfill, reject) {
             var JSZip = require("jszip");
             dataStructure[id]={};
-            //var dataArray:string[]=[];
 
             var keyArray: string[] = [];
             var promises: Promise<String>[]=[];
@@ -34,32 +45,25 @@ export default class InsightFacade implements IInsightFacade {
             // loads the data
             JSZip.loadAsync(content, {base64: true}).then(function(zipFile: any) {
 
-                // grabbing the keys in zipFile.files
-                console.log("#1; in load Async of: " + id);
+                //console.log("#1; in load Async of: " + id);
 
-
+//TODO CALL THE ASYNC?
                 Object.keys(zipFile.files).forEach(function (key: any) {
 
-                    console.log("#2...; in the keys function " + key);
+                 //   console.log("#2...; in the keys function " + key);
                     keyArray.push(key);
                 });
 
                 return zipFile;
 
             }).then(function(zipFile:any){
-
-                var testKeyArrayResult="";
-                keyArray.forEach(function(key:any) {testKeyArrayResult+= " "+key;});
-                console.log("#3; should have complete keyArray -- heres what it is right now: "+testKeyArrayResult);
-
                 keyArray.forEach(function(key:any) {
-                    console.log("#4...; inside array loop for key: " + key);
-
+                 //   console.log("#4...; inside array loop for key: " + key);
                     //need new promise each time so we can call promise all at the end:
                     var newPromise = new Promise( function(resolve) {
                         zipFile.files[key].async('string').then(function (fileData: any) {
 
-                            console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
+                  //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
                             resolve(fileData);
                         });
                     });
@@ -68,7 +72,7 @@ export default class InsightFacade implements IInsightFacade {
                 });
 
                 Promise.all(promises).then(function(arrayFileData:any){
-                    console.log("#5...; in promiseAll with: "+arrayFileData);
+                    // console.log("#5...; in promiseAll with: "+arrayFileData);
                     var keyIndex = 0;
                     arrayFileData.forEach(function(fileData:any){
                         if(fileData!=null && fileData != '') {
@@ -78,14 +82,17 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         keyIndex++;
                     });
-                    console.log(dataStructure);
-
+                    //console.log("this is the cached as an object right now: "+dataStructure);
+                    // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
                     //console.log(dataArray);
-
+                    that.dataStructure=dataStructure;
                     let success:InsightResponse= {code:200,body:{"text":"the operation was successful and the id was new (not added in this session or was previously cached)."}};
                     fulfill(success);
 
-                }).catch(function(error){console.log("JSON parse error: " +error)});
+                }).catch(function(error){
+                    console.log("JSON parse error: " +error);
+                    reject(error);
+                });
 
             }).catch(function(err:any){
 
@@ -95,98 +102,133 @@ export default class InsightFacade implements IInsightFacade {
                 console.log("#-0; async fail: "+err);
             });
 
-            console.log("#0.1; outside iterating through keys: "+id);
+            console.log("#0.1; outside iterating through id: "+id);
 
         });
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
         // TODO: finish this to return InsightResponse
+        let that=this;
+
         return new Promise (function (fulfill, reject) {
-            delete dataStructure[id];
+            delete that.dataStructure[id];
         });
     }
 
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
 
+        let that=this;
+
         var q=query;
         var queryJson=JSON.parse(JSON.stringify(q));//convert to a JS object (convert object to JSON String)????????
         var response:InsightResponse={code:777,body:{}};
-        var responseObject= {render:'TABLE',result:[new Object]};
+        var responseObject= {render:'TABLE',result:<any>[]};
 
-        //return new Promise(function(fulfill,reject) {
+
+        var mainPromise:Promise <InsightResponse>=new Promise(function(fulfill,reject) {
             if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
                 console.log("invalid query");
-                response.code=424;
-                response.body={"missing": ["WHERE or OPTIONS"]};
-                //reject(response);       //TODO: sperate case for option and where?******************
+                response.code = 424;
+                response.body = {"missing": ["WHERE or OPTIONS"]};
+                reject(response);       //TODO: seperate case for option and where?******************
             }
 
-            var queryJsonOptions=queryJson.OPTIONS;
-            if(!this.hasValidOptions(queryJsonOptions)){//checks for proper options format
+            var queryJsonOptions = queryJson.OPTIONS;
+            if (!that.hasValidOptions(queryJsonOptions)) {//checks for proper options format
                 console.log("invalid query options");
-                response.code=400;
-                response.body={"error": "invalid query OPTIONS"};
-                //reject(response); //TODO
+                response.code = 400;
+                response.body = {"error": "invalid query OPTIONS"};
+                reject(response);
             }
 
-            var keyArray=queryJsonOptions.COLUMNS;
-            var queryWhereObject=JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
+            var keyArray = queryJsonOptions.COLUMNS;
+            var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
-            for(var id in dataStructure){
-                //let newDataSetObject=dataStructure[id];
-                //let resultArray:Array<Object>=[];
-                //resultArray=newDataSetObject['result'];
-                //resultArray.forEach
-                dataStructure[id]['result'].forEach(function(courseTermData:Object) {
-                    //maaking a resultObject for each courseTermData
-                    let resultObject={};
-                    keyArray.forEach(function(k:any){
-                        resultObject[this.keyToJsonKey(keyArray)]; //add property 'key' to the result object
-                    }) //now we have an object of what we want in terms of json keys
+            var promisesForEachTermInCourse:Promise<Boolean>[]=[];
+            var promisesForEachCourse:Promise<Boolean>[]=[];
 
-                    if (this.filterManager(queryWhereObject, courseTermData)) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                        //push keyToJsonKey(WHERE_value) into an array(maybe hashtable?) with same type of keys
-                        for(var key in resultObject){
-                            if(key==='id'){
-                                key=courseTermData[key].toString; //special case if keyArray element is id we need to turn the int into a string
-                            }else {
-                                key = courseTermData[key];//take desired keys from result object and fill them with the values in valid courseTermData
-                            }
-                        }
+            for (var id in that.dataStructure) {
+
+                    let setOfCourses = that.dataStructure[id];
+                    for (var course in setOfCourses) {
+                        var newPromiseForEachCourse = new Promise(function (resolve) {
+                            let resultArray: Array<Object> = [];
+                            resultArray = setOfCourses[course.toString()]['result'];
+                            resultArray.forEach(function (courseTermData: Object) {
+
+                                let newPromiseForEachTerm=new Promise(function(resolve){
+                                    //making a resultObject for each courseTermData
+                                    let resultObject = new rObject();
+                                    keyArray.forEach(function (k: any) {
+                                        resultObject[k] = null;
+                                    });
+
+                                    var filterResult=that.filterManager(queryWhereObject, courseTermData);
+                                    if (filterResult) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                                        for (var key in resultObject) {
+                                            if (key === 'id') {
+                                                resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
+                                            } else {
+                                                resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
+                                            }
+                                        }
+                                        responseObject['result'].push(resultObject);
+                                    }
+                                    resolve(true);
+                                });
+                                promisesForEachTermInCourse.push(newPromiseForEachTerm);
+                            });
+                            resolve(true);
+                        }).catch(function(err){
+                            response['code'] = 400;
+                            response['body'] = err;
+                            reject(response);
+                        });
+                        promisesForEachCourse.push(newPromiseForEachCourse);
                     }
-                    responseObject['result'].push(resultObject);
-                });
-
             }
-            response['body']=responseObject;
-
-
-        return new Promise(function(fulfill,reject) {fulfill(response)});
+            Promise.all(promisesForEachTermInCourse).then(function () {
+                Promise.all(promisesForEachCourse).then(function () {
+                    response['code'] = 200;
+                    response['body'] = responseObject;
+                    fulfill(response);
+                });
+            });
+            //return new Promise(function(fulfill,reject) {fulfill(response)});
+        }).catch(function(err){
+            console.log("ERROR: "+err);
+        });
+        return mainPromise;
     }
 
     //takes in the filter and a course term returns if info shold be added or not
     filterManager(filter:JSON,toCompare: Object):Boolean{ //recursive function for "WHERE"; base case in
+        let that=this;
+
         var filterObject=JSON.parse(JSON.stringify(filter));
         var toCompareObject=JSON.parse(JSON.stringify(toCompare));
 
         //LOGICCOMPARISON => recursive calls
         if(filterObject.hasOwnProperty('OR')){
             let filterArray=filterObject['OR'];
-            filterArray.foreach(function(filt:any){
-                if(this.filterManager(filt,toCompare)){
-                    return true;
-                }
-            })
+            filterArray.forEach(function(filt:any) {
+                    if (that.filterManager(filt, toCompare)) {
+                        return true;
+                    }
+            });
             return false;
         }else if(filterObject.hasOwnProperty('AND')){
             let filterArray=filterObject['AND'];
             filterArray.forEach(function(filt:any){
-                if(!this.filterManager(filt,toCompare)){
-                    return false;
-                }
-            })
+                //for(var filt in object) {
+                    let resultBool=that.filterManager(filt, toCompare);
+                    if (!resultBool) {
+                        return false;
+                    }
+               // }
+            });
             return true;
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -195,7 +237,7 @@ export default class InsightFacade implements IInsightFacade {
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
             for(var key in filterObject.EQ){
                 if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompare[(this.keyToJsonKey(key)).toString()];
+                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
                     if (!(filterObject.EQ[key] === val)) {
                         return false;
                     }
@@ -207,7 +249,7 @@ export default class InsightFacade implements IInsightFacade {
             for(var key in filterObject.GT){
 
                 if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompare[(this.keyToJsonKey(key)).toString()];
+                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
                     if(typeof filterObject.GT[key]==='number' && typeof val==='number') {
                         if (filterObject.GT[key] > val) { //if lower bound(greaterThan) is greater the val
                             return false;
@@ -221,7 +263,7 @@ export default class InsightFacade implements IInsightFacade {
             for(var key in filterObject.GT){
 
                 if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompare[(this.keyToJsonKey(key)).toString()];
+                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
                     if(typeof filterObject.LT[key]==='number' && typeof val==='number') {
                         if (filterObject.LT[key] < val) { //if lower bound(greaterThan) is greater the val
                             return false;
@@ -232,12 +274,23 @@ export default class InsightFacade implements IInsightFacade {
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //SCOMPARISON =>terminal base cases
-        else if(filterObject.hasOwnProperty('IS')){}//TODO:"wildcard functionality"
+        else if(filterObject.hasOwnProperty('IS')){
+
+            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
+            for(var key in filterObject.IS){
+                if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
+                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
+                    if(!that.sComparison(filterObject.IS[key],val)) {//checks for false Scomparison conditions
+                        return false;
+                    }
+                }
+            }return true;
+        }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //NEGATION => recursive calls
-        else if(filterObject.hasOwnProperty('NOT')){ return !this.filterManager(filterObject.NOT,toCompare);}
+        else if(filterObject.hasOwnProperty('NOT')){ return !that.filterManager(filterObject.NOT,toCompare);}
         else{
-            console.log("no valid filter found");
+            //console.log("no valid filter found");
             throw "no valid filter found";
         }
     }
@@ -279,4 +332,39 @@ export default class InsightFacade implements IInsightFacade {
         }
         return false;
     }
+
+    sComparison(qKey:String,val:String):Boolean{ //key is query input; val is database value
+        // case1:*qkey* -- contains
+        if(qKey.charAt(0)==='*' && qKey.charAt(qKey.length-1)==='*'){
+            let truncatedKey=qKey.substring(1,qKey.length-1);
+            var num=val.indexOf(truncatedKey);
+            if(val.indexOf(truncatedKey)!==-1){
+                return true;
+            }
+            return false;
+        }
+        //case2:*qkey -- ends with
+        else if(qKey.charAt(0)==='*'){
+            let truncatedKey=qKey.substring(1,qKey.length);
+            if(val.endsWith(truncatedKey)){
+                return true;
+            }
+            return false;
+        }
+        //case3:qkey* -- starts with
+        else if(qKey.charAt(qKey.length-1)==='*'){
+            if(val.startsWith(qKey.substring(0,qKey.length-1))){
+                return true;
+            }
+            return false;
+        }
+        //case4:qKey -- same text as
+        else{
+            if(qKey===val){
+                return true;
+            }
+            return false;
+        }
+    }
 }
+

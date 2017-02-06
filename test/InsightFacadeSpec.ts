@@ -8,7 +8,7 @@ import InsightFacade from "../src/controller/InsightFacade";
 
 var fs = require("fs");
 
-describe("InsightFacadeSpec", function() {
+describe("addDatasetSpec", function() {
     this.timeout(5000);
 
     let facade: any = null;
@@ -25,7 +25,13 @@ describe("InsightFacadeSpec", function() {
        //facade = null;
     });
 
-
+    //BOUDARY CASES: empty zip
+    // BOUDARY CASES:
+    // BOUDARY CASES:
+    //BOUDARY CASES:
+    //BOUDARY CASES:
+    //BOUDARY CASES:
+    //BOUDARY CASES:
 
     it("addDataset test FEW json file in zip", function() {
         zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
@@ -38,18 +44,6 @@ describe("InsightFacadeSpec", function() {
             expect.fail();
         });
     });
-    
-    it("remove non existent dataset", function() {
-        facade.removeDataset("doesn't exist").then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
-
-        });
-    });
-    
     it("remove the first dataset", function() {
         facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
             var t=JSON.stringify(InF.body);
@@ -57,26 +51,6 @@ describe("InsightFacadeSpec", function() {
         }).catch(function(err:any){
             console.log(err);
             expect.fail();
-        });
-    });
-    
-    it("try to remove a dataset that has already been removed ", function() {
-        facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
-        });
-    });
-    
-     it("try to removing something from an empty dataset", function() {
-        facade.removeDataset("nothing").then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
         });
     });
 
@@ -94,48 +68,6 @@ describe("InsightFacadeSpec", function() {
         //   facade.addDataset("courses",zipContent);
 
     });
-    
-    it("adding coursesFewJson then removing it (testing removeDataSet with multiple datasets", function() {
-        zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
-        facade.addDataset("coursesFewJson", zipContent);
-        facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            console.log(JSON.stringify(facade.getDataStructure()));
-        }).catch(function(err:any){
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("try to remove null", function() {
-        facade.removeDataset(null).then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
-        });
-    });
-    it("try to remove undefined", function() {
-        facade.removeDataset(undefined).then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
-        });
-    });
-
-    it("try to remove empty string", function() {
-        facade.removeDataset("").then(function(InF:InsightResponse){
-            var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
-            expect.fail();
-        }).catch(function(err:any){
-            console.log(err);
-        });
-    });
 
     it('The big load: courses', function(){
 
@@ -151,6 +83,7 @@ describe("InsightFacadeSpec", function() {
             expect.fail();
         });
     })
+
 
     it ('empty zip file', function() {
         zipContent = fs.readFileSync("empty.zip").toString("base64");
@@ -176,9 +109,10 @@ describe("InsightFacadeSpec", function() {
         zipContent = fs.readFileSync("emptyArray.zip").toString("base64");
         return facade.addDataset("emptyArray", zipContent).then(function (InF: InsightResponse) {
             console.log(InF.code+": "+JSON.stringify(InF.body));
+            expect.fail();
         }).catch(function(err:any) {
             console.log(err);
-            expect.fail();
+
         });
     });
 
@@ -213,6 +147,15 @@ describe("InsightFacadeSpec", function() {
     it ('Testing with empty string', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", "").then(function (InF: InsightResponse) {
+            console.log(InF.code+": "+JSON.stringify(InF.body));
+            expect.fail();
+        }).catch(function(err:any) {
+            console.log(err);
+        });
+    });
+    it ('base64 that is not found', function() {
+        zipContent = fs.readFileSync("Picture.zip").toString("base64");
+        return facade.addDataset("Picture", zipContent).then(function (InF: InsightResponse) {
             console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {

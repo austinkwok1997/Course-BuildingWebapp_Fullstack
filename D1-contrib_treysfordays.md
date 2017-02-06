@@ -1,5 +1,6 @@
 Final Test Rate: 
-Coverage Rate:
+
+Coverage Rate: 80%
 
 Created Test File for addDataSet
 

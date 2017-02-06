@@ -15,25 +15,16 @@ describe("querySpec", function() {
     });
     beforeEach(function() {
         facade = new InsightFacade();
+        try {
+            //facade.removeAllDataset();
+        }catch(err){
+            console.log("remove datraset error: " +err);
+        }
     });
     afterEach(function() {
        facade = null;
     });
-/*
-    it('The big load: courses', function(){
 
-        console.time("dbsave");
-
-        zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
-        return facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
-            console.log(InF.code+": "+JSON.stringify(InF.body));
-            console.timeEnd("dbsave");
-        }).catch(function(err:any){
-            console.log(err);
-            expect.fail();
-        });
-    });
-*/
     it("simple query from spec", function() {
         console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("courses.zip").toString("base64");
@@ -43,7 +34,7 @@ describe("querySpec", function() {
            return thisIsIt.performQuery({
                 "WHERE": {
                     "GT": {
-                        "courses_avg": 75
+                        "courses_avg": 97
                     }
                 },
                 "OPTIONS": {
@@ -58,6 +49,41 @@ describe("querySpec", function() {
                     "FORM": "TABLE"
                 }
             }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+
+    it("query from piazza", function() {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("courses.zip").toString("base64");
+        var thisIsIt=facade;
+
+        thisIsIt.addDataset("courses", zipContent).then(function() {
+            return thisIsIt.performQuery(
+                {
+                    "WHERE":{
+                        "AND":[
+                            {"GT" : {"courses_avg":90}},
+                            {"GT" : {"courses_avg":90}}
+                        ]
+
+                    },
+                    "OPTIONS":{
+                        "COLUMNS":[
+                            "courses_dept",
+                            "courses_avg"
+                        ],
+                        "ORDER":"courses_avg",
+                        "FORM":"TABLE"
+                    }
+                }
+            ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
                 console.log(JSON.stringify(InF));
             })
@@ -104,9 +130,10 @@ describe("querySpec", function() {
             expect.fail();
         });
     });
-
+//TODO ERROR...
     it("MY query TEST 1", function() {
         console.log("+++TEST: MY query 1 from spec");
+        console.time("timer");
         zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
         facade.addDataset("coursesFewJson", zipContent).then(function() {
             return facade.performQuery(
@@ -146,7 +173,10 @@ describe("querySpec", function() {
                 }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
+                console.timeEnd("timer");
+                console.time("dbsave");
                 console.log(JSON.stringify(InF));
+                console.timeEnd("dbsave");
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -182,7 +212,7 @@ describe("querySpec", function() {
                         "courses_avg",
                         "courses_uuid"
                     ],
-                    "ORDER": "courses_avg",
+                    "ORDER": "courses_dept",
                     "FORM": "TABLE"
                 }
             }
@@ -282,9 +312,10 @@ describe("querySpec", function() {
                         "COLUMNS":[
                             "courses_dept",
                             "courses_id",
-                            "courses_avg"
+                            "courses_avg",
+                            "courses_uuid"
                         ],
-                        "ORDER":"courses_avg",
+                        "ORDER":"courses_dept",
                         "FORM":"TABLE"
                     }
                 }

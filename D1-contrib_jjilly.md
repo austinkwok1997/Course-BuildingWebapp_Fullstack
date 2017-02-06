@@ -1,5 +1,5 @@
 Final test pass rate: 
-coverage rate:
+coverage rate:80%
 
 Helped with async zipfile reader in addDataSet
 

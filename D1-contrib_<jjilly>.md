@@ -2,9 +2,13 @@ Final test pass rate:
 coverage rate:
 
 Helped with async zipfile reader in addDataSet
+
 Made QueryResponse return the proper code
+
 Made the majority of perfromQuery
+
 Created zip files with a variety of files for testing
+
 Created tests for performQuery
 
 Key commits

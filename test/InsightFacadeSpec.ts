@@ -38,6 +38,18 @@ describe("InsightFacadeSpec", function() {
             expect.fail();
         });
     });
+    
+    it("remove non existent dataset", function() {
+        facade.removeDataset("doesn't exist").then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
+
+        });
+    });
+    
     it("remove the first dataset", function() {
         facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
             var t=JSON.stringify(InF.body);
@@ -45,6 +57,26 @@ describe("InsightFacadeSpec", function() {
         }).catch(function(err:any){
             console.log(err);
             expect.fail();
+        });
+    });
+    
+    it("try to remove a dataset that has already been removed ", function() {
+        facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
+        });
+    });
+    
+     it("try to removing something from an empty dataset", function() {
+        facade.removeDataset("nothing").then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
         });
     });
 
@@ -61,6 +93,48 @@ describe("InsightFacadeSpec", function() {
         //   zipContent = fs.readFileSync("courses.zip").toString("base64");
         //   facade.addDataset("courses",zipContent);
 
+    });
+    
+    it("adding coursesFewJson then removing it (testing removeDataSet with multiple datasets", function() {
+        zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
+        facade.addDataset("coursesFewJson", zipContent);
+        facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            console.log(JSON.stringify(facade.getDataStructure()));
+        }).catch(function(err:any){
+            console.log(err);
+            expect.fail();
+        });
+    });
+
+    it("try to remove null", function() {
+        facade.removeDataset(null).then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
+        });
+    });
+    it("try to remove undefined", function() {
+        facade.removeDataset(undefined).then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
+        });
+    });
+
+    it("try to remove empty string", function() {
+        facade.removeDataset("").then(function(InF:InsightResponse){
+            var t=JSON.stringify(InF.body);
+            console.log(InF.code+t);
+            expect.fail();
+        }).catch(function(err:any){
+            console.log(err);
+        });
     });
 
     it('The big load: courses', function(){

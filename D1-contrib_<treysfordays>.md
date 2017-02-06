@@ -2,8 +2,11 @@ Final Test Rate:
 Coverage Rate:
 
 Created Test File for addDataSet
+
 Set Up file reader so that we could test addDataSet
+
 Came up with data structure.
+
 Made Checker to makesure QueryRequest is valid.
 
 Key Commits

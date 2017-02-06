@@ -1,4 +1,3 @@
-
 /**
  * This is the main programmatic entry point for the project.
  */
@@ -8,6 +7,7 @@ import Log from "../Util";
 import {queryParser} from "restify";
 import {stringify} from "querystring";
 import {type} from "os";
+import {isUndefined} from "util";
 //import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
 class dStructure {
@@ -26,61 +26,56 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-        
-         if(id == null || id == undefined || id == "") {//edge cases
-            return new Promise(function (fulfill, reject) {
-                let response:InsightResponse = {code: 400, body: {"error": "id isn't a string"}}
-                reject(response);
-            });
-        }
 
         if(content == null || content == undefined || content == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
                 reject(response);
             });
-        }
-        if(!dataStructure.hasOwnProperty(id)) {
-            return new Promise(function (fulfill, reject) {
-                var JSZip = require("jszip");
-                dataStructure[id] = {};
+        }else {
+            if (!dataStructure.hasOwnProperty(id)) {
+                return new Promise(function (fulfill, reject) {
+                    var JSZip = require("jszip");
+                    dataStructure[id] = {};
 
-                var keyArray: string[] = [];
-                var promises: Promise<String>[] = [];
+                    var keyArray: string[] = [];
+                    var promises: Promise<String>[] = [];
 
-                // loads the data
-                JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
+                    // loads the data
+                    JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
 
-                    //console.log("#1; in load Async of: " + id);
-                    Object.keys(zipFile.files).forEach(function (key: any) {
+                        //console.log("#1; in load Async of: " + id);
+                        Object.keys(zipFile.files).forEach(function (key: any) {
 
-                        //   console.log("#2...; in the keys function " + key);
-                        keyArray.push(key);
-                    });
-
-                    return zipFile;
-
-                }).then(function (zipFile: any) {
-                    keyArray.forEach(function (key: any) {
-                        //   console.log("#4...; inside array loop for key: " + key);
-                        //need new promise each time so we can call promise all at the end:
-                        var newPromise = new Promise(function (resolve) {
-                            zipFile.files[key].async('string').then(function (fileData: any) {
-
-                                //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
-                                resolve(fileData);
-                            });
+                            //   console.log("#2...; in the keys function " + key);
+                            keyArray.push(key);
                         });
 
-                        promises.push(newPromise);
-                    });
+                        return zipFile;
 
-                    Promise.all(promises).then(function (arrayFileData: any) {
-                        // console.log("#5...; in promiseAll with: "+arrayFileData);
-                        var keyIndex = 0;
-                        arrayFileData.forEach(function (fileData: any) {
-                            if (fileData != null && fileData != '') {
-                                   try {
+                    }).then(function (zipFile: any) {
+                        keyArray.forEach(function (key: any) {
+                            //   console.log("#4...; inside array loop for key: " + key);
+                            //need new promise each time so we can call promise all at the end:
+                            var newPromise = new Promise(function (resolve) {
+                                zipFile.files[key].async('string').then(function (fileData: any) {
+
+                                    //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
+                                    resolve(fileData);
+                                });
+                            });
+
+                            promises.push(newPromise);
+                        });
+
+                        Promise.all(promises).then(function (arrayFileData: any) {
+                            // console.log("#5...; in promiseAll with: "+arrayFileData);
+                            var keyIndex = 0;
+                            arrayFileData.forEach(function (fileData: any) {
+                                if (fileData != null && fileData != '') {
+                                    //var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                    // dataStructure[id][keyArray[keyIndex]] = obj;
+                                    try {
                                         if(Array.isArray(JSON.parse(fileData))){
                                             throw "error JSON file not right";
                                         }
@@ -97,53 +92,52 @@ export default class InsightFacade implements IInsightFacade {
                                     }
 
                                 }
+                                keyIndex++;
+                            });
+                            //console.log("this is the cached as an object right now: "+dataStructure);
+                            // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
+                            //console.log(dataArray);
+                            ///that.dataStructure=dataStructure;
+                            let success: InsightResponse = {
+                                code: 200,
+                                body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
+                            };
+                            fulfill(success);
 
-                            }
-                            keyIndex++;
+                        }).catch(function (error) {
+                            console.log("JSON parse error: " + error);
+                            reject(error);
                         });
-                        //console.log("this is the cached as an object right now: "+dataStructure);
-                        // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
-                        //console.log(dataArray);
-                        ///that.dataStructure=dataStructure;
-                        let success: InsightResponse = {
-                            code: 200,
-                            body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
-                        };
-                        fulfill(success);
 
-                    }).catch(function (error) {
-                        console.log("JSON parse error: " + error);
-                        reject(error);
+                    }).catch(function (err: any) {
+
+                        let errorInsResp: InsightResponse = {
+                            code: 400,
+                            body: {"text": "error" + ": fs could not read file: " + err}
+                        };
+                        reject(errorInsResp);
+
+                        console.log("#-0; async fail: " + err);
                     });
 
-                }).catch(function (err: any) {
+                    console.log("#0.1; outside iterating through id: " + id);
 
-                    let errorInsResp: InsightResponse = {
-                        code: 400,
-                        body: {"text": "error" + ": fs could not read file: " + err}
-                    };
-                    reject(errorInsResp);
-
-                    console.log("#-0; async fail: " + err);
                 });
-
-                console.log("#0.1; outside iterating through id: " + id);
-
-            });
-        }else{
-            let alreadyHasInsResp: InsightResponse = {
-                code: 204,
-                body: {"text": "the operation was successful and the id already existed (was added in this session or was previously cached)."}
-            };
-            return new Promise(function(resolve, reject){
-                resolve(alreadyHasInsResp);
-            });
+            } else {
+                let alreadyHasInsResp: InsightResponse = {
+                    code: 204,
+                    body: {"text": "the operation was successful and the id already existed (was added in this session or was previously cached)."}
+                };
+                return new Promise(function (resolve, reject) {
+                    resolve(alreadyHasInsResp);
+                });
+            }
         }
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
-        
-         if(id == null || id == undefined || id == "") {//edge cases
+
+        if(id == null || id == undefined || id == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
                 reject(response);
@@ -170,7 +164,7 @@ export default class InsightFacade implements IInsightFacade {
             throw err;
         });
     }
-
+/*
     removeAllDataset(){
         var promises:Promise<rObject>[]=[];
 
@@ -190,7 +184,7 @@ export default class InsightFacade implements IInsightFacade {
             throw err;
         })
     }
-
+*/
     performQuery(query: QueryRequest): Promise <InsightResponse> {
 
         let that=this;
@@ -208,7 +202,7 @@ export default class InsightFacade implements IInsightFacade {
                 console.log("invalid query");
                 response.code = 424;
                 response.body = {"missing": ["WHERE or OPTIONS"]};
-                reject(response);       //TODO: seperate case for option and where?******************
+                reject(response);
             }
 
             var queryJsonOptions = queryJson.OPTIONS;
@@ -235,7 +229,15 @@ export default class InsightFacade implements IInsightFacade {
             for (var id in dataStructure) {
 
                     let setOfCourses = dataStructure[id];
+                    if(setOfCourses===undefined){
+                        that.removeDataset(id);
+                        reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
+                    }
                     for (var course in setOfCourses) {
+                        if(setOfCourses[course]===undefined){
+                            that.removeDataset(id);
+                            reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
+                        }
                         var newPromiseForEachCourse = new Promise(function (resolve) {
                             let resultArray: Array<Object> = [];
                             resultArray = setOfCourses[course.toString()]['result'];

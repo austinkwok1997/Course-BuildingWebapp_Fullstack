@@ -34,6 +34,12 @@ export default class InsightFacade implements IInsightFacade {
 
         //let dataStructure=new dStructure();//************************************
         //let that=this;
+         if(content == null || content == undefined || content == "") {
+            return new Promise(function (fulfill, reject) {
+                let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
+                reject(response);
+            });
+        }
         if(!dataStructure.hasOwnProperty(id)) {
             return new Promise(function (fulfill, reject) {
                 var JSZip = require("jszip");
@@ -76,9 +82,14 @@ export default class InsightFacade implements IInsightFacade {
                         var keyIndex = 0;
                         arrayFileData.forEach(function (fileData: any) {
                             if (fileData != null && fileData != '') {
-                                var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                try {
+                                    var obj = JSON.parse(fileData); //parses JSON string to Json object
 
-                                dataStructure[id][keyArray[keyIndex]] = obj;
+                                    dataStructure[id][keyArray[keyIndex]] = obj;
+                                }catch (e) {
+                                    let response:InsightResponse = {code: 400, body: {"error": "zip contains non JSON files"}};
+                                    reject(response);
+                                }
                             }
                             keyIndex++;
                         });

@@ -9,6 +9,8 @@ Came up with data structure.
 
 Made Checker to makesure QueryRequest is valid.
 
+Worked on edge cases for add and remove dataSet
+
 Key Commits
 https://github.com/CS310-2017Jan/cpsc310project_team154/commit/1f4af42e3cc3446d6dccbeeb76823a6dfd7de594
 https://github.com/CS310-2017Jan/cpsc310project_team154/commit/85ccdfd90f3d37424c5df3e57e9176e0d1bee036

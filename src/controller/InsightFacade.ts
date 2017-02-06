@@ -26,6 +26,13 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
+        
+         if(id == null || id == undefined || id == "") {//edge cases
+            return new Promise(function (fulfill, reject) {
+                let response:InsightResponse = {code: 400, body: {"error": "id isn't a string"}}
+                reject(response);
+            });
+        }
 
         if(content == null || content == undefined || content == "") {//edge cases
             return new Promise(function (fulfill, reject) {
@@ -129,6 +136,13 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
+        
+         if(id == null || id == undefined || id == "") {//edge cases
+            return new Promise(function (fulfill, reject) {
+                let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
+                reject(response);
+            });
+        }
 
         return new Promise (function (fulfill, reject) {
             if(dataStructure.hasOwnProperty(id)) {

@@ -80,16 +80,22 @@ export default class InsightFacade implements IInsightFacade {
                         var keyIndex = 0;
                         arrayFileData.forEach(function (fileData: any) {
                             if (fileData != null && fileData != '') {
-                                //var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                   try {
+                                        if(Array.isArray(JSON.parse(fileData))){
+                                            throw "error JSON file not right";
+                                        }
+                                        var obj = JSON.parse(fileData); //parses JSON string to Json object
 
-                               // dataStructure[id][keyArray[keyIndex]] = obj;
-                                try {
-                                    var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                        dataStructure[id][keyArray[keyIndex]] = obj;
+                                    } catch (e) {
+                                        let response: InsightResponse = {
+                                            code: 400,
+                                            body: {"error": "zip contains non JSON files"}
+                                        };
+                                        delete dataStructure[id];
+                                        reject(response);
+                                    }
 
-                                    dataStructure[id][keyArray[keyIndex]] = obj;
-                                }catch (e) {
-                                    let response:InsightResponse = {code: 400, body: {"error": "zip contains non JSON files"}};
-                                    reject(response);
                                 }
 
                             }

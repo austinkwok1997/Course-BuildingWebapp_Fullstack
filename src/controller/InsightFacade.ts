@@ -163,6 +163,8 @@ return;
                 };
                 reject(deleteDoneInsResp);
             }
+            
+                       
         }).catch(function(err){
             console.log(err);
             throw err;
@@ -292,6 +294,10 @@ return;
                 response['body'] = {"error": err};
                 reject(response);
             });
+        
+//TODO
+reject(null);
+return;
 
         }).catch(function(err){
             console.log("ERROR: "+JSON.stringify(err));

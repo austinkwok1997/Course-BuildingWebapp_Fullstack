@@ -31,6 +31,11 @@ export default class InsightFacade implements IInsightFacade {
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
                 reject(response);
+
+
+//TODO
+reject(null);
+return;
             });
         }else {
             if (!dataStructure.hasOwnProperty(id)) {
@@ -121,11 +126,9 @@ export default class InsightFacade implements IInsightFacade {
                     });
 
                     console.log("#0.1; outside iterating through id: " + id);
-
- //TODO
+//TODO
 reject(null);
 return;
-                    
                 });
             } else {
                 let alreadyHasInsResp: InsightResponse = {
@@ -134,6 +137,10 @@ return;
                 };
                 return new Promise(function (resolve, reject) {
                     resolve(alreadyHasInsResp);
+
+//TODO
+reject(null);
+return;
                 });
             }
         }
@@ -145,6 +152,10 @@ return;
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
                 reject(response);
+
+//TODO
+reject(null);
+return;
             });
         }
 
@@ -163,11 +174,11 @@ return;
                 };
                 reject(deleteDoneInsResp);
             }
-            
-//TODO
-reject(null);
-return;
-                       
+
+            //TODO
+            reject(null);
+            return;
+
         }).catch(function(err){
             console.log(err);
             throw err;
@@ -297,7 +308,6 @@ return;
                 response['body'] = {"error": err};
                 reject(response);
             });
-        
 //TODO
 reject(null);
 return;
@@ -307,6 +317,7 @@ return;
             return new Promise(function(resolve, reject){reject(err);});
         });
         return mainPromise;
+
     }
 
     sortByKey(sortingOrderKey:string,responseObject:rObject):Array<rObject>{

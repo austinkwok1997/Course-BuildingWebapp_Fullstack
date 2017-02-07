@@ -164,6 +164,9 @@ return;
                 reject(deleteDoneInsResp);
             }
             
+//TODO
+reject(null);
+return;
                        
         }).catch(function(err){
             console.log(err);

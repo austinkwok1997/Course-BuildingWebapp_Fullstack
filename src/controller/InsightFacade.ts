@@ -122,6 +122,10 @@ export default class InsightFacade implements IInsightFacade {
 
                     console.log("#0.1; outside iterating through id: " + id);
 
+ //TODO
+reject(null);
+return;
+                    
                 });
             } else {
                 let alreadyHasInsResp: InsightResponse = {

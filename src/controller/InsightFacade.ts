@@ -121,8 +121,7 @@ export default class InsightFacade implements IInsightFacade {
                             body: {"text": "error" + ": fs could not read file: " + err}
                         };
                         reject(errorInsResp);
-
-                        console.log("#-0; async fail: " + err);
+                        return;
                     });
 
                     console.log("#0.1; outside iterating through id: " + id);
@@ -151,7 +150,6 @@ return;
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
                 reject(response);
                 return;
-
             });
         }
 
@@ -163,17 +161,15 @@ return;
                     body: {"text": "the operation was successful."}
                 };
                 fulfill(deleteDoneInsResp);
+                return
             }else{
                 let deleteDoneInsResp: InsightResponse = {
                     code: 404,
                     body: {"text": "the operation was unsuccessful because the delete was for a resource that was not previously added."}
                 };
                 reject(deleteDoneInsResp);
+                return;
             }
-
-            //TODO
-            reject(null);
-            return;
 
         }).catch(function(err){
             console.log(err);
@@ -251,11 +247,13 @@ return;
                     if(setOfCourses===undefined){
                         that.removeDataset(id);
                         reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
+                        return
                     }
                     for (var course in setOfCourses) {
                         if(setOfCourses[course]===undefined){
                             that.removeDataset(id);
                             reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
+                            return;
                         }
                         var newPromiseForEachCourse = new Promise(function (resolve) {
                             let resultArray: Array<Object> = [];
@@ -281,11 +279,13 @@ return;
                                         responseObject['result'].push(resultObject);
                                     }
                                     resolve(true);
-                                    
+                                    return;
+
                                 });
                                 promisesForEachTermInCourse.push(newPromiseForEachTerm);
                             });
                             resolve(true);
+                            return;
                         })
                         promisesForEachCourse.push(newPromiseForEachCourse);
                     }
@@ -317,7 +317,10 @@ return;
 
         }).catch(function(err){
             console.log("ERROR: "+JSON.stringify(err));
-            return new Promise(function(resolve, reject){reject(err);});
+            return new Promise(function(resolve, reject){
+                reject(err);
+                return;
+            });
         });
         return mainPromise;
 

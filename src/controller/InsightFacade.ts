@@ -64,6 +64,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                     //          console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
                                     resolve(fileData);
+                                    return;
                                 });
                             });
 

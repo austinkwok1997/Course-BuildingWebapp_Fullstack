@@ -31,11 +31,8 @@ export default class InsightFacade implements IInsightFacade {
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
                 reject(response);
+                return;
 
-
-//TODO
-reject(null);
-return;
             });
         }else {
             if (!dataStructure.hasOwnProperty(id)) {
@@ -94,6 +91,7 @@ return;
                                         };
                                         delete dataStructure[id];
                                         reject(response);
+                                        return;
                                     }
 
                                 }
@@ -108,10 +106,12 @@ return;
                                 body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
                             };
                             fulfill(success);
+                            return;
 
                         }).catch(function (error) {
                             console.log("JSON parse error: " + error);
                             reject(error);
+                            return;
                         });
 
                     }).catch(function (err: any) {
@@ -137,10 +137,8 @@ return;
                 };
                 return new Promise(function (resolve, reject) {
                     resolve(alreadyHasInsResp);
+                    return;
 
-//TODO
-reject(null);
-return;
                 });
             }
         }
@@ -152,10 +150,8 @@ return;
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
                 reject(response);
+                return;
 
-//TODO
-reject(null);
-return;
             });
         }
 
@@ -223,6 +219,7 @@ return;
                 response.code = 424;
                 response.body = {"missing": ["WHERE or OPTIONS"]};
                 reject(response);
+                return;
             }
 
             var queryJsonOptions = queryJson.OPTIONS;
@@ -231,6 +228,7 @@ return;
                 response.code = 400;
                 response.body = {"error": "invalid query OPTIONS"};
                 reject(response);
+                return;
             }
 
             var keyArray = queryJsonOptions.COLUMNS;
@@ -239,6 +237,7 @@ return;
                 response.code = 400;
                 response.body = {"error": "Order key needs to be included in columns"};
                 reject(response);
+                return;
                 //TODO TEST THIS HANDLING:: PREVIOUS ERRORS LINKED TO THIS
             }
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
@@ -282,6 +281,7 @@ return;
                                         responseObject['result'].push(resultObject);
                                     }
                                     resolve(true);
+                                    
                                 });
                                 promisesForEachTermInCourse.push(newPromiseForEachTerm);
                             });
@@ -296,17 +296,20 @@ return;
                     response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject)};
                     console.log("# of items in result: " +responseObject['result'].length);
                     fulfill(response);
+                    return;
                 }).catch(function (err) {
                     console.log("PromiseEachCourseError is: " + err);
                     response['code'] = 400;
                     response['body'] = {"error": err};
                     reject(response);
+                    return;
                 });
             }).catch(function (err) {
                 console.log("PromiseEachTERMCourseError is: " + err);
                 response['code'] = 400;
                 response['body'] = {"error": err};
                 reject(response);
+                return;
             });
 //TODO
 reject(null);

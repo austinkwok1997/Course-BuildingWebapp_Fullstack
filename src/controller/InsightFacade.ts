@@ -51,18 +51,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     }).then(function (zipFile: any) {
                         keyArray.forEach(function (key: any) {
-                            //   console.log("#4...; inside array loop for key: " + key);
-                            //need new promise each time so we can call promise all at the end:
-                            var newPromise = new Promise(function (resolve) {
-                                zipFile.files[key].async('string').then(function (fileData: any) {
-
-                                    //console.log("#4.1...; inside the async fucntion: "+ id+ " " + fileData);
-                                    resolve(fileData);
-                                    return;
-                                });
-                            });
-
-                            promises.push(newPromise);
+                            promises.push(zipFile.files[key].async('string'));
                         });
 
                         Promise.all(promises).then(function (arrayFileData: any) {
@@ -95,10 +84,6 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                                 keyIndex++;
                             });
-                            //console.log("this is the cached as an object right now: "+dataStructure);
-                            // console.log("this is the cached as a in JSON stringify format: "+JSON.stringify(dataStructure));
-                            //console.log(dataArray);
-                            ///that.dataStructure=dataStructure;
                             let success: InsightResponse = {
                                 code: 204,
                                 body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
@@ -108,7 +93,10 @@ export default class InsightFacade implements IInsightFacade {
 
                         }).catch(function (error) {
                             console.log("JSON parse error: " + error);
-                            reject(error);
+                            reject({
+                                code: 400,
+                                body: {"text": "error" +"JSON parse error: " + error}
+                            });
                             return;
                         });
 
@@ -166,9 +154,6 @@ export default class InsightFacade implements IInsightFacade {
                 return;
             }
 
-        }).catch(function(err){
-            console.log(err);
-            throw err;
         });
     }
 

@@ -128,7 +128,7 @@ export default class InsightFacade implements IInsightFacade {
 
     removeDataset(id: string): Promise<InsightResponse> {
 
-/*
+
         if(id == null || id == undefined || id == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
@@ -156,13 +156,7 @@ export default class InsightFacade implements IInsightFacade {
             }
 
         });
-        */
-//TODO
-        return new Promise(function (fulfill, reject) {
-            let response:InsightResponse = {code: 777, body: {"test": "empty"}}
-            reject(response);
-            return;
-        });
+        
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {

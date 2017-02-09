@@ -110,11 +110,7 @@ export default class InsightFacade implements IInsightFacade {
                         return;
                     });
 
-                    console.log("#0.1; outside iterating through id: " + id);
-            
-     //TODO
-reject(null);
-return;
+
                 });
             } else {
                 let alreadyHasInsResp: InsightResponse = {
@@ -132,6 +128,7 @@ return;
 
     removeDataset(id: string): Promise<InsightResponse> {
 
+/*
         if(id == null || id == undefined || id == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
@@ -159,9 +156,17 @@ return;
             }
 
         });
+        */
+//TODO
+        return new Promise(function (fulfill, reject) {
+            let response:InsightResponse = {code: 777, body: {"test": "empty"}}
+            reject(response);
+            return;
+        });
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
+        /*
 
         let that=this;
 
@@ -243,7 +248,12 @@ return;
             });
         });
         return mainPromise;
-
+        */
+        return new Promise(function (fulfill, reject) {
+            let response:InsightResponse = {code: 777, body: {"test": "empty"}}
+            reject(response);
+            return;
+        });
 
     }
 

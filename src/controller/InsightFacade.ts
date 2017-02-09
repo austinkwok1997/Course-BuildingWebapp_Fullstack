@@ -103,7 +103,7 @@ export default class InsightFacade implements IInsightFacade {
                             //console.log(dataArray);
                             ///that.dataStructure=dataStructure;
                             let success: InsightResponse = {
-                                code: 200,
+                                code: 204,
                                 body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
                             };
                             fulfill(success);
@@ -129,7 +129,7 @@ export default class InsightFacade implements IInsightFacade {
                 });
             } else {
                 let alreadyHasInsResp: InsightResponse = {
-                    code: 204,
+                    code: 201,
                     body: {"text": "the operation was successful and the id already existed (was added in this session or was previously cached)."}
                 };
                 return new Promise(function (resolve, reject) {
@@ -155,7 +155,7 @@ export default class InsightFacade implements IInsightFacade {
             if(dataStructure.hasOwnProperty(id)) {
                 delete dataStructure[id];
                 let deleteDoneInsResp: InsightResponse = {
-                    code: 201,
+                    code: 204,
                     body: {"text": "the operation was successful."}
                 };
                 fulfill(deleteDoneInsResp);
@@ -174,37 +174,36 @@ export default class InsightFacade implements IInsightFacade {
             throw err;
         });
     }
-/*
-    removeAllDataset(){
-        var promises:Promise<rObject>[]=[];
+    /*
+     removeAllDataset(){
+     var promises:Promise<rObject>[]=[];
 
-        return new Promise(function(fulfill,reject) {
-            for (var key in dataStructure) {
-                let newPromise=new Promise(function(fulfill){
-                    this.removeDataset(key);
-                });
-                promises.push(newPromise);
-            }
-            Promise.all(promises).then(function(arrayObject:any){
-                console.log("all dataset should be deleted");
-                fulfill(true);
-            })
-        }).catch(function(err){
-            console.log(err);
-            throw err;
-        })
-    }
-*/
+     return new Promise(function(fulfill,reject) {
+     for (var key in dataStructure) {
+     let newPromise=new Promise(function(fulfill){
+     this.removeDataset(key);
+     });
+     promises.push(newPromise);
+     }
+     Promise.all(promises).then(function(arrayObject:any){
+     console.log("all dataset should be deleted");
+     fulfill(true);
+     })
+     }).catch(function(err){
+     console.log(err);
+     throw err;
+     })
+     }
+     */
     performQuery(query: QueryRequest): Promise <InsightResponse> {
-        return new Promise((function(fulfill,reject){
-            reject(null);}
-            )
-        );
-      /*  
+        /*  return new Promise((function(fulfill,reject){
+         reject(null);}
+         )
+         );
+         */
         let that=this;
 
-        var q=query;
-        var queryJson=JSON.parse(JSON.stringify(q));//convert to a JS object (convert object to JSON String)????????
+        var queryJson:any=query;//convert to a JS object (convert object to JSON String)????????
         var response:InsightResponse={code:777,body:{}};
         var responseObject= {render:'TABLE',result:<any>[]};
 
@@ -245,77 +244,75 @@ export default class InsightFacade implements IInsightFacade {
 
             for (var id in dataStructure) {
 
-                    let setOfCourses = dataStructure[id];
-                    if(setOfCourses===undefined){
-                        that.removeDataset(id);
+                let setOfCourses = dataStructure[id];
+                if(setOfCourses===undefined){
+                    that.removeDataset(id);
+                    reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
+                    return
+                }
+                for (var course in setOfCourses) {
+                    if(setOfCourses[course]===undefined){
+                        that.removeDataset(id); //TODO put this in add dataset
                         reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
-                        return
+                        return;
                     }
-                    for (var course in setOfCourses) {
-                        if(setOfCourses[course]===undefined){
-                            that.removeDataset(id);
-                            reject({code:400,body:{"error": "undefined Object in dataStructure should now be removed" }});
-                            return;
+                    // var newPromiseForEachCourse = new Promise(function (resolve) {
+                    let resultArray: Array<Object> = [];
+                    resultArray = setOfCourses[course.toString()]['result'];
+                    resultArray.forEach(function (courseTermData: Object) {
+
+                        // let newPromiseForEachTerm=new Promise(function(resolve){
+                        //making a resultObject for each courseTermData
+                        let resultObject = new rObject();
+                        keyArray.forEach(function (k: any) {
+                            resultObject[k] = null;
+                        });
+
+                        var filterResult=that.filterManager(queryWhereObject, courseTermData);
+                        if (filterResult===true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                            for (var key in resultObject) {
+                                if (key === 'id') {
+                                    resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
+                                } else {
+                                    resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
+                                }
+                            }
+                            responseObject['result'].push(resultObject);
                         }
-                        var newPromiseForEachCourse = new Promise(function (resolve) {
-                            let resultArray: Array<Object> = [];
-                            resultArray = setOfCourses[course.toString()]['result'];
-                            resultArray.forEach(function (courseTermData: Object) {
+                        //resolve(true);
+                        // return;
 
-                                let newPromiseForEachTerm=new Promise(function(resolve){
-                                    //making a resultObject for each courseTermData
-                                    let resultObject = new rObject();
-                                    keyArray.forEach(function (k: any) {
-                                        resultObject[k] = null;
-                                    });
-
-                                    var filterResult=that.filterManager(queryWhereObject, courseTermData);
-                                    if (filterResult===true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                                        for (var key in resultObject) {
-                                            if (key === 'id') {
-                                                resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
-                                            } else {
-                                                resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
-                                            }
-                                        }
-                                        responseObject['result'].push(resultObject);
-                                    }
-                                    resolve(true);
-                                    return;
-
-                                });
-                                promisesForEachTermInCourse.push(newPromiseForEachTerm);
-                            });
-                            resolve(true);
-                            return;
-                        })
-                        promisesForEachCourse.push(newPromiseForEachCourse);
-                    }
+                    });
+                    // promisesForEachTermInCourse.push(newPromiseForEachTerm);
+                    //});
+                    //resolve(true);
+                    //return;
+                    //})
+                    // promisesForEachCourse.push(newPromiseForEachCourse);
+                }
             }
-            Promise.all(promisesForEachTermInCourse).then(function () {
-                Promise.all(promisesForEachCourse).then(function () {
-                    response['code'] = 200;
-                    response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject)};
-                    console.log("# of items in result: " +responseObject['result'].length);
-                    fulfill(response);
-                    return;
-                }).catch(function (err) {
-                    console.log("PromiseEachCourseError is: " + err);
-                    response['code'] = 400;
-                    response['body'] = {"error": err};
-                    reject(response);
-                    return;
-                });
-            }).catch(function (err) {
-                console.log("PromiseEachTERMCourseError is: " + err);
-                response['code'] = 400;
-                response['body'] = {"error": err};
-                reject(response);
-                return;
-            });
-//TODO
-reject(null);
-return;
+            // Promise.all(promisesForEachTermInCourse).then(function () {
+            //     Promise.all(promisesForEachCourse).then(function () {
+            response['code'] = 200;
+            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject)};
+            console.log("# of items in result: " +responseObject['result'].length);
+            fulfill(response);
+            return;
+            /*   }).catch(function (err) {
+             console.log("PromiseEachCourseError is: " + err);
+             response['code'] = 400;
+             response['body'] = {"error": err};
+             reject(response);
+             return;
+             });
+             }).catch(function (err) {
+             console.log("PromiseEachTERMCourseError is: " + err);
+             response['code'] = 400;
+             response['body'] = {"error": err};
+             reject(response);
+             return;
+             });
+             */
 
         }).catch(function(err){
             console.log("ERROR: "+JSON.stringify(err));
@@ -325,7 +322,7 @@ return;
             });
         });
         return mainPromise;
-        */
+
 
     }
 
@@ -390,11 +387,11 @@ return;
             let filterArray=filterObject['AND'];
             let resultBool=true;
             for(let filt=0;filt<filterArray.length;filt++){
-                    resultBool=that.filterManager(filterArray[filt], toCompare);
-                    //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
-                    if (resultBool===false) {
-                        break;
-                    }
+                resultBool=that.filterManager(filterArray[filt], toCompare);
+                //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
+                if (resultBool===false) {
+                    break;
+                }
             };
             return resultBool;
         }
@@ -527,9 +524,9 @@ return;
     hasValidOptions(opKey:any):Boolean{
         var qOption=JSON.parse(JSON.stringify(opKey));
         if(qOption.hasOwnProperty('ORDER')&& qOption.hasOwnProperty('FORM')){
-           if(qOption.FORM == "TABLE"){
-               return true;
-           }
+            if(qOption.FORM == "TABLE"){
+                return true;
+            }
         }
         return false;
     }
@@ -571,3 +568,4 @@ return;
         }
     }
 }
+

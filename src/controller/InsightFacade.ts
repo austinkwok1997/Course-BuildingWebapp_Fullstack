@@ -162,7 +162,7 @@ return;
                     body: {"text": "the operation was successful."}
                 };
                 fulfill(deleteDoneInsResp);
-                return
+                return;
             }else{
                 let deleteDoneInsResp: InsightResponse = {
                     code: 404,
@@ -199,7 +199,11 @@ return;
     }
 */
     performQuery(query: QueryRequest): Promise <InsightResponse> {
-
+        return new Promise((function(fulfill,reject){
+            reject(null);}
+            )
+        );
+      /*  
         let that=this;
 
         var q=query;
@@ -324,6 +328,7 @@ return;
             });
         });
         return mainPromise;
+        */
 
     }
 

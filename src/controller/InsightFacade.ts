@@ -20,7 +20,8 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-
+//TODO: not add datadet that is not a zip file;
+        //TODO: not add empty zip file
         if(content == null || content == undefined || content == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
@@ -156,11 +157,12 @@ export default class InsightFacade implements IInsightFacade {
             }
 
         });
-        
+
+
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
-        /*
+
 
         let that=this;
 
@@ -175,7 +177,7 @@ export default class InsightFacade implements IInsightFacade {
             if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
                 console.log("invalid query");
                 response.code = 400;
-                response.body = {"missing": ["WHERE or OPTIONS"]};
+                response.body = {"error":  "Missing WHERE or OPTIONS"};
                 reject(response);
                 return;
             }
@@ -242,12 +244,6 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
         return mainPromise;
-        */
-        return new Promise(function (fulfill, reject) {
-            let response:InsightResponse = {code: 777, body: {"test": "empty"}}
-            reject(response);
-            return;
-        });
 
     }
 
@@ -298,6 +294,9 @@ export default class InsightFacade implements IInsightFacade {
         //LOGICCOMPARISON => recursive calls
         if(filterObject.hasOwnProperty('OR')){
             let filterArray=filterObject['OR'];
+            if(filterArray.length===0){
+                throw {code:400,body:{"error":"AND array is empty"}};
+            }
             let resultBool:boolean=false;
             for(let filt=0;filt<filterArray.length;filt++){
                 resultBool=that.filterManager(filterArray[filt], toCompare);
@@ -309,6 +308,9 @@ export default class InsightFacade implements IInsightFacade {
             return resultBool;
         }else if(filterObject.hasOwnProperty('AND')){
             let filterArray=filterObject['AND'];
+            if(filterArray.length===0){
+                throw {code:400,body:{"error":"AND array is empty"}};
+            }
             let resultBool=true;
             for(let filt=0;filt<filterArray.length;filt++){
                 resultBool=that.filterManager(filterArray[filt], toCompare);
@@ -346,7 +348,7 @@ export default class InsightFacade implements IInsightFacade {
                             return false;
                         }
                     }else{
-                        throw {code:400,body:{"error":"EQ value should be a number"}};
+                        throw {code:400,body:{"error":"GT value should be a number"}};
                     }
                 }
             }return true; //all keys pass comparison test at this point
@@ -362,7 +364,7 @@ export default class InsightFacade implements IInsightFacade {
                             return false;
                         }
                     }else{
-                        throw {code:400,body:{"error":"EQ value should be a number"}};
+                        throw {code:400,body:{"error":"LT value should be a number"}};
                     }
                 }
             }return true; //all keys pass comparison test at this point

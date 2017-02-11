@@ -227,9 +227,10 @@ export default class InsightFacade implements IInsightFacade {
                             let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
-                                
+
                                 let curId=that.underscoreManager(underscoreWord,'id');
                                 if(dataStructure.hasOwnProperty(curId)) {
+                                    /*
                                     idSet.add(curId);
                                     let key = that.underscoreManager(underscoreWord, 'key');
                                     if (underscoreWord === 'id') {
@@ -237,10 +238,11 @@ export default class InsightFacade implements IInsightFacade {
                                     } else {
                                         resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
                                     }
+                                    */
                                 }else{
                                     missingIdArray.push(curId);
                                 }
-                                
+
                             }
                             if(missingIdArray.length!== 0){
                                 response.code = 424;

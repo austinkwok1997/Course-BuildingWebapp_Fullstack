@@ -214,7 +214,7 @@ export default class InsightFacade implements IInsightFacade {
                 for (var course in setOfCourses) {
                     let resultArray: any = [];
                     resultArray = setOfCourses[course.toString()]['result'];
-                    /*
+
                     for(let courseTermData of resultArray) {
                         let resultObject: any = {};
                         keyArray.forEach(function (k: any) {
@@ -224,7 +224,7 @@ export default class InsightFacade implements IInsightFacade {
                         var filterResult = that.filterManager(queryWhereObject, courseTermData);
                         if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
                             let missingIdArray=[];
-
+/*
                             for (var underscoreWord in resultObject) {
                                 let curId=that.underscoreManager(underscoreWord,'id');
                                 if(dataStructure.hasOwnProperty(curId)) {
@@ -247,11 +247,11 @@ export default class InsightFacade implements IInsightFacade {
                             }
                             responseObject['result'].push(resultObject);
                         }
-
+*/
                     };
-                    */
+                    
                 }
-                
+
             }
             let missingIdArray=Array.from(missingIdSet)
             for(let i=0;i<missingIdArray.length;i++){

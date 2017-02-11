@@ -1,1261 +1,564 @@
-import {expect} from "chai";
-import {InsightResponse} from "../src/controller/IInsightFacade";
-import InsightFacade from "../src/controller/InsightFacade";
-var fs = require("fs");
+/**
+ * This is the main programmatic entry point for the project.
+ */
+import {IInsightFacade, InsightResponse, QueryRequest} from "./IInsightFacade";
 
-describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
-    this.timeout(5000);
+import Log from "../Util";
+import {queryParser} from "restify";
+import {stringify} from "querystring";
+import {type} from "os";
+import {isUndefined} from "util";
+//import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
-    let facade: any = null;
-    let zipContent: any;
-    before(function() {
-        facade = new InsightFacade();
-        console.time("dbsave");
-        zipContent = fs.readFileSync("courses.zip").toString("base64");
-        facade.addDataset("courses", zipContent).then(function(InF:InsightResponse){
-            console.log(InF.code+": "+JSON.stringify(InF.body));
-            console.timeEnd("dbsave");
-        }).catch(function(err:any){
-            console.log(err);
-            expect.fail();
-        });
-    });
-    beforeEach(function() {
-        facade = new InsightFacade();
-    });
-    afterEach(function() {
-        facade = null;
-    });
-    it("Apollo: Should be able to find all sections for a dept.", function() {
-        console.log("+++TEST: simple query from spec");
-        return facade.performQuery({
-            "WHERE": {
-            "IS"
-        :
-            {
-                "courses_dept": "chem"
-            }
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "courses_dept",
-                    "courses_avg",
-                    "courses_id",
-                ],
-                "ORDER": "courses_avg",
-                "FORM": "TABLE"
-            }
-        }).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+var dataStructure:any ={};
+var missingIdSet=new Set();
 
-    it("Astro: Should be able to find sections taught by a specific person.", function() {
-        console.log("+++TEST: MY query 1");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                        "IS": {
-                            "courses_instructor": "b*"
-                        }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+export default class InsightFacade implements IInsightFacade {
 
-    it("TODO Aurora: performQuery 424.", function() {
-        console.log("+++TEST: MY query 1 from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "IS": {
-                        "foo_instructor": "b*"
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log("Aurora: performQuery 424.");
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-            console.log("Aurora: performQuery 424.");
-        });
-    });
+    constructor() {
+        Log.trace('InsightFacadeImpl::init()');
 
-/*
-    it("Revolution: performQuery 400.", function() {
-        console.log("+++TEST: simple query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
+    }
 
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_avg",
-                        "courses_uuid"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log("Revolution: performQuery 400.");
-        }).catch(function (err: any) {
-            console.log(err);
-            console.log("Revolution: performQuery 400.");
-            expect.fail();
-        });
-    });
+    addDataset(id: string, content: string): Promise<InsightResponse> {
+//TODO: not add datadet that is not a zip file;
+        //TODO: not add empty zip file
+        if(content == null || content == undefined || content == "") {//edge cases
+            return new Promise(function (fulfill, reject) {
+                let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
+                reject(response);
+                return;
 
-    it("Barcelona: Invalid query should result in 400.", function() {
-        console.log("+++TEST: simple query from spec");
-        return facade.performQuery(
-            {
-                "WHERE":{
+            });
+        }else {
+            if (!dataStructure.hasOwnProperty(id)) {
+                return new Promise(function (fulfill, reject) {
+                    var JSZip = require("jszip");
+                    dataStructure[id] = {};
 
-                },
-                "OPTIONS":{
-                    "COLUMNS":[
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER":"courses_avg",
-                    "FORM":"TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log("Barcelona: Invalid query should result in 400.");
-        }).catch(function (err: any) {
-            console.log(err);
-            console.log("Barcelona: Invalid query should result in 400.");
-            expect.fail();
-        });
-    });
+                    var keyArray: string[] = [];
+                    var promises: Promise<String>[] = [];
 
-    it("Barracuda: Invalid query should result in 400.", function() {
-        console.log("+++TEST: simple query from spec");
-        return facade.performQuery(
-            {
-                "WHERE":{
+                    // loads the data
+                    JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
 
-                },
-                "OPTIONS":{
-                    "COLUMNS":[
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER":"courses_avg",
-                    "FORM":"TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log("Barracuda: Invalid query should result in 400.");
-        }).catch(function (err: any) {
-            console.log(err);
-            console.log("Barracuda: Invalid query should result in 400.");
-            expect.fail();
-        });
-    });
-*/
-    it("Bongo: Should be able to find sections with lots of auditors. ", function() {
-            console.log("+++TEST: complex query from spec");
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                        "GT": {
-                            "courses_audit": 5
-                        }
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "courses_dept",
-                            "courses_id",
-                            "courses_avg"
-                        ],
-                        "ORDER": "courses_avg",
-                        "FORM": "TABLE"
-                    }
-                }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                        //console.log("#1; in load Async of: " + id);
+                        Object.keys(zipFile.files).forEach(function (key: any) {
 
-    it("Colusa: Should be able to find sections with high averages.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "GT": {
-                        "courses_avg": 98
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                            //   console.log("#2...; in the keys function " + key);
+                            keyArray.push(key);
+                        });
 
-    it("Camelot: Should be able to find course average for a course.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "EQ": {
-                        "courses_avg": 90
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_dept",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                        return zipFile;
 
-    it("Darwin: Should be able to find course title for courses in a dept.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "AND":[
-                        {"IS": {
-                        "courses_title": "int cell bio lab"
-                    }},{"IS": {
-                            "courses_dept": "biol"
-                        }}
-                    ]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_dept",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                    }).then(function (zipFile: any) {
+                        keyArray.forEach(function (key: any) {
+                            promises.push(zipFile.files[key].async('string'));
+                        });
 
-    it("Deepmind: Should be able to find sections ind a dept with average between 70 and 80.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "AND":[
-                        {"GT": {
-                            "courses_avg": 70
-                        }},{"IS": {
-                            "courses_dept": "biol"
-                        }},{"LT": {
-                            "courses_avg": 80
-                        }}
-                    ]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                        Promise.all(promises).then(function (arrayFileData: any) {
+                            //console.log("#5...; in promiseAll with: "+arrayFileData);
+                            var keyIndex = 0;
 
-    it("Elixir: Should be able to find sections with an or query on different keys.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "OR":[
-                        {"EQ": {
-                            "courses_avg": 70
-                        }},{"IS": {
-                            "courses_dept": "biol"
-                        }},{"LT": {
-                            "courses_avg": 20
-                        }}
-                    ]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Excalibur: Should be able to find all sections of specific courses from different departments.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "OR":[
-                        {"IS": {
-                            "courses_dept": "biol"
-                        }},{"IS": {
-                            "courses_dept": "chem"
-                        }}
-                    ]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_uuid",
-                    ],
-                    "ORDER": "courses_uuid",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Fester: Should be able to find all instructors with the same partial name.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "IS": {
-                            "courses_instructor": "b*"
-                        }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_avg"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+                            arrayFileData.forEach(function (fileData: any) {
+                                if (fileData != null && fileData != '') {
+                                    //var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                    // dataStructure[id][keyArray[keyIndex]] = obj;
+                                    try {
+                                        var obj = JSON.parse(fileData);
+                                        if(Array.isArray(obj)){
+                                            throw "error JSON file is Array";
+                                        }
+                                         //parses JSON string to Json object
 
 
-    it("Fireball: Should be able to find all courses in a dept with a partial name.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "IS": {
-                        "courses_dept": "bi*"
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_title"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-    it("Firefly: Should be able to find all instructurs in a dept with a partial name.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "IS": {
-                        "courses_dept": "bi*"
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_id",
-                        "courses_instructor"
-                    ],
-                    "ORDER": "courses_instructor",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Firestorm: Should be able to find all sections in a dept not taught by a specific person.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "AND":[
-                    {"NOT": {
-                        "IS": {
-                            "courses_instructor": "zeiler, kathryn"
-                        }
-                    }},{
-                        "IS": {
-                            "courses_dept": "biol"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_uuid",
-                        "courses_instructor"
-                    ],
-                    "ORDER": "courses_uuid",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Firetruck: Should be able to find all courses in a dept except some specific examples.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "AND":[
-                    {"NOT": {
-                        "IS": {
-                            "courses_uuid": "20622"
-                        }
-                    }},{
-                        "IS": {
-                            "courses_dept": "biol"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept",
-                        "courses_uuid",
-                        "courses_instructor"
-                    ],
-                    "ORDER": "courses_uuid",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Flamingo: Should be able to find all courses taught by a set of instructors.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "IS": {
-                            "courses_instructor": "*bi*"
-                        }
-                    },{
-                        "IS": {
-                            "courses_instructor": "*kat*"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor"
-                    ],
-                    "ORDER": "courses_instructor",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-
-    it("Fusion: Should be able to find all courses in multiple deptartments with a set of instructors.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "IS": {
-                            "courses_dept": "chem"
-                        }
-                    },{
-                        "IS": {
-                            "courses_dept": "biol"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-//******************************************************************************************************************
-    it("Galactica: Handle complex AND queries.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "AND": [{
-                    "AND": [{
-                        "AND": [{
-                            "AND": [{
-                                "AND": [{
-                                    "GT": {
-                                        "courses_avg": 97
+                                    } catch (e) {
+                                        let response: InsightResponse = {
+                                            code: 400,
+                                            body: {"error": "zip contains non JSON files"}
+                                        };
+                                        delete dataStructure[id];
+                                        reject(response);
+                                        return;
                                     }
-                                },{
-                                    "LT": {
-                                        "courses_avg": 98
-                                    }
-                                }]
-                            }]
-                        }]
-                    }]
-                }]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-    it("Gemini: Handle complex OR queries.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR": [{
-                    "OR": [{
-                        "OR": [{
-                            "OR": [{
-                                "OR": [{
-                                    "GT": {
-                                        "courses_avg": 97
-                                    }
-                                },{
-                                    "LT": {
-                                        "courses_avg": 10
-                                    }
+                                    dataStructure[id][keyArray[keyIndex]] = obj;
+
                                 }
-                                ]
-                            }]
-                        }]
-                    }]
-                }]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-    //TODO:Glavin: Check that non-integer numbers work.
-    //TODO:Hades: Check EQ.
-//**************************************************************TESTING FAIL CASES**************************************
-    it("Honeycomb: Empty columns result in invalid query 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "IS": {
-                            "courses_dept": "chem"
-                        }
-                    },{
-                        "IS": {
-                            "courses_dept": "biol"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-        });
-    });
+                                keyIndex++;
+                            });
+                            let success: InsightResponse = {
+                                code: 204,
+                                body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
+                            };
+                            fulfill(success);
+                            return;
 
-    it("Hydra: Missing FORM results in invalid query with 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "IS": {
-                            "courses_dept": "chem"
-                        }
-                    },{
-                        "IS": {
-                            "courses_dept": "biol"
-                        }
-                    }
-                ]}
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    //"FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-        });
-    });
+                        }).catch(function (error) {
+                            console.log("JSON parse error: " + error);
+                            reject({
+                                code: 400,
+                                body: {"text": "error" +"JSON parse error: " + error}
+                            });
+                            return;
+                        });
 
-    it("Indigo: Handle double negation.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "NOT": {
-                    "NOT": {
-                        "GT": {
-                            "courses_avg": 97
-                        }
-                    }
-                }
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+                    }).catch(function (err: any) {
 
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-    //TODO JUST A TYPICAL GT???
-    it("Irongate: Check GT on number field.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                    "GT": {
-                        "courses_avg": ""
-                    }
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_title",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-        });
-    });
-    //TODO WHAT DOE CHECK MATH OPERATIONS MEAN??
-    it("Ivory: Gheck math operations with OR.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "GT": {
-                            "courses_avg": 98
-                        }
-                    },{
-                        "LT": {
-                            "courses_avg": 10
-                        }
-                    }
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
-//TODO Jade: Complex query with AND, EQ, and GT. (in other query spec tests)
+                        let errorInsResp: InsightResponse = {
+                            code: 400,
+                            body: {"text": "error" + ": fs could not read file: " + err}
+                        };
+                        reject(errorInsResp);
+                        return;
+                    });
 
 
-    it("Jaguar: Invalid query should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_avg",
-                    "FORM": "TABLE"
-                }
+                });
+            } else {
+                let alreadyHasInsResp: InsightResponse = {
+                    code: 201,
+                    body: {"text": "the operation was successful and the id already existed (was added in this session or was previously cached)."}
+                };
+                return new Promise(function (resolve, reject) {
+                    resolve(alreadyHasInsResp);
+                    return;
+
+                });
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
+        }
+    }
+
+    removeDataset(id: string): Promise<InsightResponse> {
+
+
+        if(id == null || id == undefined || id == "") {//edge cases
+            return new Promise(function (fulfill, reject) {
+                let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
+                reject(response);
+                return;
+            });
+        }
+
+        return new Promise (function (fulfill, reject) {
+            if(dataStructure.hasOwnProperty(id)) {
+                delete dataStructure[id];
+                let deleteDoneInsResp: InsightResponse = {
+                    code: 204,
+                    body: {"text": "the operation was successful."}
+                };
+                fulfill(deleteDoneInsResp);
+                return;
+            }else{
+                let deleteDoneInsResp: InsightResponse = {
+                    code: 404,
+                    body: {"text": "the operation was unsuccessful because the delete was for a resource that was not previously added."}
+                };
+                reject(deleteDoneInsResp);
+                return;
+            }
 
         });
-    });
-    it("Jiro: Invalid ORDER should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "GT": {
-                            "courses_avg": 98
-                        }
-                    },{
-                        "LT": {
-                            "courses_avg": 10
-                        }
-                    }
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "thstrdshrdhtrdtrdhtrdhrd",
-                    "FORM": "TABLE"
-                }
+
+
+    }
+
+    performQuery(query: QueryRequest): Promise <InsightResponse> {
+
+
+        let that=this;
+
+        var queryJson:any=query;//convert to a JS object (convert object to JSON String)????????
+        var response:InsightResponse={code:777,body:{}};
+        var responseObject= {render:'TABLE',result:<any>[]};
+
+        var sortingOrderKey:string;
+
+
+        var mainPromise:Promise <InsightResponse>=new Promise(function(fulfill,reject) {
+
+
+            if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
+                console.log("invalid query");
+                response.code = 400;
+                response.body = {"error":  "Missing WHERE or OPTIONS"};
+                reject(response);
+                return;
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
 
-        });
-    });
-    it("Jonah: Invalid FORM should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "GT": {
-                            "courses_avg": 98
-                        }
-                    },{
-                        "LT": {
-                            "courses_avg": 10
-                        }
-                    }
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER":  "courses_id",
-                    "FORM": "WAT"
-                }
+            var queryJsonOptions = queryJson.OPTIONS;
+            if (!that.hasValidOptions(queryJsonOptions)) {//checks for proper options format
+                console.log("invalid query options");
+                response.code = 400;
+                response.body = {"error": "invalid query OPTIONS"};
+                reject(response);
+                return;
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
 
-        });
-    });
-
-    it("Kanga: Invalid key should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                    {
-                        "GT": {
-                            "tyrdyudrhd": 98
-                        }
-                    },{
-                        "LT": {
-                            "fdhggfhgfhf": 10
-                        }
-                    }
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER":  "courses_id",
-                    "FORM": "TABLE"
-                }
+            var keyArray = queryJsonOptions.COLUMNS;
+            sortingOrderKey=queryJsonOptions.ORDER;
+            if(!keyArray.includes(sortingOrderKey)){
+                response.code = 400;
+                response.body = {"error": "Order key needs to be included in columns"};
+                reject(response);
+                return;
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
+            var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
-        });
-    });
-    it("Kodiak: Invalid nested key should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":
-                    {
-                        "GT": {
-                            "courses_avg": {"courses_avg": 10}
+            var promisesForEachTermInCourse:Promise<Boolean>[]=[];
+            var promisesForEachCourse:Promise<Boolean>[]=[];
+            var idSet:any=new Set();
+
+            for (var id in dataStructure) {
+
+                let setOfCourses = dataStructure[id];
+                for (var course in setOfCourses) {
+                    let resultArray: any = [];
+                    resultArray = setOfCourses[course.toString()]['result'];
+
+                    for(let courseTermData of resultArray) {
+                        let resultObject: any = {};
+                        keyArray.forEach(function (k: any) {
+                            resultObject[k] = null;
+                        });
+
+                        var filterResult = that.filterManager(queryWhereObject, courseTermData);
+
+                        if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                            let missingIdArray:any=[];
+
+                            for (var underscoreWord in resultObject) {
+
+                                let curId=that.underscoreManager(underscoreWord,'id');
+                                if(dataStructure.hasOwnProperty(curId)) {
+
+                                    idSet.add(curId);
+
+                                    if (underscoreWord === 'id') {
+                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                    } else {
+                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))];//take desired keys from result object and fill them with the values in valid courseTermData
+                                    }
+
+
+                                }else{
+                                    missingIdArray.push(curId);
+                                }
+
+                            }
+                            if(missingIdArray.length!== 0){
+                                response.code = 424;
+                                response.body = {"Missing":  missingIdArray};
+                                reject(response);
+                                return;
+                            }
+                            responseObject['result'].push(resultObject);
                         }
-                    }
-            ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
 
-        });
-    });
-
-    it("Kryptonite: Invalid EQ should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                        "EQ": {
-                            "courses_dept": "chem"
-                        }
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-
-        });
-    });
-    it("Kwyjibo: Invalid LT should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":
-                    {
-                        "LT": {
-                            "courses_dept": "chem"
-                        }
-                    }
-                ,
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
-                }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-
-        });
-    });
-    it("Laguna: Invalid GT should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":
-                {
-                    "GT": {
-                        "courses_dept": "chem"
                     }
 
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
+                }
+
+            }
+            let missingIdArray=Array.from(missingIdSet);
+            for(let i=0;i<missingIdArray.length;i++){
+                if(dataStructure.hasOwnProperty(missingIdArray[i])){
+                    missingIdSet.delete(missingIdArray[i]);
                 }
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
+            if(missingIdSet.size>0){
+                let missingIdArray=Array.from(missingIdSet);
+                missingIdSet.clear();
+                response.code = 424;
+                response.body = {"Missing":  missingIdArray};
+                reject(response);
+                return;
+            }
 
+            response['code'] = 200;
+            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
+            console.log("# of items in result: " +responseObject['result'].length);
+            fulfill(response);
+            return;
+
+        }).catch(function(err){
+            return new Promise(function(resolve, reject){
+                reject(err);
+                return;
+            });
         });
-    });
-    it("Liberation: Invalid IS should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                        "IS": {
-                            "courses_avg": 98
-                        }
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
+        return mainPromise;
+
+    }
+
+    underscoreManager(str:string,type:string):string{
+        if(type == "id") {
+            var keyArr = str.split('_');
+            return keyArr[0];
+        }else if(type=="key"){
+            var keyArr=str.split('_');
+            return keyArr[1];
+        }else{
+            console.log("wrong type for underscore manager");
+            throw "wrong type for underscore manager";
+        }
+    }
+
+
+    sortByKey(sortingOrder:string,responseObject:any, idSet:Set<any>):Array<Object>{
+        let that=this;
+        var sortingOrderKey=that.underscoreManager(sortingOrder,'key');
+        let arrayToSort=responseObject['result'];
+        let idArr=Array.from(idSet);
+
+        for(var id in idArr){
+            if (that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
+
+                arrayToSort = that.bubbleSort(responseObject['result'], sortingOrderKey, id);
+            } else { //SORTING BY ALPHABETS
+                var alphaSorting = function (ObjA: any, ObjB: any) {
+                    if (ObjA[id + '_' + sortingOrderKey] < ObjB[id + '_' + sortingOrderKey])
+                        return -1;
+                    if (ObjA[id + '_' + sortingOrderKey] > ObjB[id + '_' + sortingOrderKey])
+                        return 1;
+                    return 0;
+                }
+                arrayToSort.sort(alphaSorting);
+            }
+        };
+        return arrayToSort;
+    }
+
+    bubbleSort(array:Array<any>,sortingOrder:string,id:string):Array<Object> {
+        for(let i=0;i<array.length;i++){
+            for(var j=0;j<array.length-1-i;j++){
+                if(array[j][id+'_'+sortingOrder]>array[j+1][id+'_'+sortingOrder]){
+                    let temp=array[j];
+                    array[j]=array[j+1];
+                    array[j+1]=temp;
                 }
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
+        }
+        return array;
+    }
 
-        });
-    });
-    it("Lorax: Empty AND should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "AND":[
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
+
+    getDataStructure():Object{
+        return dataStructure;
+    }
+
+    filterManager(filterObject:any,toCompare: Object):boolean{
+        let that=this;
+
+        //LOGICCOMPARISON => recursive calls
+        if(filterObject.hasOwnProperty('OR')){
+            let filterArray=filterObject['OR'];
+            if(filterArray.length===0){
+                throw {code:400,body:{"error":"AND array is empty"}};
+            }
+            let resultBool:boolean=false;
+            for(let filt=0;filt<filterArray.length;filt++){
+                resultBool=that.filterManager(filterArray[filt], toCompare);
+                //console.log("OR loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
+                if (resultBool===true) {
+                    break;
                 }
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-
-        });
-    });
-    it("Malibu: Empty OR should result in 400.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "OR":[
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
-                }
+            return resultBool;
+        }else if(filterObject.hasOwnProperty('AND')){
+            let filterArray=filterObject['AND'];
+            if(filterArray.length===0){
+                throw {code:400,body:{"error":"AND array is empty"}};
             }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-            expect.fail();
-        }).catch(function (err: any) {
-            console.log(err);
-
-        });
-    });
-    it("Mango: Contradictory query should be valid.", function() {
-        console.log("+++TEST: complex query from spec");
-        return facade.performQuery(
-            {"WHERE":{
-                "AND":[
-                    {
-                        "GT": {
-                            "courses_avg": 60
-                        }
-                    },{
-                        "LT": {
-                            "courses_avg": 40
-                        }
+            let resultBool=true;
+            for(let filt=0;filt<filterArray.length;filt++){
+                resultBool=that.filterManager(filterArray[filt], toCompare);
+                //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
+                if (resultBool===false) {
+                    break;
+                }
+            };
+            return resultBool;
+        }
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //MCOMPARISON =>terminal base cases
+        else if(filterObject.hasOwnProperty('EQ')){
+            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
+            for(var underscore in filterObject.EQ){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    if((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
+                        throw {code:400,body:{"error":"EQ value should be a number"}};
                     }
-                ]
-            },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_id",
-                        "courses_title",
-                        "courses_instructor",
-                        "courses_dept"
-                    ],
-                    "ORDER": "courses_id",
-                    "FORM": "TABLE"
+                    let id=that.underscoreManager(underscore,'id')
+                    missingIdSet.add(id);
+                    if (!(filterObject.EQ[underscore] === val)) {
+                        return false;
+                    }
                 }
-            }
-        ).then(function (InF: InsightResponse) {
-            //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-    });
+            }return true; //all keys pass equality test at this point (can apply to strings too?)
+        }
+        else if(filterObject.hasOwnProperty('GT')){
+            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
+            for(var underscore in filterObject.GT){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    if((typeof filterObject.GT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
+                        missingIdSet.add(that.underscoreManager(underscore,'id'));
+                        if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
+                            return false;
+                        }
+                    }else{
+                        throw {code:400,body:{"error":"GT value should be a number"}};
+                    }
+                }
+            }return true; //all keys pass comparison test at this point
+        }
+        else if(filterObject.hasOwnProperty('LT')){
+            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
+            for(var underscore in filterObject.LT){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    missingIdSet.add(that.underscoreManager(underscore,'id'));
+                    if((typeof filterObject.LT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
+                        if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
+                            return false;
+                        }
+                    }else{
+                        throw {code:400,body:{"error":"LT value should be a number"}};
+                    }
+                }
+            }return true; //all keys pass comparison test at this point
+        }
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //SCOMPARISON =>terminal base cases
+        else if(filterObject.hasOwnProperty('IS')){
 
-});
+            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
+            for(var underscore in filterObject.IS){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    var bool=that.isKeyWithNumType(that.underscoreManager(underscore, 'key'));
+                    if((typeof filterObject.IS[underscore] !== 'string') || (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
+                        throw {code:400,body:{"error":"IS value should be a string"}};
+                    }
+                    missingIdSet.add(that.underscoreManager(underscore,'id'));
+                    if(that.sComparison(filterObject.IS[underscore],val)===false) {//checks for false Scomparison conditions
+                        return false;
+                    }
+                }
+            }return true;
+        }
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //NEGATION => recursive calls
+        else if(filterObject.hasOwnProperty('NOT')){
+            return !that.filterManager(filterObject.NOT,toCompare);
+        }
+        else{
+            //console.log("no valid filter found");
+            throw {code:400,body:{"error":"no valid filter found"}};
+        }
+    }
+
+    keyToJsonKey(key: string): string{
+        switch(key){
+            case "dept":
+                return "Subject";
+            case "id":
+                return "Course";
+            case "avg":
+                return "Avg";
+            case "instructor":
+                return "Professor";
+            case "title":
+                return "Title";
+            case "pass":
+                return "Pass";
+            case "fail":
+                return "Fail";
+            case "audit":
+                return "Audit";
+            case "uuid":
+                return "id";
+            default:
+                //console.log("not valid key query");
+                throw {code:400,body:{"error":"not valid key in query"}};
+        }
+    }
+
+    isKeyWithNumType(key: String):boolean{
+        switch(key){
+            case "dept":
+                return false;
+            case "id":
+                return false;
+            case "avg":
+                return true;
+            case "instructor":
+                return false;
+            case "title":
+                return false;
+            case "pass":
+                return true;
+            case "fail":
+                return true;
+            case "audit":
+                return true;
+            case "uuid":
+                return false;
+            default:
+                //console.log("not valid key query");
+                throw "not valid key in query";
+        }
+    }
+
+    hasValidOptions(opKey:any):Boolean{
+        var qOption=JSON.parse(JSON.stringify(opKey));
+        if(qOption.hasOwnProperty('ORDER')&& qOption.hasOwnProperty('FORM')){
+            if(qOption.FORM == "TABLE"){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    sComparison(qKey:String,val:String):Boolean{ //key is query input; val is database value
+        // case1:*qkey* -- contains
+        if(typeof qKey !== 'string'){
+            throw "Invalid query: IS value should be a string";
+        }
+        if(qKey.charAt(0)==='*' && qKey.charAt(qKey.length-1)==='*'){
+            let truncatedKey=qKey.substring(1,qKey.length-1);
+            var num=val.indexOf(truncatedKey);
+            if(val.indexOf(truncatedKey)!==-1){
+                return true;
+            }
+            return false;
+        }
+        //case2:*qkey -- ends with
+        else if(qKey.charAt(0)==='*'){
+            let truncatedKey=qKey.substring(1,qKey.length);
+            if(val.endsWith(truncatedKey)){
+                return true;
+            }
+            return false;
+        }
+        //case3:qkey* -- starts with
+        else if(qKey.charAt(qKey.length-1)==='*'){
+            if(val.startsWith(qKey.substring(0,qKey.length-1))){
+                return true;
+            }
+            return false;
+        }
+        //case4:qKey -- same text as
+        else{
+            if(qKey===val){
+                return true;
+            }
+            return false;
+        }
+    }
+}

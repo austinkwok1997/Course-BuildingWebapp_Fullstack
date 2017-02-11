@@ -329,19 +329,6 @@ export default class InsightFacade implements IInsightFacade {
         return arrayToSort;
     }
 
-    bubbleSort(array:Array<any>,sortingOrder:string,id:string):Array<Object> {
-        for(let i=0;i<array.length;i++){
-            for(var j=0;j<array.length-1-i;j++){
-                if(array[j][id+'_'+sortingOrder]>array[j+1][id+'_'+sortingOrder]){
-                    let temp=array[j];
-                    array[j]=array[j+1];
-                    array[j+1]=temp;
-                }
-            }
-        }
-        return array;
-    }
-
 
     getDataStructure():Object{
         return dataStructure;

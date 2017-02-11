@@ -233,13 +233,13 @@ export default class InsightFacade implements IInsightFacade {
 
                                     idSet.add(curId);
                                     let key = that.underscoreManager(underscoreWord, 'key');
-                                    /*
-                                    if (underscoreWord === 'id') {
-                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
-                                    } else {
+                                    
+                                   // if (underscoreWord === 'id') {
+                                  //      resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
+                                  //  } else {
                                         resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
-                                    }
-                                    */
+                                  //  }
+                                    
 
                                 }else{
                                     missingIdArray.push(curId);

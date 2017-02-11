@@ -227,7 +227,7 @@ export default class InsightFacade implements IInsightFacade {
                             let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
-                                /*
+                                
                                 let curId=that.underscoreManager(underscoreWord,'id');
                                 if(dataStructure.hasOwnProperty(curId)) {
                                     idSet.add(curId);
@@ -240,7 +240,7 @@ export default class InsightFacade implements IInsightFacade {
                                 }else{
                                     missingIdArray.push(curId);
                                 }
-                                */
+                                
                             }
                             if(missingIdArray.length!== 0){
                                 response.code = 424;

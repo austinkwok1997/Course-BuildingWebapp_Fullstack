@@ -211,10 +211,10 @@ export default class InsightFacade implements IInsightFacade {
             for (var id in dataStructure) {
 
                 let setOfCourses = dataStructure[id];
-                /*
                 for (var course in setOfCourses) {
                     let resultArray: any = [];
                     resultArray = setOfCourses[course.toString()]['result'];
+                    /*
                     for(let courseTermData of resultArray) {
                         let resultObject: any = {};
                         keyArray.forEach(function (k: any) {
@@ -249,8 +249,9 @@ export default class InsightFacade implements IInsightFacade {
                         }
 
                     };
+                    */
                 }
-                */
+                
             }
             let missingIdArray=Array.from(missingIdSet)
             for(let i=0;i<missingIdArray.length;i++){

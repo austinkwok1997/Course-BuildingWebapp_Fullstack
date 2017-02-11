@@ -11,6 +11,7 @@ import {isUndefined} from "util";
 //import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
 var dataStructure:any ={};
+var missingIdSet=new Set();
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -203,36 +204,66 @@ export default class InsightFacade implements IInsightFacade {
 
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
             var promisesForEachCourse:Promise<Boolean>[]=[];
-
+            var idSet:any=new Set();
             for (var id in dataStructure) {
 
                 let setOfCourses = dataStructure[id];
                 for (var course in setOfCourses) {
-                    let resultArray: Array<Object> = [];
+                    let resultArray: any = [];
                     resultArray = setOfCourses[course.toString()]['result'];
-                    resultArray.forEach(function (courseTermData: Object) {
-                        let resultObject:any = {};
+                    for(let courseTermData of resultArray) {
+                        let resultObject: any = {};
                         keyArray.forEach(function (k: any) {
                             resultObject[k] = null;
                         });
 
-                        var filterResult=that.filterManager(queryWhereObject, courseTermData);
-                        if (filterResult===true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                            for (var key in resultObject) {
-                                if (key === 'id') {
-                                    resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
-                                } else {
-                                    resultObject[key] = JSON.parse(JSON.stringify(courseTermData))[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
+                        var filterResult = that.filterManager(queryWhereObject, courseTermData);
+                        if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                            let missingIdArray=[];
+
+                            for (var underscoreWord in resultObject) {
+                                let curId=that.underscoreManager(underscoreWord,'id');
+                                if(dataStructure.hasOwnProperty(curId)) {
+                                    idSet.add(curId);
+                                    let key = that.underscoreManager(underscoreWord, 'key');
+                                    if (underscoreWord === 'id') {
+                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()].toString; //special case if keyArray element is id we need to turn the int into a string
+                                    } else {
+                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(key).toString()];//take desired keys from result object and fill them with the values in valid courseTermData
+                                    }
+                                }else{
+                                    missingIdArray.push(curId);
                                 }
+                            }
+                            if(missingIdArray.length!== 0){
+                                response.code = 424;
+                                response.body = {"Missing":  missingIdArray};
+                                reject(response);
+                                return;
                             }
                             responseObject['result'].push(resultObject);
                         }
 
-                    });
+                    };
                 }
             }
+            let missingIdArray=Array.from(missingIdSet)
+            for(let i=0;i<missingIdArray.length;i++){
+                if(dataStructure.hasOwnProperty(missingIdArray[i])){
+                    missingIdSet.delete(missingIdArray[i]);
+                }
+            }
+            if(missingIdSet.size>0){
+                let missingIdArray=Array.from(missingIdSet);
+                missingIdSet.clear();
+                response.code = 424;
+                response.body = {"Missing":  missingIdArray};
+                reject(response);
+                return;
+            }
+
             response['code'] = 200;
-            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject)};
+            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
             console.log("# of items in result: " +responseObject['result'].length);
             fulfill(response);
             return;
@@ -247,31 +278,48 @@ export default class InsightFacade implements IInsightFacade {
 
     }
 
-    sortByKey(sortingOrderKey:string,responseObject:any):Array<Object>{
-        let that=this;
-
-        let arrayToSort=responseObject['result'];
-        let returnObject= {render:'TABLE',result:<any>[]};
-        if(that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
-
-            arrayToSort=that.bubbleSort(responseObject['result'],sortingOrderKey);
-        }else{ //SORTING BY ALPHABETS
-            var alphaSorting=function(ObjA:any,ObjB:any){
-                if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
-                    return -1;
-                if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
-                    return 1;
-                return 0;
-            }
-            arrayToSort.sort(alphaSorting);
+    underscoreManager(str:string,type:string):string{
+        if(type == "id") {
+            var keyArr = str.split('_');
+            return keyArr[0];
+        }else if(type=="key"){
+            var keyArr=str.split('_');
+            return keyArr[1];
+        }else{
+            console.log("wrong type for underscore manager");
+            throw "wrong type for underscore manager";
         }
+    }
+
+
+    sortByKey(sortingOrder:string,responseObject:any, idSet:Set<any>):Array<Object>{
+        let that=this;
+        var sortingOrderKey=that.underscoreManager(sortingOrder,'key');
+        let arrayToSort=responseObject['result'];
+        let idArr=Array.from(idSet);
+
+        for(var id in idArr){
+            if (that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
+
+                arrayToSort = that.bubbleSort(responseObject['result'], sortingOrderKey, id);
+            } else { //SORTING BY ALPHABETS
+                var alphaSorting = function (ObjA: any, ObjB: any) {
+                    if (ObjA[id + '_' + sortingOrderKey] < ObjB[id + '_' + sortingOrderKey])
+                        return -1;
+                    if (ObjA[id + '_' + sortingOrderKey] > ObjB[id + '_' + sortingOrderKey])
+                        return 1;
+                    return 0;
+                }
+                arrayToSort.sort(alphaSorting);
+            }
+        };
         return arrayToSort;
     }
 
-    bubbleSort(array:Array<any>,sortingOrderKey:string):Array<Object> {
+    bubbleSort(array:Array<any>,sortingOrder:string,id:string):Array<Object> {
         for(let i=0;i<array.length;i++){
             for(var j=0;j<array.length-1-i;j++){
-                if(array[j][sortingOrderKey]>array[j+1][sortingOrderKey]){
+                if(array[j][id+'_'+sortingOrder]>array[j+1][id+'_'+sortingOrder]){
                     let temp=array[j];
                     array[j]=array[j+1];
                     array[j+1]=temp;
@@ -286,10 +334,8 @@ export default class InsightFacade implements IInsightFacade {
         return dataStructure;
     }
 
-    filterManager(filter:Object,toCompare: Object):boolean{
+    filterManager(filterObject:any,toCompare: Object):boolean{
         let that=this;
-
-        var filterObject=JSON.parse(JSON.stringify(filter));
 
         //LOGICCOMPARISON => recursive calls
         if(filterObject.hasOwnProperty('OR')){
@@ -325,13 +371,16 @@ export default class InsightFacade implements IInsightFacade {
         //MCOMPARISON =>terminal base cases
         else if(filterObject.hasOwnProperty('EQ')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var key in filterObject.EQ){
-                if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
-                    if((typeof filterObject.EQ[key] !== 'number') || !(that.isKeyWithNumType(key))){
+            for(var underscore in filterObject.EQ){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    if((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
                         throw {code:400,body:{"error":"EQ value should be a number"}};
                     }
-                    if (!(filterObject.EQ[key] === val)) {
+                    let id=that.underscoreManager(underscore,'id')
+                    missingIdSet.add(id);
+                    if (!(filterObject.EQ[underscore] === val)) {
                         return false;
                     }
                 }
@@ -339,12 +388,13 @@ export default class InsightFacade implements IInsightFacade {
         }
         else if(filterObject.hasOwnProperty('GT')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var key in filterObject.GT){
-
-                if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
-                    if((typeof filterObject.GT[key]==='number') && (that.isKeyWithNumType(key))) {
-                        if (filterObject.GT[key] >= val) { //if lower bound(greaterThan) is greater the val
+            for(var underscore in filterObject.GT){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    if((typeof filterObject.GT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
+                        missingIdSet.add(that.underscoreManager(underscore,'id'));
+                        if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
                     }else{
@@ -355,12 +405,13 @@ export default class InsightFacade implements IInsightFacade {
         }
         else if(filterObject.hasOwnProperty('LT')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var key in filterObject.LT){
-
-                if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
-                    if((typeof filterObject.LT[key]==='number') && (that.isKeyWithNumType(key))){
-                        if (filterObject.LT[key] <= val) { //if lower bound(greaterThan) is greater the val
+            for(var underscore in filterObject.LT){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    missingIdSet.add(that.underscoreManager(underscore,'id'));
+                    if((typeof filterObject.LT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
+                        if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
                     }else{
@@ -374,13 +425,16 @@ export default class InsightFacade implements IInsightFacade {
         else if(filterObject.hasOwnProperty('IS')){
 
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var key in filterObject.IS){
-                if(toCompareObject.hasOwnProperty((this.keyToJsonKey(key)).toString())) {
-                    let val = toCompareObject[(this.keyToJsonKey(key)).toString()];
-                    if((typeof filterObject.IS[key] !== 'string') || (that.isKeyWithNumType(key))){
+            for(var underscore in filterObject.IS){
+                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if(toCompareObject.hasOwnProperty(prop)) {
+                    let val = toCompareObject[prop.toString()];
+                    var bool=that.isKeyWithNumType(that.underscoreManager(underscore, 'key'));
+                    if((typeof filterObject.IS[underscore] !== 'string') || (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
                         throw {code:400,body:{"error":"IS value should be a string"}};
                     }
-                    if(that.sComparison(filterObject.IS[key],val)===false) {//checks for false Scomparison conditions
+                    missingIdSet.add(that.underscoreManager(underscore,'id'));
+                    if(that.sComparison(filterObject.IS[underscore],val)===false) {//checks for false Scomparison conditions
                         return false;
                     }
                 }
@@ -399,23 +453,23 @@ export default class InsightFacade implements IInsightFacade {
 
     keyToJsonKey(key: String): String{
         switch(key){
-            case "courses_dept":
+            case "dept":
                 return "Subject";
-            case "courses_id":
+            case "id":
                 return "Course";
-            case "courses_avg":
+            case "avg":
                 return "Avg";
-            case "courses_instructor":
+            case "instructor":
                 return "Professor";
-            case "courses_title":
+            case "title":
                 return "Title";
-            case "courses_pass":
+            case "pass":
                 return "Pass";
-            case "courses_fail":
+            case "fail":
                 return "Fail";
-            case "courses_audit":
+            case "audit":
                 return "Audit";
-            case "courses_uuid":
+            case "uuid":
                 return "id";
             default:
                 //console.log("not valid key query");
@@ -425,23 +479,23 @@ export default class InsightFacade implements IInsightFacade {
 
     isKeyWithNumType(key: String):boolean{
         switch(key){
-            case "courses_dept":
+            case "dept":
                 return false;
-            case "courses_id":
+            case "id":
                 return false;
-            case "courses_avg":
+            case "avg":
                 return true;
-            case "courses_instructor":
+            case "instructor":
                 return false;
-            case "courses_title":
+            case "title":
                 return false;
-            case "courses_pass":
+            case "pass":
                 return true;
-            case "courses_fail":
+            case "fail":
                 return true;
-            case "courses_audit":
+            case "audit":
                 return true;
-            case "courses_uuid":
+            case "uuid":
                 return false;
             default:
                 //console.log("not valid key query");

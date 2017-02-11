@@ -222,11 +222,12 @@ export default class InsightFacade implements IInsightFacade {
                         });
 
                         var filterResult = that.filterManager(queryWhereObject, courseTermData);
-/*                        
+
                         if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                            let missingIdArray=[];
+                            let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
+                                /*
                                 let curId=that.underscoreManager(underscoreWord,'id');
                                 if(dataStructure.hasOwnProperty(curId)) {
                                     idSet.add(curId);
@@ -239,6 +240,7 @@ export default class InsightFacade implements IInsightFacade {
                                 }else{
                                     missingIdArray.push(curId);
                                 }
+                                */
                             }
                             if(missingIdArray.length!== 0){
                                 response.code = 424;
@@ -248,7 +250,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                             responseObject['result'].push(resultObject);
                         }
-*/
+
                     }
 
                 }

@@ -208,7 +208,7 @@ export default class InsightFacade implements IInsightFacade {
                 reject(response);
                 return;
             }
-            
+
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
@@ -282,7 +282,7 @@ export default class InsightFacade implements IInsightFacade {
             }
 
             response['code'] = 200;
-            response['body'] = {render:'TABLE',result:responseObject};//that.sortByKey(sortingOrderKey,responseObject,idSet)};
+            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
             console.log("# of items in result: " +responseObject['result'].length);
             fulfill(response);
             return;
@@ -317,20 +317,20 @@ export default class InsightFacade implements IInsightFacade {
         let arrayToSort=responseObject['result'];
         let idArr=Array.from(idSet);
 
-        for(var id in idArr){
-            if (that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
+        for(let id=0;id<idArr.length;id++){
+           // if (that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
 
-                arrayToSort = that.bubbleSort(responseObject['result'], sortingOrderKey, id);
-            } else { //SORTING BY ALPHABETS
-                var alphaSorting = function (ObjA: any, ObjB: any) {
-                    if (ObjA[id + '_' + sortingOrderKey] < ObjB[id + '_' + sortingOrderKey])
+            //    arrayToSort = that.bubbleSort(responseObject['result'], sortingOrderKey, id);
+           // } else { //SORTING BY ALPHABETS
+                var objectCompare = function (ObjA: any, ObjB: any) {
+                    if (ObjA[idArr[id] + '_' + sortingOrderKey] < ObjB[idArr[id] + '_' + sortingOrderKey])
                         return -1;
-                    if (ObjA[id + '_' + sortingOrderKey] > ObjB[id + '_' + sortingOrderKey])
+                    if (ObjA[idArr[id] + '_' + sortingOrderKey] > ObjB[idArr[id] + '_' + sortingOrderKey])
                         return 1;
                     return 0;
                 }
-                arrayToSort.sort(alphaSorting);
-            }
+                arrayToSort.sort(objectCompare);
+           // }
         };
         return arrayToSort;
     }

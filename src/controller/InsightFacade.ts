@@ -196,12 +196,19 @@ export default class InsightFacade implements IInsightFacade {
 
             var keyArray = queryJsonOptions.COLUMNS;
             sortingOrderKey=queryJsonOptions.ORDER;
+            if(!dataStructure.hasOwnProperty(that.underscoreManager(sortingOrderKey,'id'))){
+                response.code = 424;
+                response.body = {"Missing": [that.underscoreManager(sortingOrderKey,'id')]};
+                reject(response);
+                return;
+            }
             if(!keyArray.includes(sortingOrderKey)){
                 response.code = 400;
                 response.body = {"error": "Order key needs to be included in columns"};
                 reject(response);
                 return;
             }
+            
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
@@ -236,7 +243,7 @@ export default class InsightFacade implements IInsightFacade {
                                    // if (underscoreWord === 'id') {
                                     //    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
                                   //  } else {
-                                       resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];//take desired keys from result object and fill them with the values in valid courseTermData
+                                       resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];//TODO TIMEOUT
                                    // }
 
 
@@ -275,7 +282,7 @@ export default class InsightFacade implements IInsightFacade {
             }
 
             response['code'] = 200;
-            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
+            response['body'] = {render:'TABLE',result:responseObject};//that.sortByKey(sortingOrderKey,responseObject,idSet)};
             console.log("# of items in result: " +responseObject['result'].length);
             fulfill(response);
             return;

@@ -175,8 +175,8 @@ export default class InsightFacade implements IInsightFacade {
 
 
         var mainPromise:Promise <InsightResponse>=new Promise(function(fulfill,reject) {
-          
-            
+
+
             if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
                 console.log("invalid query");
                 response.code = 400;
@@ -207,10 +207,11 @@ export default class InsightFacade implements IInsightFacade {
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
             var promisesForEachCourse:Promise<Boolean>[]=[];
             var idSet:any=new Set();
-/*
+
             for (var id in dataStructure) {
 
                 let setOfCourses = dataStructure[id];
+                /*
                 for (var course in setOfCourses) {
                     let resultArray: any = [];
                     resultArray = setOfCourses[course.toString()]['result'];
@@ -249,6 +250,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     };
                 }
+                */
             }
             let missingIdArray=Array.from(missingIdSet)
             for(let i=0;i<missingIdArray.length;i++){
@@ -264,7 +266,7 @@ export default class InsightFacade implements IInsightFacade {
                 reject(response);
                 return;
             }
-*/
+
             response['code'] = 200;
             response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
             console.log("# of items in result: " +responseObject['result'].length);

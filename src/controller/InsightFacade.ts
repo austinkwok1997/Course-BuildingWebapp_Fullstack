@@ -196,7 +196,7 @@ export default class InsightFacade implements IInsightFacade {
 
             var keyArray = queryJsonOptions.COLUMNS;
             sortingOrderKey=queryJsonOptions.ORDER;
-            if(!dataStructure.hasOwnProperty(that.underscoreManager(sortingOrderKey,'id'))){
+            if(!dataStructure.hasOwnProperty(that.underscoreManager(sortingOrderKey,'id'))){ //for 424 in Order key
                 response.code = 424;
                 response.body = {"Missing": [that.underscoreManager(sortingOrderKey,'id')]};
                 reject(response);
@@ -240,19 +240,18 @@ export default class InsightFacade implements IInsightFacade {
 
                                     idSet.add(curId);
                                     let theKey=that.underscoreManager(underscoreWord,'key');
-                                   // if (underscoreWord === 'id') {
-                                    //    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
-                                  //  } else {
-                                       resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];//TODO TIMEOUT
-                                   // }
-
+                                   if (underscoreWord === 'id') {
+                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                    } else {
+                                       resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+                                    }
 
                                 }else{
                                     missingIdArray.push(curId);
                                 }
 
                             }
-                            if(missingIdArray.length!== 0){
+                            if(missingIdArray.length!== 0){//for 424 in columns
                                 response.code = 424;
                                 response.body = {"Missing":  missingIdArray};
                                 reject(response);
@@ -272,7 +271,7 @@ export default class InsightFacade implements IInsightFacade {
                     missingIdSet.delete(missingIdArray[i]);
                 }
             }
-            if(missingIdSet.size>0){
+            if(missingIdSet.size>0){//for 424 in filters
                 let missingIdArray=Array.from(missingIdSet);
                 missingIdSet.clear();
                 response.code = 424;
@@ -318,10 +317,6 @@ export default class InsightFacade implements IInsightFacade {
         let idArr=Array.from(idSet);
 
         for(let id=0;id<idArr.length;id++){
-           // if (that.isKeyWithNumType(sortingOrderKey)) { //SORTING BY NUMBER
-
-            //    arrayToSort = that.bubbleSort(responseObject['result'], sortingOrderKey, id);
-           // } else { //SORTING BY ALPHABETS
                 var objectCompare = function (ObjA: any, ObjB: any) {
                     if (ObjA[idArr[id] + '_' + sortingOrderKey] < ObjB[idArr[id] + '_' + sortingOrderKey])
                         return -1;
@@ -330,7 +325,6 @@ export default class InsightFacade implements IInsightFacade {
                     return 0;
                 }
                 arrayToSort.sort(objectCompare);
-           // }
         };
         return arrayToSort;
     }

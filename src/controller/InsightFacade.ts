@@ -11,7 +11,7 @@ import {isUndefined} from "util";
 //import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
 var dataStructure:any ={};
-var missingIdSet=new Set();
+var missingIdArr:any=[];
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -196,12 +196,6 @@ export default class InsightFacade implements IInsightFacade {
 
             var keyArray = queryJsonOptions.COLUMNS;
             sortingOrderKey=queryJsonOptions.ORDER;
-            if(!dataStructure.hasOwnProperty(that.underscoreManager(sortingOrderKey,'id'))){ //for 424 in Order key
-                response.code = 424;
-                response.body = {"Missing": [that.underscoreManager(sortingOrderKey,'id')]};
-                reject(response);
-                return;
-            }
             if(!keyArray.includes(sortingOrderKey)){
                 response.code = 400;
                 response.body = {"error": "Order key needs to be included in columns"};
@@ -214,6 +208,14 @@ export default class InsightFacade implements IInsightFacade {
             var promisesForEachTermInCourse:Promise<Boolean>[]=[];
             var promisesForEachCourse:Promise<Boolean>[]=[];
             var idSet:any=new Set();
+
+            that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id array for 424
+            for(let i=0;i<keyArray.length;i++){//adds column id to missing id array for 424
+                let idToBeChecked=that.underscoreManager(keyArray[i],'id');
+                if(!dataStructure.hasOwnProperty(idToBeChecked)){
+                    missingIdArr.push(idToBeChecked);
+                }
+            }
 
             for (var id in dataStructure) {
 
@@ -228,34 +230,19 @@ export default class InsightFacade implements IInsightFacade {
                             resultObject[k] = null;
                         });
 
-                        var filterResult = that.filterManager(queryWhereObject, courseTermData);
+                        var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
 
                         if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                            let missingIdArray:any=[];
+                            //let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
-
-                                let curId=that.underscoreManager(underscoreWord,'id');
-                                if(dataStructure.hasOwnProperty(curId)) {
-
-                                    idSet.add(curId);
-                                    let theKey=that.underscoreManager(underscoreWord,'key');
-                                   if (underscoreWord === 'id') {
-                                        resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
-                                    } else {
-                                       resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
-                                    }
-
-                                }else{
-                                    missingIdArray.push(curId);
+                                let theKey=that.underscoreManager(underscoreWord,'key');
+                                if (underscoreWord === 'id') {
+                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                } else {
+                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
                                 }
 
-                            }
-                            if(missingIdArray.length!== 0){//for 424 in columns
-                                response.code = 424;
-                                response.body = {"Missing":  missingIdArray};
-                                reject(response);
-                                return;
                             }
                             responseObject['result'].push(resultObject);
                         }
@@ -265,17 +252,17 @@ export default class InsightFacade implements IInsightFacade {
                 }
 
             }
-            let missingIdArray=Array.from(missingIdSet);
-            for(let i=0;i<missingIdArray.length;i++){
-                if(dataStructure.hasOwnProperty(missingIdArray[i])){
-                    missingIdSet.delete(missingIdArray[i]);
+
+            for(let i=0;i<missingIdArr.length;i++){
+                if(dataStructure.hasOwnProperty(missingIdArr[i])){
+                    missingIdArr.splice(i);
                 }
             }
-            if(missingIdSet.size>0){//for 424 in filters
-                let missingIdArray=Array.from(missingIdSet);
-                missingIdSet.clear();
+            if(missingIdArr.length>0){//for 424
+                let missingIdArray=Array.from(missingIdArr);
                 response.code = 424;
                 response.body = {"Missing":  missingIdArray};
+                missingIdArr=[];
                 reject(response);
                 return;
             }
@@ -334,7 +321,7 @@ export default class InsightFacade implements IInsightFacade {
         return dataStructure;
     }
 
-    filterManager(filterObject:any,toCompare: Object):boolean{
+    filterManager(filterObject:any,toCompare: Object, fourTwoFourChecker: boolean):boolean{
         let that=this;
 
         //LOGICCOMPARISON => recursive calls
@@ -345,7 +332,7 @@ export default class InsightFacade implements IInsightFacade {
             }
             let resultBool:boolean=false;
             for(let filt=0;filt<filterArray.length;filt++){
-                resultBool=that.filterManager(filterArray[filt], toCompare);
+                resultBool=that.filterManager(filterArray[filt], toCompare,fourTwoFourChecker);
                 //console.log("OR loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
                 if (resultBool===true) {
                     break;
@@ -359,7 +346,7 @@ export default class InsightFacade implements IInsightFacade {
             }
             let resultBool=true;
             for(let filt=0;filt<filterArray.length;filt++){
-                resultBool=that.filterManager(filterArray[filt], toCompare);
+                resultBool=that.filterManager(filterArray[filt], toCompare,fourTwoFourChecker);
                 //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
                 if (resultBool===false) {
                     break;
@@ -372,6 +359,9 @@ export default class InsightFacade implements IInsightFacade {
         else if(filterObject.hasOwnProperty('EQ')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
             for(var underscore in filterObject.EQ){
+                if (fourTwoFourChecker) {
+                    missingIdArr.push(that.underscoreManager(underscore, 'id'));
+                }
                 var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
                 if(toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
@@ -379,7 +369,6 @@ export default class InsightFacade implements IInsightFacade {
                         throw {code:400,body:{"error":"EQ value should be a number"}};
                     }
                     let id=that.underscoreManager(underscore,'id')
-                    missingIdSet.add(id);
                     if (!(filterObject.EQ[underscore] === val)) {
                         return false;
                     }
@@ -389,11 +378,13 @@ export default class InsightFacade implements IInsightFacade {
         else if(filterObject.hasOwnProperty('GT')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
             for(var underscore in filterObject.GT){
+                if (fourTwoFourChecker) {
+                    missingIdArr.push(that.underscoreManager(underscore, 'id'));
+                }
                 var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
                 if(toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
                     if((typeof filterObject.GT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
-                        missingIdSet.add(that.underscoreManager(underscore,'id'));
                         if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
@@ -406,10 +397,12 @@ export default class InsightFacade implements IInsightFacade {
         else if(filterObject.hasOwnProperty('LT')){
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
             for(var underscore in filterObject.LT){
+                if (fourTwoFourChecker) {
+                    missingIdArr.push(that.underscoreManager(underscore, 'id'));
+                }
                 var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
                 if(toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
-                    missingIdSet.add(that.underscoreManager(underscore,'id'));
                     if((typeof filterObject.LT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
                         if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
@@ -426,6 +419,9 @@ export default class InsightFacade implements IInsightFacade {
 
             var toCompareObject=JSON.parse(JSON.stringify(toCompare));
             for(var underscore in filterObject.IS){
+                if (fourTwoFourChecker) {
+                    missingIdArr.push(that.underscoreManager(underscore, 'id'));
+                }
                 var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
                 if(toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
@@ -433,7 +429,6 @@ export default class InsightFacade implements IInsightFacade {
                     if((typeof filterObject.IS[underscore] !== 'string') || (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
                         throw {code:400,body:{"error":"IS value should be a string"}};
                     }
-                    missingIdSet.add(that.underscoreManager(underscore,'id'));
                     if(that.sComparison(filterObject.IS[underscore],val)===false) {//checks for false Scomparison conditions
                         return false;
                     }
@@ -443,7 +438,7 @@ export default class InsightFacade implements IInsightFacade {
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //NEGATION => recursive calls
         else if(filterObject.hasOwnProperty('NOT')){
-            return !that.filterManager(filterObject.NOT,toCompare);
+            return !that.filterManager(filterObject.NOT,toCompare,fourTwoFourChecker);
         }
         else{
             //console.log("no valid filter found");
@@ -513,37 +508,37 @@ export default class InsightFacade implements IInsightFacade {
         return false;
     }
 
-    sComparison(qKey:String,val:String):Boolean{ //key is query input; val is database value
+    sComparison(queryKey:String,dataSetVal:String):Boolean{ //key is query input; val is database value
         // case1:*qkey* -- contains
-        if(typeof qKey !== 'string'){
+        if(typeof queryKey !== 'string'){
             throw "Invalid query: IS value should be a string";
         }
-        if(qKey.charAt(0)==='*' && qKey.charAt(qKey.length-1)==='*'){
-            let truncatedKey=qKey.substring(1,qKey.length-1);
-            var num=val.indexOf(truncatedKey);
-            if(val.indexOf(truncatedKey)!==-1){
+        if(queryKey.charAt(0)==='*' && queryKey.charAt(queryKey.length-1)==='*'){
+            let truncatedKey=queryKey.substring(1,queryKey.length-1);
+            var num=dataSetVal.indexOf(truncatedKey);
+            if(dataSetVal.indexOf(truncatedKey)!==-1){
                 return true;
             }
             return false;
         }
         //case2:*qkey -- ends with
-        else if(qKey.charAt(0)==='*'){
-            let truncatedKey=qKey.substring(1,qKey.length);
-            if(val.endsWith(truncatedKey)){
+        else if(queryKey.charAt(0)==='*'){
+            let truncatedKey=queryKey.substring(1,queryKey.length);
+            if(dataSetVal.endsWith(truncatedKey)){
                 return true;
             }
             return false;
         }
         //case3:qkey* -- starts with
-        else if(qKey.charAt(qKey.length-1)==='*'){
-            if(val.startsWith(qKey.substring(0,qKey.length-1))){
+        else if(queryKey.charAt(queryKey.length-1)==='*'){
+            if(dataSetVal.startsWith(queryKey.substring(0,queryKey.length-1))){
                 return true;
             }
             return false;
         }
         //case4:qKey -- same text as
         else{
-            if(qKey===val){
+            if(queryKey===dataSetVal){
                 return true;
             }
             return false;

@@ -209,8 +209,8 @@ export default class InsightFacade implements IInsightFacade {
             var promisesForEachCourse:Promise<Boolean>[]=[];
             var idSet:any=new Set();
 
-            that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id array for 424
-            for(let i=0;i<keyArray.length;i++){//adds column id to missing id array for 424
+            that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
+            for(let i=0;i<keyArray.length;i++){
                 let idToBeChecked=that.underscoreManager(keyArray[i],'id');
                 if(!dataStructure.hasOwnProperty(idToBeChecked)){
                     missingIdArr.push(idToBeChecked);
@@ -236,13 +236,14 @@ export default class InsightFacade implements IInsightFacade {
                             //let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
+                                let curId=that.underscoreManager(underscoreWord,'id');
+                                idSet.add(curId);
                                 let theKey=that.underscoreManager(underscoreWord,'key');
                                 if (underscoreWord === 'id') {
                                     resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
                                 } else {
                                     resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
                                 }
-
                             }
                             responseObject['result'].push(resultObject);
                         }
@@ -270,11 +271,13 @@ export default class InsightFacade implements IInsightFacade {
             response['code'] = 200;
             response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
             console.log("# of items in result: " +responseObject['result'].length);
+            missingIdArr=[];
             fulfill(response);
             return;
 
         }).catch(function(err){
             return new Promise(function(resolve, reject){
+                missingIdArr=[];
                 reject(err);
                 return;
             });

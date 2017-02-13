@@ -13,6 +13,7 @@ import {isUndefined} from "util";
 var dataStructure:any ={};
 var missingIdArr:any=[];
 
+
 export default class InsightFacade implements IInsightFacade {
 
     constructor() {
@@ -167,6 +168,7 @@ export default class InsightFacade implements IInsightFacade {
 
         let that=this;
 
+        var uuidUniqueSet=new Set();
         var queryJson:any=query;//convert to a JS object (convert object to JSON String)????????
         var response:InsightResponse={code:777,body:{}};
         var responseObject= {render:'TABLE',result:<any>[]};
@@ -205,8 +207,6 @@ export default class InsightFacade implements IInsightFacade {
 
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
-            var promisesForEachTermInCourse:Promise<Boolean>[]=[];
-            var promisesForEachCourse:Promise<Boolean>[]=[];
             var idSet:any=new Set();
 
             that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
@@ -230,22 +230,29 @@ export default class InsightFacade implements IInsightFacade {
                             resultObject[k] = null;
                         });
 
+                        if(courseTermData.id ===20623){
+                            console.log('test**');
+                        }
+
                         var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
 
                         if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
                             //let missingIdArray:any=[];
 
                             for (var underscoreWord in resultObject) {
-                                let curId=that.underscoreManager(underscoreWord,'id');
+                                let curId = that.underscoreManager(underscoreWord, 'id');
                                 idSet.add(curId);
-                                let theKey=that.underscoreManager(underscoreWord,'key');
+                                let theKey = that.underscoreManager(underscoreWord, 'key');
                                 if (underscoreWord === 'id') {
-                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord,'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
                                 } else {
                                     resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
                                 }
                             }
-                            responseObject['result'].push(resultObject);
+                            if (!uuidUniqueSet.has(courseTermData.id)) {//to account for repeating result objects bug TODO
+                                uuidUniqueSet.add(courseTermData.id);
+                                responseObject['result'].push(resultObject);
+                            }
                         }
 
                     }
@@ -541,7 +548,7 @@ export default class InsightFacade implements IInsightFacade {
         }
         //case4:qKey -- same text as
         else{
-            if(queryKey===dataSetVal){
+            if(queryKey==dataSetVal){ //if uuid we will be comparing string to num do not use strict equal
                 return true;
             }
             return false;

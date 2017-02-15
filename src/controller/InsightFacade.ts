@@ -22,7 +22,6 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-//TODO: not add datadet that is not a zip file;
 //TODO: not add empty zip file
         let that=this;
 
@@ -68,9 +67,9 @@ export default class InsightFacade implements IInsightFacade {
                                         //parsing through zip with html files
                                         var htmlObj = parse5.parse(fileData);
                                         try {
-                                            let roomsArray = that.arrayOfRoomsInHtmlObject(htmlObj);
-                                            promisesForHttp.push(roomsArray);
-                                            dataStructure[id][arrayOfFilesInId[keyIndex]] = roomsArray;
+                                            let roomsObject = that.arrayOfRoomsInHtmlObject(htmlObj);
+                                            promisesForHttp.push(roomsObject);
+                                            dataStructure[id][arrayOfFilesInId[keyIndex]] = roomsObject;
                                         }catch(err){
                                             console.log("no room in this building or file"+keyIndex);
                                         }
@@ -113,6 +112,7 @@ export default class InsightFacade implements IInsightFacade {
                                 code: 400,
                                 body: {"text": "error" +"JSON or HTML parse error: " + error}
                             });
+                            delete dataStructure[id];
                             return;
                         });
 
@@ -122,6 +122,7 @@ export default class InsightFacade implements IInsightFacade {
                             code: 400,
                             body: {"text": "error" + ": fs could not read file: " + err}
                         };
+                        delete dataStructure[id];
                         reject(errorInsResp);
                         return;
                     });
@@ -142,11 +143,12 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    arrayOfRoomsInHtmlObject(htmlObj: any):Promise<Array<any>> {
+    arrayOfRoomsInHtmlObject(htmlObj: any):Promise<Object> {
         //TODO: Clean up the calls:should not need to access htmlObj for every variable for every room
         // maybe return an array of objects if we need object for everyroom in a building
         const http=require('http');
 
+        let returnObject={result:<any>[]};
         let arrOfRoomAndText = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[5].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes;
         let arrOfParsedRoom: any = [];
         let arrOfRoom:any=[];
@@ -156,12 +158,12 @@ export default class InsightFacade implements IInsightFacade {
         let address=htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].childNodes[0].value;
         let url= 'http://skaha.cs.ubc.ca:11316/api/v1/team154/'+encodeURIComponent(address.trim());
 
-  //      return (http.get(url,(res:any)=>{
+        return (http.get(url,(res:any)=>{
             //res should be an object with lat lon OR error
-//            res=JSON.parse(res);
-//            if(res.hasOwnProperty("message")){
-//                throw  res.code+" "+res.message;
-//            }
+            res=JSON.parse(res);
+            if(res.hasOwnProperty("message")){
+                throw  res.code+" "+res.message;
+            }
 
             for(let i=0;i<arrOfParsedRoom.length;i++) {
                 let roomObj: any = {};
@@ -177,9 +179,9 @@ export default class InsightFacade implements IInsightFacade {
                 roomObj.address = address;
                 //TODO: find rooms_lat: number; The latitude of the building.
                 //TODO: find rooms_lon: number; The longitude of the building.
-//               roomObj.lat=res.lat;
- //               console.log(res.lat+" "+res.lon);
-//                roomObj.lon=res.lon;
+               roomObj.lat=res.lat;
+                console.log(res.lat+" "+res.lon);
+                roomObj.lon=res.lon;
                 //find rooms_seats: number; The number of seats in the room.
                 roomObj.seats =Number(arrOfParsedRoom[i].childNodes[3].childNodes[0].value);
                 //find rooms_type: string; The room type (e.g., "Small Group")
@@ -190,10 +192,9 @@ export default class InsightFacade implements IInsightFacade {
                 roomObj.href =arrOfParsedRoom[i].childNodes[1].childNodes[1].attrs[0].value;
                 arrOfRoom.push(roomObj);
             }
-            return arrOfRoom;
-   //     }));
-
-
+            returnObject['result']=arrOfRoom;
+            return returnObject;
+        }));
     }
 
     removeDataset(id: string): Promise<InsightResponse> {

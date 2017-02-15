@@ -23,7 +23,7 @@ export default class InsightFacade implements IInsightFacade {
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 //TODO: not add datadet that is not a zip file;
-        //TODO: not add empty zip file
+//TODO: not add empty zip file
         let that=this;
 
         if(content == null || content == undefined || content == "") {//edge cases
@@ -42,6 +42,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     var arrayOfFilesInId: string[] = [];
                     var promises: Promise<String>[] = [];
+                    var promisesForHttp: Promise<any>[]=[];
 
                     // loads the data
                     JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
@@ -66,10 +67,14 @@ export default class InsightFacade implements IInsightFacade {
                                     if(id=="rooms") { //TODO should be base64 of room.zip???
                                         //parsing through zip with html files
                                         var htmlObj = parse5.parse(fileData);
-//TODO need to make sure what filedata is in parse5 is an html file
-                                        //let roomObject=that.objectifyHtmlObject(htmlObj);
-                                        dataStructure[id][arrayOfFilesInId[keyIndex]] = htmlObj//roomObject;
-                                    } else{                                                         //TODO FOR COURSES - JSON FILES: should be strictly 'courses'
+                                        try {
+                                            let roomsArray = that.arrayOfRoomsInHtmlObject(htmlObj);
+                                            promisesForHttp.push(roomsArray);
+                                            dataStructure[id][arrayOfFilesInId[keyIndex]] = roomsArray;
+                                        }catch(err){
+                                            console.log("no room in this building or file"+keyIndex);
+                                        }
+                                    } else{                                         //TODO FOR COURSES - JSON FILES: should be strictly 'courses'
                                         //var obj = JSON.parse(fileData); //parses JSON string to Json object
                                         // dataStructure[id][keyArray[keyIndex]] = obj;
                                         try {
@@ -97,9 +102,11 @@ export default class InsightFacade implements IInsightFacade {
                                 code: 204,
                                 body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
                             };
-                            fulfill(success);
-                            return;
-
+                            Promise.all(promisesForHttp).then(function(){ //TODO should not need roundabout promise all method for http...
+                                var test=dataStructure;
+                                fulfill(success);
+                                return;
+                            })
                         }).catch(function (error) {
                             console.log("JSON or HTML parse error: " + error);
                             reject({
@@ -135,18 +142,57 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    objectifyHtmlObject(htmlObj: any){
-        //TODO: find rooms_fullname: string; Full building name (e.g., "Hugh Dempster Pavilion").
-        //TODO: find rooms_shortname: string; Short building name (e.g., "DMP").
-        //TODO: find rooms_number: string; The room number. Not always a number, so represented as a string.
-        //TODO: find rooms_name: string; The room id; should be rooms_shortname+"_"+rooms_number.
-        //TODO: find rooms_address: string; The building address. (e.g., "6245 Agronomy Road V6T 1Z4").
-        //TODO: find rooms_lat: number; The latitude of the building. Instructions for getting this field are below.
-        //TODO: find rooms_lon: number; The longitude of the building. Instructions for getting this field are below.
-        //TODO: find rooms_seats: number; The number of seats in the room.
-        //TODO: find rooms_type: string; The room type (e.g., "Small Group").
-        //TODO: find rooms_furniture: string; The room type (e.g., "Classroom-Movable Tables & Chairs").
-        //TODO: find rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").
+    arrayOfRoomsInHtmlObject(htmlObj: any):Promise<Array<any>> {
+        //TODO: Clean up the calls:should not need to access htmlObj for every variable for every room
+        // maybe return an array of objects if we need object for everyroom in a building
+        const http=require('http');
+
+        let arrOfRoomAndText = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[5].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes;
+        let arrOfParsedRoom: any = [];
+        let arrOfRoom:any=[];
+        for (let i = 1; i < arrOfRoomAndText.length; i=i + 2) {
+            arrOfParsedRoom.push(arrOfRoomAndText[i]);
+        }
+        let address=htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].childNodes[0].value;
+        let url= 'http://skaha.cs.ubc.ca:11316/api/v1/team154/'+encodeURIComponent(address.trim());
+
+  //      return (http.get(url,(res:any)=>{
+            //res should be an object with lat lon OR error
+//            res=JSON.parse(res);
+//            if(res.hasOwnProperty("message")){
+//                throw  res.code+" "+res.message;
+//            }
+
+            for(let i=0;i<arrOfParsedRoom.length;i++) {
+                let roomObj: any = {};
+                //find rooms_fullname: string; Full building name (e.g., "Hugh Dempster Pavilion").
+                roomObj.fullname = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[0].childNodes[0].value;;
+                //find rooms_shortname: string; Short building name (e.g., "DMP").
+                roomObj.shortname = htmlObj.childNodes[6].childNodes[1].childNodes[9].attrs[1].value;
+                //find rooms_number: string; The room number. Not always a number, so represented as a string.
+                roomObj.number = arrOfParsedRoom[i].childNodes[1].childNodes[1].childNodes[0].value;//is a string
+                //find rooms_name: string; The room id; should be rooms_shortname+"_"+rooms_number.
+                roomObj.name = roomObj.shortname +"_"+ roomObj.number;
+                //find rooms_address: string; The building address. (e.g., "6245 Agronomy Road V6T 1Z4"). NEED ZIP CODE???
+                roomObj.address = address;
+                //TODO: find rooms_lat: number; The latitude of the building.
+                //TODO: find rooms_lon: number; The longitude of the building.
+//               roomObj.lat=res.lat;
+ //               console.log(res.lat+" "+res.lon);
+//                roomObj.lon=res.lon;
+                //find rooms_seats: number; The number of seats in the room.
+                roomObj.seats =Number(arrOfParsedRoom[i].childNodes[3].childNodes[0].value);
+                //find rooms_type: string; The room type (e.g., "Small Group")
+                roomObj.type =arrOfParsedRoom[i].childNodes[7].childNodes[0].value.trim();
+                //find rooms_furniture: string; The room type (e.g., "Classroom-Movable Tables & Chairs")
+                roomObj.furniture =arrOfParsedRoom[i].childNodes[5].childNodes[0].value.trim();
+                //find rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").
+                roomObj.href =arrOfParsedRoom[i].childNodes[1].childNodes[1].attrs[0].value;
+                arrOfRoom.push(roomObj);
+            }
+            return arrOfRoom;
+   //     }));
+
 
     }
 

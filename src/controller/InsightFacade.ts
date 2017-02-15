@@ -24,6 +24,8 @@ export default class InsightFacade implements IInsightFacade {
     addDataset(id: string, content: string): Promise<InsightResponse> {
 //TODO: not add datadet that is not a zip file;
         //TODO: not add empty zip file
+        let that=this;
+
         if(content == null || content == undefined || content == "") {//edge cases
             return new Promise(function (fulfill, reject) {
                 let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
@@ -35,54 +37,58 @@ export default class InsightFacade implements IInsightFacade {
             if (!dataStructure.hasOwnProperty(id)) {
                 return new Promise(function (fulfill, reject) {
                     var JSZip = require("jszip");
+                    var parse5=require('parse5');
                     dataStructure[id] = {};
 
-                    var keyArray: string[] = [];
+                    var arrayOfFilesInId: string[] = [];
                     var promises: Promise<String>[] = [];
 
                     // loads the data
                     JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
-
                         //console.log("#1; in load Async of: " + id);
-                        Object.keys(zipFile.files).forEach(function (key: any) {
-
+                        Object.keys(zipFile.files).forEach(function (file: any) {
                             //   console.log("#2...; in the keys function " + key);
-                            keyArray.push(key);
+                            arrayOfFilesInId.push(file);
                         });
 
                         return zipFile;
 
                     }).then(function (zipFile: any) {
-                        keyArray.forEach(function (key: any) {
-                            promises.push(zipFile.files[key].async('string'));
+                        arrayOfFilesInId.forEach(function (file: any) {
+                            promises.push(zipFile.files[file].async('string'));
                         });
 
                         Promise.all(promises).then(function (arrayFileData: any) {
                             //console.log("#5...; in promiseAll with: "+arrayFileData);
                             var keyIndex = 0;
-
                             arrayFileData.forEach(function (fileData: any) {
                                 if (fileData != null && fileData != '') {
-                                    //var obj = JSON.parse(fileData); //parses JSON string to Json object
-                                    // dataStructure[id][keyArray[keyIndex]] = obj;
-                                    try {
-                                        var obj = JSON.parse(fileData);
-                                        if(Array.isArray(obj)){
-                                            throw "error JSON file is Array";
+                                    if(id=="rooms") { //TODO should be base64 of room.zip???
+                                        //parsing through zip with html files
+                                        var htmlObj = parse5.parse(fileData);
+//TODO need to make sure what filedata is in parse5 is an html file
+                                        //let roomObject=that.objectifyHtmlObject(htmlObj);
+                                        dataStructure[id][arrayOfFilesInId[keyIndex]] = htmlObj//roomObject;
+                                    } else{                                                         //TODO FOR COURSES - JSON FILES: should be strictly 'courses'
+                                        //var obj = JSON.parse(fileData); //parses JSON string to Json object
+                                        // dataStructure[id][keyArray[keyIndex]] = obj;
+                                        try {
+                                            var jsonObj = JSON.parse(fileData);
+                                            if (Array.isArray(jsonObj)) {
+                                                throw "error JSON file is Array";
+                                            }
+                                            //parses JSON string to Json object
+                                        } catch (e) {
+                                            let response: InsightResponse = {
+                                                code: 400,
+                                                body: {"error": "zip contains non JSON files"}
+                                            };
+                                            delete dataStructure[id];
+                                            reject(response);
+                                            return;
                                         }
-                                         //parses JSON string to Json object
-
-
-                                    } catch (e) {
-                                        let response: InsightResponse = {
-                                            code: 400,
-                                            body: {"error": "zip contains non JSON files"}
-                                        };
-                                        delete dataStructure[id];
-                                        reject(response);
-                                        return;
+                                        dataStructure[id][arrayOfFilesInId[keyIndex]] = jsonObj;
                                     }
-                                    dataStructure[id][keyArray[keyIndex]] = obj;
 
                                 }
                                 keyIndex++;
@@ -95,10 +101,10 @@ export default class InsightFacade implements IInsightFacade {
                             return;
 
                         }).catch(function (error) {
-                            console.log("JSON parse error: " + error);
+                            console.log("JSON or HTML parse error: " + error);
                             reject({
                                 code: 400,
-                                body: {"text": "error" +"JSON parse error: " + error}
+                                body: {"text": "error" +"JSON or HTML parse error: " + error}
                             });
                             return;
                         });
@@ -127,6 +133,21 @@ export default class InsightFacade implements IInsightFacade {
                 });
             }
         }
+    }
+
+    objectifyHtmlObject(htmlObj: any){
+        //TODO: find rooms_fullname: string; Full building name (e.g., "Hugh Dempster Pavilion").
+        //TODO: find rooms_shortname: string; Short building name (e.g., "DMP").
+        //TODO: find rooms_number: string; The room number. Not always a number, so represented as a string.
+        //TODO: find rooms_name: string; The room id; should be rooms_shortname+"_"+rooms_number.
+        //TODO: find rooms_address: string; The building address. (e.g., "6245 Agronomy Road V6T 1Z4").
+        //TODO: find rooms_lat: number; The latitude of the building. Instructions for getting this field are below.
+        //TODO: find rooms_lon: number; The longitude of the building. Instructions for getting this field are below.
+        //TODO: find rooms_seats: number; The number of seats in the room.
+        //TODO: find rooms_type: string; The room type (e.g., "Small Group").
+        //TODO: find rooms_furniture: string; The room type (e.g., "Classroom-Movable Tables & Chairs").
+        //TODO: find rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").
+
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
@@ -230,9 +251,6 @@ export default class InsightFacade implements IInsightFacade {
                             resultObject[k] = null;
                         });
 
-                        if(courseTermData.id ===20623){
-                            console.log('test**');
-                        }
 
                         var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
 
@@ -518,7 +536,8 @@ export default class InsightFacade implements IInsightFacade {
         return false;
     }
 
-    sComparison(queryKey:String,dataSetVal:String):Boolean{ //key is query input; val is database value
+    sComparison(queryKey:String,dataSetVal:String):Boolean{
+        //key is query input; val is database value
         // case1:*qkey* -- contains
         if(typeof queryKey !== 'string'){
             throw "Invalid query: IS value should be a string";

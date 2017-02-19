@@ -10,8 +10,8 @@ import {type} from "os";
 import {isUndefined} from "util";
 //import reduceEachTrailingCommentRange = ts.reduceEachTrailingCommentRange;
 
-var dataStructure:any ={};
-var missingIdArr:any=[];
+var dataStructure: any = {};
+var missingIdArr: any = [];
 
 
 export default class InsightFacade implements IInsightFacade {
@@ -23,25 +23,25 @@ export default class InsightFacade implements IInsightFacade {
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 //TODO: not add empty zip file
-        let that=this;
+        let that = this;
 
-        if(content == null || content == undefined || content == "") {//edge cases
+        if (content == null || content == undefined || content == "") {//edge cases
             return new Promise(function (fulfill, reject) {
-                let response:InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
+                let response: InsightResponse = {code: 400, body: {"error": "content isn't a zip file"}}
                 reject(response);
                 return;
 
             });
-        }else {
+        } else {
             if (!dataStructure.hasOwnProperty(id)) {
                 return new Promise(function (fulfill, reject) {
                     var JSZip = require("jszip");
-                    var parse5=require('parse5');
+                    var parse5 = require('parse5');
                     dataStructure[id] = {};
 
                     var arrayOfFilesInId: string[] = [];
                     var promises: Promise<String>[] = [];
-                    var promisesForHttp: Promise<any>[]=[];
+                    var promisesForHttp: Promise<any>[] = [];
 
                     // loads the data
                     JSZip.loadAsync(content, {base64: true}).then(function (zipFile: any) {
@@ -63,17 +63,17 @@ export default class InsightFacade implements IInsightFacade {
                             var keyIndex = 0;
                             arrayFileData.forEach(function (fileData: any) {
                                 if (fileData != null && fileData != '') {
-                                    if(id=="rooms") { //TODO should be base64 of room.zip???
+                                    if (id == "rooms") { //TODO should be base64 of room.zip???
                                         //parsing through zip with html files
                                         var htmlObj = parse5.parse(fileData);
                                         try {
                                             let roomsObject = that.arrayOfRoomsInHtmlObject(htmlObj);
                                             promisesForHttp.push(roomsObject);
-                                            dataStructure[id][arrayOfFilesInId[keyIndex]] = roomsObject;
-                                        }catch(err){
-                                            console.log("no room in this building or file"+keyIndex);
+                                            dataStructure[id][arrayOfFilesInId[keyIndex]] = promisesForHttp[keyIndex];
+                                        } catch (err) {
+                                            // console.log("no room in this building or file"+keyIndex);
                                         }
-                                    } else{                                         //TODO FOR COURSES - JSON FILES: should be strictly 'courses'
+                                    } else {                                         //TODO FOR COURSES - JSON FILES: should be strictly 'courses'
                                         //var obj = JSON.parse(fileData); //parses JSON string to Json object
                                         // dataStructure[id][keyArray[keyIndex]] = obj;
                                         try {
@@ -97,20 +97,31 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                                 keyIndex++;
                             });
+
+
                             let success: InsightResponse = {
                                 code: 204,
                                 body: {"text": "the operation was successful and the id was new (not added in this session or was previously cached)."}
                             };
-                            Promise.all(promisesForHttp).then(function(){ //TODO should not need roundabout promise all method for http...
-                                var test=dataStructure;
+                            if (id == 'rooms') {//for rooms zip files
+                                Promise.all(promisesForHttp).then(function (arr) { //TODO should not need roundabout promise all method for http...
+
+                                    dataStructure[id] = arr;
+
+                                    fulfill(success);
+                                    return;
+                                })
+                            } else {
+                                //otherwise if its not room
                                 fulfill(success);
                                 return;
-                            })
+                            }
+
                         }).catch(function (error) {
                             console.log("JSON or HTML parse error: " + error);
                             reject({
                                 code: 400,
-                                body: {"text": "error" +"JSON or HTML parse error: " + error}
+                                body: {"text": "error" + "JSON or HTML parse error: " + error}
                             });
                             delete dataStructure[id];
                             return;
@@ -143,73 +154,90 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    arrayOfRoomsInHtmlObject(htmlObj: any):Promise<Object> {
+    arrayOfRoomsInHtmlObject(htmlObj: any): Promise<Object> {
         //TODO: Clean up the calls:should not need to access htmlObj for every variable for every room
         // maybe return an array of objects if we need object for everyroom in a building
-        const http=require('http');
+        const http = require('http');
 
-        let returnObject={result:<any>[]};
+        let returnObject = {result: <any>[]};
         let arrOfRoomAndText = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[5].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes;
         let arrOfParsedRoom: any = [];
-        let arrOfRoom:any=[];
-        for (let i = 1; i < arrOfRoomAndText.length; i=i + 2) {
+        let arrOfRoom: any = [];
+        for (let i = 1; i < arrOfRoomAndText.length; i = i + 2) {
             arrOfParsedRoom.push(arrOfRoomAndText[i]);
         }
-        let address=htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].childNodes[0].value;
-        let url= 'http://skaha.cs.ubc.ca:11316/api/v1/team154/'+encodeURIComponent(address.trim());
+        let address = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].childNodes[0].value;
+        let url = 'http://skaha.cs.ubc.ca:11316/api/v1/team154/' + encodeURIComponent(address.trim());
 
-        return (http.get(url,(res:any)=>{
-            //res should be an object with lat lon OR error
-            res=JSON.parse(res);
-            if(res.hasOwnProperty("message")){
-                throw  res.code+" "+res.message;
-            }
+        return new Promise(function (fulfil, reject) {
+            http.get(url, (res: any) => {
+                //res should be an object with lat lon OR error
+                res.setEncoding('utf8');
+                let rawData = '';
+                res.on('data', (chunk: any) => {
+                    rawData += chunk;
+                });
+                res.on('end', () => {
+                    try {
+                        let parsedData = JSON.parse(rawData);
 
-            for(let i=0;i<arrOfParsedRoom.length;i++) {
-                let roomObj: any = {};
-                //find rooms_fullname: string; Full building name (e.g., "Hugh Dempster Pavilion").
-                roomObj.fullname = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[0].childNodes[0].value;;
-                //find rooms_shortname: string; Short building name (e.g., "DMP").
-                roomObj.shortname = htmlObj.childNodes[6].childNodes[1].childNodes[9].attrs[1].value;
-                //find rooms_number: string; The room number. Not always a number, so represented as a string.
-                roomObj.number = arrOfParsedRoom[i].childNodes[1].childNodes[1].childNodes[0].value;//is a string
-                //find rooms_name: string; The room id; should be rooms_shortname+"_"+rooms_number.
-                roomObj.name = roomObj.shortname +"_"+ roomObj.number;
-                //find rooms_address: string; The building address. (e.g., "6245 Agronomy Road V6T 1Z4"). NEED ZIP CODE???
-                roomObj.address = address;
-                //TODO: find rooms_lat: number; The latitude of the building.
-                //TODO: find rooms_lon: number; The longitude of the building.
-               roomObj.lat=res.lat;
-                console.log(res.lat+" "+res.lon);
-                roomObj.lon=res.lon;
-                //find rooms_seats: number; The number of seats in the room.
-                roomObj.seats =Number(arrOfParsedRoom[i].childNodes[3].childNodes[0].value);
-                //find rooms_type: string; The room type (e.g., "Small Group")
-                roomObj.type =arrOfParsedRoom[i].childNodes[7].childNodes[0].value.trim();
-                //find rooms_furniture: string; The room type (e.g., "Classroom-Movable Tables & Chairs")
-                roomObj.furniture =arrOfParsedRoom[i].childNodes[5].childNodes[0].value.trim();
-                //find rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").
-                roomObj.href =arrOfParsedRoom[i].childNodes[1].childNodes[1].attrs[0].value;
-                arrOfRoom.push(roomObj);
-            }
-            returnObject['result']=arrOfRoom;
-            return returnObject;
-        }));
+                        if (parsedData.hasOwnProperty("message")) {
+                            reject(parsedData.code + " " + parsedData.message);
+                        }
+
+                        for (let i = 0; i < arrOfParsedRoom.length; i++) {
+                            let roomObj: any = {};
+                            //find rooms_fullname: string; Full building name (e.g., "Hugh Dempster Pavilion").
+                            roomObj.fullname = htmlObj.childNodes[6].childNodes[3].childNodes[31].childNodes[10].childNodes[1].childNodes[3].childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[0].childNodes[0].value;
+                            ;
+                            //find rooms_shortname: string; Short building name (e.g., "DMP").
+                            roomObj.shortname = htmlObj.childNodes[6].childNodes[1].childNodes[9].attrs[1].value;
+                            //find rooms_number: string; The room number. Not always a number, so represented as a string.
+                            roomObj.number = arrOfParsedRoom[i].childNodes[1].childNodes[1].childNodes[0].value;//is a string
+                            //find rooms_name: string; The room id; should be rooms_shortname+"_"+rooms_number.
+                            roomObj.name = roomObj.shortname + "_" + roomObj.number;
+                            //find rooms_address: string; The building address. (e.g., "6245 Agronomy Road V6T 1Z4"). NEED ZIP CODE???
+                            roomObj.address = address;
+                            //find rooms_lat: number; The latitude of the building.
+                            //find rooms_lon: number; The longitude of the building.
+                            roomObj.lat = parsedData.lat;
+                            roomObj.lon = parsedData.lon;
+                            //find rooms_seats: number; The number of seats in the room.
+                            roomObj.seats = Number(arrOfParsedRoom[i].childNodes[3].childNodes[0].value);
+                            //find rooms_type: string; The room type (e.g., "Small Group")
+                            roomObj.type = arrOfParsedRoom[i].childNodes[7].childNodes[0].value.trim();
+                            //find rooms_furniture: string; The room type (e.g., "Classroom-Movable Tables & Chairs")
+                            roomObj.furniture = arrOfParsedRoom[i].childNodes[5].childNodes[0].value.trim();
+                            //find rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").
+                            roomObj.href = arrOfParsedRoom[i].childNodes[1].childNodes[1].attrs[0].value;
+                            arrOfRoom.push(roomObj);
+                        }
+                        returnObject['result'] = arrOfRoom;
+                        fulfil(returnObject);
+                        return;
+                    } catch (err) {
+                        console.log(err);
+                        reject(err);
+                        return;
+                    }
+                });
+            })
+        })
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
 
 
-        if(id == null || id == undefined || id == "") {//edge cases
+        if (id == null || id == undefined || id == "") {//edge cases
             return new Promise(function (fulfill, reject) {
-                let response:InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
+                let response: InsightResponse = {code: 404, body: {"error": "id isn't a string"}}
                 reject(response);
                 return;
             });
         }
 
-        return new Promise (function (fulfill, reject) {
-            if(dataStructure.hasOwnProperty(id)) {
+        return new Promise(function (fulfill, reject) {
+            if (dataStructure.hasOwnProperty(id)) {
                 delete dataStructure[id];
                 let deleteDoneInsResp: InsightResponse = {
                     code: 204,
@@ -217,7 +245,7 @@ export default class InsightFacade implements IInsightFacade {
                 };
                 fulfill(deleteDoneInsResp);
                 return;
-            }else{
+            } else {
                 let deleteDoneInsResp: InsightResponse = {
                     code: 404,
                     body: {"text": "the operation was unsuccessful because the delete was for a resource that was not previously added."}
@@ -234,23 +262,23 @@ export default class InsightFacade implements IInsightFacade {
     performQuery(query: QueryRequest): Promise <InsightResponse> {
 
 
-        let that=this;
+        let that = this;
 
-        var uuidUniqueSet=new Set();
-        var queryJson:any=query;//convert to a JS object (convert object to JSON String)????????
-        var response:InsightResponse={code:777,body:{}};
-        var responseObject= {render:'TABLE',result:<any>[]};
+        var uuidUniqueSet = new Set();
+        var queryJson: any = query;//convert to a JS object (convert object to JSON String)????????
+        var response: InsightResponse = {code: 777, body: {}};
+        var responseObject = {render: 'TABLE', result: <any>[]};
 
-        var sortingOrderKey:string;
+        var sortingOrderKey: string;
 
 
-        var mainPromise:Promise <InsightResponse>=new Promise(function(fulfill,reject) {
+        var mainPromise: Promise <InsightResponse> = new Promise(function (fulfill, reject) {
 
 
             if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
                 console.log("invalid query");
                 response.code = 400;
-                response.body = {"error":  "Missing WHERE or OPTIONS"};
+                response.body = {"error": "Missing WHERE or OPTIONS"};
                 reject(response);
                 return;
             }
@@ -265,34 +293,76 @@ export default class InsightFacade implements IInsightFacade {
             }
 
             var keyArray = queryJsonOptions.COLUMNS;
-            sortingOrderKey=queryJsonOptions.ORDER;
-            if(!keyArray.includes(sortingOrderKey)){
-                response.code = 400;
-                response.body = {"error": "Order key needs to be included in columns"};
-                reject(response);
-                return;
+            var courseRoomCheck = keyArray[0];
+            if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+                if (!dataStructure.hasOwnProperty('rooms')) {
+                    console.log("no rooms found in dataset");
+                    response.code = 424;
+                    response.body = {"error": "no rooms found in dataset"};
+                    reject(response);
+                    return;
+                }
+            } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                if (!dataStructure.hasOwnProperty('courses')) {
+                    console.log("no courses found in dataset");
+                    response.code = 424;
+                    response.body = {"error": "no courses found in dataset"};
+                }
             }
+            sortingOrderKey = queryJsonOptions.ORDER;
+            //if (!keyArray.includes(sortingOrderKey)) {
+            //   response.code = 400;
+            //    response.body = {"error": "Order key needs to be included in columns"};
+            //     reject(response);
+            //     return;
+            //  }
 
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
-            var idSet:any=new Set();
+            var idSet: any = new Set();
 
             that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
-            for(let i=0;i<keyArray.length;i++){
-                let idToBeChecked=that.underscoreManager(keyArray[i],'id');
-                if(!dataStructure.hasOwnProperty(idToBeChecked)){
+            for (let i = 0; i < keyArray.length; i++) {
+                let idToBeChecked = that.underscoreManager(keyArray[i], 'id');
+                if (!dataStructure.hasOwnProperty(idToBeChecked)) {
                     missingIdArr.push(idToBeChecked);
                 }
             }
 
-            for (var id in dataStructure) {
+            if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+                let setOfRooms = dataStructure['rooms'];
+                for (let building of setOfRooms) {
+                    let resultArray: any = [];
+                    resultArray = building['result'];
+                    for (let room of resultArray) {
+                        let resultObject: any = {};
+                        keyArray.forEach(function (k: any) {
+                            resultObject[k] = null;
+                        });
+                        var filterResult = that.filterManager(queryWhereObject, room, false);
 
-                let setOfCourses = dataStructure[id];
+                        if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                            //let missingIdArray:any=[];
+
+                            for (var underscoreWord in resultObject) {
+                                let curId = that.underscoreManager(underscoreWord, 'id');
+                                idSet.add(curId);
+                                let theKey = that.underscoreManager(underscoreWord, 'key');
+                                resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
+                            }
+                            responseObject['result'].push(resultObject);
+                        }
+                    }
+
+                }
+            } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                let setOfCourses = dataStructure["courses"];
+
                 for (var course in setOfCourses) {
                     let resultArray: any = [];
                     resultArray = setOfCourses[course.toString()]['result'];
 
-                    for(let courseTermData of resultArray) {
+                    for (let courseTermData of resultArray) {
                         let resultObject: any = {};
                         keyArray.forEach(function (k: any) {
                             resultObject[k] = null;
@@ -323,33 +393,37 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                 }
-
             }
 
-            for(let i=0;i<missingIdArr.length;i++){
-                if(dataStructure.hasOwnProperty(missingIdArr[i])){
+
+            for (let i = 0; i < missingIdArr.length; i++) {
+                if (dataStructure.hasOwnProperty(missingIdArr[i])) {
                     missingIdArr.splice(i);
                 }
             }
-            if(missingIdArr.length>0){//for 424
-                let missingIdArray=Array.from(missingIdArr);
+            if (missingIdArr.length > 0) {//for 424
+                let missingIdArray = Array.from(missingIdArr);
                 response.code = 424;
-                response.body = {"Missing":  missingIdArray};
-                missingIdArr=[];
+                response.body = {"Missing": missingIdArray};
+                missingIdArr = [];
                 reject(response);
                 return;
             }
 
             response['code'] = 200;
-            response['body'] = {render:'TABLE',result:that.sortByKey(sortingOrderKey,responseObject,idSet)};
-            console.log("# of items in result: " +responseObject['result'].length);
-            missingIdArr=[];
+            if (sortingOrderKey != null) {
+                response['body'] = {render: 'TABLE', result: that.sortByKey(sortingOrderKey, responseObject, idSet)};
+            } else {
+                response['body'] = {render: 'TABLE', result: responseObject['result']};
+            }
+            console.log("# of items in result: " + responseObject['result'].length);
+            missingIdArr = [];
             fulfill(response);
             return;
 
-        }).catch(function(err){
-            return new Promise(function(resolve, reject){
-                missingIdArr=[];
+        }).catch(function (err) {
+            return new Promise(function (resolve, reject) {
+                missingIdArr = [];
                 reject(err);
                 return;
             });
@@ -358,171 +432,190 @@ export default class InsightFacade implements IInsightFacade {
 
     }
 
-    underscoreManager(str:string,type:string):string{
-        if(type == "id") {
+    underscoreManager(str: string, type: string): string {
+        if (type == "id") {
             var keyArr = str.split('_');
             return keyArr[0];
-        }else if(type=="key"){
-            var keyArr=str.split('_');
+        } else if (type == "key") {
+            var keyArr = str.split('_');
             return keyArr[1];
-        }else{
+        } else {
             console.log("wrong type for underscore manager");
             throw "wrong type for underscore manager";
         }
     }
 
 
-    sortByKey(sortingOrder:string,responseObject:any, idSet:Set<any>):Array<Object>{
-        let that=this;
-        var sortingOrderKey=that.underscoreManager(sortingOrder,'key');
-        let arrayToSort=responseObject['result'];
-        let idArr=Array.from(idSet);
+    sortByKey(sortingOrder: string, responseObject: any, idSet: Set<any>): Array<Object> {
+        let that = this;
+        var sortingOrderKey = that.underscoreManager(sortingOrder, 'key');
+        let arrayToSort = responseObject['result'];
+        let idArr = Array.from(idSet);
 
-        for(let id=0;id<idArr.length;id++){
-                var objectCompare = function (ObjA: any, ObjB: any) {
-                    if (ObjA[idArr[id] + '_' + sortingOrderKey] < ObjB[idArr[id] + '_' + sortingOrderKey])
-                        return -1;
-                    if (ObjA[idArr[id] + '_' + sortingOrderKey] > ObjB[idArr[id] + '_' + sortingOrderKey])
-                        return 1;
-                    return 0;
-                }
-                arrayToSort.sort(objectCompare);
-        };
+        for (let id = 0; id < idArr.length; id++) {
+            var objectCompare = function (ObjA: any, ObjB: any) {
+                if (ObjA[idArr[id] + '_' + sortingOrderKey] < ObjB[idArr[id] + '_' + sortingOrderKey])
+                    return -1;
+                if (ObjA[idArr[id] + '_' + sortingOrderKey] > ObjB[idArr[id] + '_' + sortingOrderKey])
+                    return 1;
+                return 0;
+            }
+            arrayToSort.sort(objectCompare);
+        }
+        ;
         return arrayToSort;
     }
 
 
-    getDataStructure():Object{
+    getDataStructure(): Object {
         return dataStructure;
     }
 
-    filterManager(filterObject:any,toCompare: Object, fourTwoFourChecker: boolean):boolean{
-        let that=this;
+    filterManager(filterObject: any, toCompare: Object, fourTwoFourChecker: boolean): boolean {
+        let that = this;
 
         //LOGICCOMPARISON => recursive calls
-        if(filterObject.hasOwnProperty('OR')){
-            let filterArray=filterObject['OR'];
-            if(filterArray.length===0){
-                throw {code:400,body:{"error":"AND array is empty"}};
+        if (filterObject.hasOwnProperty('OR')) {
+            let filterArray = filterObject['OR'];
+            if (filterArray.length === 0) {
+                throw {code: 400, body: {"error": "AND array is empty"}};
             }
-            let resultBool:boolean=false;
-            for(let filt=0;filt<filterArray.length;filt++){
-                resultBool=that.filterManager(filterArray[filt], toCompare,fourTwoFourChecker);
+            let resultBool: boolean = false;
+            for (let filt = 0; filt < filterArray.length; filt++) {
+                resultBool = that.filterManager(filterArray[filt], toCompare, fourTwoFourChecker);
                 //console.log("OR loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
-                if (resultBool===true) {
+                if (resultBool === true) {
                     break;
                 }
             }
             return resultBool;
-        }else if(filterObject.hasOwnProperty('AND')){
-            let filterArray=filterObject['AND'];
-            if(filterArray.length===0){
-                throw {code:400,body:{"error":"AND array is empty"}};
+        } else if (filterObject.hasOwnProperty('AND')) {
+            let filterArray = filterObject['AND'];
+            if (filterArray.length === 0) {
+                throw {code: 400, body: {"error": "AND array is empty"}};
             }
-            let resultBool=true;
-            for(let filt=0;filt<filterArray.length;filt++){
-                resultBool=that.filterManager(filterArray[filt], toCompare,fourTwoFourChecker);
+            let resultBool = true;
+            for (let filt = 0; filt < filterArray.length; filt++) {
+                resultBool = that.filterManager(filterArray[filt], toCompare, fourTwoFourChecker);
                 //console.log("AND loop: boolResult: "+resultBool +" for: " + JSON.stringify(filterArray[filt]));
-                if (resultBool===false) {
+                if (resultBool === false) {
                     break;
                 }
-            };
+            }
+            ;
             return resultBool;
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //MCOMPARISON =>terminal base cases
-        else if(filterObject.hasOwnProperty('EQ')){
-            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var underscore in filterObject.EQ){
+        else if (filterObject.hasOwnProperty('EQ')) {
+            var toCompareObject = JSON.parse(JSON.stringify(toCompare));
+            for (var underscore in filterObject.EQ) {
                 if (fourTwoFourChecker) {
                     missingIdArr.push(that.underscoreManager(underscore, 'id'));
                 }
-                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
-                if(toCompareObject.hasOwnProperty(prop)) {
+                var prop = this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if (toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
-                    if((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
-                        throw {code:400,body:{"error":"EQ value should be a number"}};
-                    }
-                    let id=that.underscoreManager(underscore,'id')
-                    if (!(filterObject.EQ[underscore] === val)) {
-                        return false;
+                    if ((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
+                        throw {code: 400, body: {"error": "EQ value should be a number"}};
+                    } else if (prop == "Year") {
+                        if (!(filterObject.EQ[underscore] === Number(val))) {
+                            return false;
+                        }
+                    } else {
+                        let id = that.underscoreManager(underscore, 'id');
+                        if (!(filterObject.EQ[underscore] === val)) {
+                            return false;
+                        }
                     }
                 }
-            }return true; //all keys pass equality test at this point (can apply to strings too?)
+            }
+            return true; //all keys pass equality test at this point (can apply to strings too?)
         }
-        else if(filterObject.hasOwnProperty('GT')){
-            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var underscore in filterObject.GT){
+        else if (filterObject.hasOwnProperty('GT')) {
+            var toCompareObject = JSON.parse(JSON.stringify(toCompare));
+            for (var underscore in filterObject.GT) {
                 if (fourTwoFourChecker) {
                     missingIdArr.push(that.underscoreManager(underscore, 'id'));
                 }
-                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
-                if(toCompareObject.hasOwnProperty(prop)) {
+                var prop = this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if (toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
-                    if((typeof filterObject.GT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
+                    if ((typeof filterObject.GT[underscore] === 'number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
                         if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    }else{
-                        throw {code:400,body:{"error":"GT value should be a number"}};
+                    } else if (prop == "Year") {
+                        if (filterObject.GT[underscore] >= Number(val)) { //if lower bound(greaterThan) is greater the val
+                            return false;
+                        }
+                    } else {
+                        throw {code: 400, body: {"error": "GT value should be a number"}};
                     }
                 }
-            }return true; //all keys pass comparison test at this point
+            }
+            return true; //all keys pass comparison test at this point
         }
-        else if(filterObject.hasOwnProperty('LT')){
-            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var underscore in filterObject.LT){
+        else if (filterObject.hasOwnProperty('LT')) {
+            var toCompareObject = JSON.parse(JSON.stringify(toCompare));
+            for (var underscore in filterObject.LT) {
                 if (fourTwoFourChecker) {
                     missingIdArr.push(that.underscoreManager(underscore, 'id'));
                 }
-                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
-                if(toCompareObject.hasOwnProperty(prop)) {
+                var prop = this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if (toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
-                    if((typeof filterObject.LT[underscore]==='number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
+                    if ((typeof filterObject.LT[underscore] === 'number') && (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
                         if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    }else{
-                        throw {code:400,body:{"error":"LT value should be a number"}};
+                    } else if(prop == "Year"){
+                        if (filterObject.LT[underscore] <= Number(val)) { //if lower bound(greaterThan) is greater the val
+                            return false;
+                        }
+                    } else{
+                        throw {code: 400, body: {"error": "LT value should be a number"}};
                     }
                 }
-            }return true; //all keys pass comparison test at this point
+            }
+            return true; //all keys pass comparison test at this point
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //SCOMPARISON =>terminal base cases
-        else if(filterObject.hasOwnProperty('IS')){
+        else if (filterObject.hasOwnProperty('IS')) {
 
-            var toCompareObject=JSON.parse(JSON.stringify(toCompare));
-            for(var underscore in filterObject.IS){
+            var toCompareObject = JSON.parse(JSON.stringify(toCompare));
+            for (var underscore in filterObject.IS) {
                 if (fourTwoFourChecker) {
                     missingIdArr.push(that.underscoreManager(underscore, 'id'));
                 }
-                var prop=this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
-                if(toCompareObject.hasOwnProperty(prop)) {
+                var prop = this.keyToJsonKey(that.underscoreManager(underscore, 'key'));
+                if (toCompareObject.hasOwnProperty(prop)) {
                     let val = toCompareObject[prop.toString()];
-                    var bool=that.isKeyWithNumType(that.underscoreManager(underscore, 'key'));
-                    if((typeof filterObject.IS[underscore] !== 'string') || (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))){
-                        throw {code:400,body:{"error":"IS value should be a string"}};
+                    var bool = that.isKeyWithNumType(that.underscoreManager(underscore, 'key'));
+                    if ((typeof filterObject.IS[underscore] !== 'string') || (that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
+                        throw {code: 400, body: {"error": "IS value should be a string"}};
                     }
-                    if(that.sComparison(filterObject.IS[underscore],val)===false) {//checks for false Scomparison conditions
+                    if (that.sComparison(filterObject.IS[underscore], val) === false) {//checks for false Scomparison conditions
                         return false;
                     }
                 }
-            }return true;
+            }
+            return true;
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //NEGATION => recursive calls
-        else if(filterObject.hasOwnProperty('NOT')){
-            return !that.filterManager(filterObject.NOT,toCompare,fourTwoFourChecker);
+        else if (filterObject.hasOwnProperty('NOT')) {
+            return !that.filterManager(filterObject.NOT, toCompare, fourTwoFourChecker);
         }
-        else{
+        else {
             //console.log("no valid filter found");
-            throw {code:400,body:{"error":"no valid filter found"}};
+            throw {code: 400, body: {"error": "no valid filter found"}};
         }
     }
 
-    keyToJsonKey(key: string): string{
-        switch(key){
+    keyToJsonKey(key: string): string {
+        switch (key) {
             case "dept":
                 return "Subject";
             case "id":
@@ -541,14 +634,38 @@ export default class InsightFacade implements IInsightFacade {
                 return "Audit";
             case "uuid":
                 return "id";
+            case "year":
+                return "Year";
+            case "fullname":
+                return "fullname";
+            case "shortname":
+                return "shortname";
+            case "number":
+                return "number";
+            case "name":
+                return "name";
+            case "address":
+                return "address";
+            case "lat":
+                return "lat";
+            case "lon":
+                return "lon";
+            case "seats":
+                return "seats";
+            case "type":
+                return "type";
+            case "furniture":
+                return "furniture";
+            case "href":
+                return "href";
             default:
                 //console.log("not valid key query");
-                throw {code:400,body:{"error":"not valid key in query"}};
+                throw {code: 400, body: {"error": "not valid key in query"}};
         }
     }
 
-    isKeyWithNumType(key: String):boolean{
-        switch(key){
+    isKeyWithNumType(key: String): boolean {
+        switch (key) {
             case "dept":
                 return false;
             case "id":
@@ -567,54 +684,78 @@ export default class InsightFacade implements IInsightFacade {
                 return true;
             case "uuid":
                 return false;
+            case "year":
+                return true;
+            case "fullname":
+                return false;
+            case "shortname":
+                return false;
+            case "number":
+                return false;
+            case "name":
+                return false;
+            case "address":
+                return false;
+            case "lat":
+                return true;
+            case "lon":
+                return true;
+            case "seats":
+                return true;
+            case "type":
+                return false;
+            case "furniture":
+                return false;
+            case "href":
+                return false;
             default:
                 //console.log("not valid key query");
                 throw "not valid key in query";
         }
     }
 
-    hasValidOptions(opKey:any):Boolean{
-        var qOption=JSON.parse(JSON.stringify(opKey));
-        if(qOption.hasOwnProperty('ORDER')&& qOption.hasOwnProperty('FORM')){
-            if(qOption.FORM == "TABLE"){
+    hasValidOptions(opKey: any): Boolean {
+        var qOption = JSON.parse(JSON.stringify(opKey));
+        if (qOption.hasOwnProperty('COLUMNS') && qOption.hasOwnProperty('FORM')) {
+            if (qOption.FORM == "TABLE") {
                 return true;
             }
         }
         return false;
     }
 
-    sComparison(queryKey:String,dataSetVal:String):Boolean{
+    sComparison(queryKey: String, dataSetVal: String): Boolean {
         //key is query input; val is database value
         // case1:*qkey* -- contains
-        if(typeof queryKey !== 'string'){
+        if (typeof queryKey !== 'string') {
             throw "Invalid query: IS value should be a string";
         }
-        if(queryKey.charAt(0)==='*' && queryKey.charAt(queryKey.length-1)==='*'){
-            let truncatedKey=queryKey.substring(1,queryKey.length-1);
-            var num=dataSetVal.indexOf(truncatedKey);
-            if(dataSetVal.indexOf(truncatedKey)!==-1){
+        if (queryKey.charAt(0) === '*' && queryKey.charAt(queryKey.length - 1) === '*') {
+            let truncatedKey = queryKey.substring(1, queryKey.length - 1);
+            var num = dataSetVal.indexOf(truncatedKey);
+            if (dataSetVal.indexOf(truncatedKey) !== -1) {
                 return true;
             }
             return false;
         }
         //case2:*qkey -- ends with
-        else if(queryKey.charAt(0)==='*'){
-            let truncatedKey=queryKey.substring(1,queryKey.length);
-            if(dataSetVal.endsWith(truncatedKey)){
+        else if (queryKey.charAt(0) === '*') {
+            let truncatedKey = queryKey.substring(1, queryKey.length);
+            if (dataSetVal.endsWith(truncatedKey)) {
                 return true;
             }
             return false;
         }
         //case3:qkey* -- starts with
-        else if(queryKey.charAt(queryKey.length-1)==='*'){
-            if(dataSetVal.startsWith(queryKey.substring(0,queryKey.length-1))){
+        else if (queryKey.charAt(queryKey.length - 1) === '*') {
+            if (dataSetVal.startsWith(queryKey.substring(0, queryKey.length - 1))) {
                 return true;
             }
             return false;
         }
         //case4:qKey -- same text as
-        else{
-            if(queryKey==dataSetVal){ //if uuid we will be comparing string to num do not use strict equal
+        else {
+            if (queryKey == dataSetVal) { //if uuid we will be comparing string to num do not use strict equal
                 return true;
             }
             return false;

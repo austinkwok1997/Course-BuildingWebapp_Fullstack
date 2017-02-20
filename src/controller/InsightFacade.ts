@@ -309,6 +309,14 @@ export default class InsightFacade implements IInsightFacade {
                     response.body = {"error": "no courses found in dataset"};
                 }
             }
+            if (!that.multipleKeysWhere(queryJson.WHERE, courseRoomCheck) || !that.multipleKeysColums(queryJson.OPTIONS.COLUMNS, courseRoomCheck)) {
+                console.log("found different keys in query");
+                response.code = 400;
+                response.body = {"error": "invalid query with multiple keys"};
+                reject(response);
+                return;
+            }
+
             sortingOrderKey = queryJsonOptions.ORDER;
             //if (!keyArray.includes(sortingOrderKey)) {
             //   response.code = 400;
@@ -569,11 +577,11 @@ export default class InsightFacade implements IInsightFacade {
                         if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    } else if(prop == "Year"){
+                    } else if (prop == "Year") {
                         if (filterObject.LT[underscore] <= Number(val)) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    } else{
+                    } else {
                         throw {code: 400, body: {"error": "LT value should be a number"}};
                     }
                 }
@@ -761,4 +769,35 @@ export default class InsightFacade implements IInsightFacade {
             return false;
         }
     }
+
+    multipleKeysWhere(query: any, id: string): boolean {
+        let that = this;
+        let key = Object.keys(query);
+        if (key[0] == "IS" || key[0] == "LT" || key[0] == "GT" || key[0] == "EQ") {
+            let innerKey = Object.keys(query[key[0]]);
+            return (that.underscoreManager(innerKey[0], 'id') == that.underscoreManager(id, 'id'));
+        }else if (key[0] == "AND" || key[0] == "OR"){
+            let AndOrArray = query[key[0]];
+            for (let element of AndOrArray){
+                if (!that.multipleKeysWhere(element, id)){
+                    return false;
+                }
+            }
+            return true;
+        }else if (key[0] == "NOT"){
+            return this.multipleKeysWhere(query[key[0]], id);
+        }
+        return false;
+    }
+    multipleKeysColums(IDarray: any, id: string): boolean{
+        let that = this;
+        for (let element of IDarray){
+            if (that.underscoreManager(element, 'id') != that.underscoreManager(id, 'id')){
+                return false
+            }
+        }
+        return true;
+    }
+
+
 }

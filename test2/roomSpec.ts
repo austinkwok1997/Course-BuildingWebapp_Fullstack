@@ -23,12 +23,14 @@ describe("roomSpec", function () {
         return thisIsIt.performQuery({
             "WHERE": {
                 "IS": {
-                    "rooms_name": "DMP_*"
+                    "rooms_address": "1895 Lower Mall BC V6T 1Z4*"
                 }
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "rooms_name"
+                    "rooms_name",
+                    "rooms_lat",
+                    "rooms_lon"
                 ],
                 "ORDER": "rooms_name",
                 "FORM": "TABLE"
@@ -137,7 +139,7 @@ describe("roomSpec", function () {
                 },
                 "OPTIONS": {
                     "COLUMNS": [
-                        "rooms_address", "rooms_name"
+                        "rooms_address", "rooms_name", "rooms_lat", "rooms_lon"
                     ],
                     "FORM": "TABLE"
                 }
@@ -199,19 +201,22 @@ describe("roomSpec", function () {
                     "AND": [
                         {
                             "EQ": {
-                                "rooms_lat": 49.26125
+                                "rooms_lat": 49.26048
                             }
                         },
                         {
                             "EQ": {
-                                "rooms_lon": -123.24807
+                                "rooms_lon": -123.24944
                             }
                         }
                     ]
                 },
                 "OPTIONS": {
                     "COLUMNS": [
-                        "rooms_address"
+                        "rooms_address",
+                        "rooms_lat",
+                        "rooms_lon"
+
                     ],
                     "ORDER": "rooms_address",
                     "FORM": "TABLE"
@@ -530,6 +535,167 @@ describe("roomSpec", function () {
                         "rooms_type"
                     ],
                     "ORDER": "rooms_name",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing with studio", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+                    "AND": [
+                        {
+                            "IS": {
+                                "rooms_type": "*Studio*"
+                            }
+
+                        },
+                        {
+                            "NOT": {
+                                "IS": {
+                                    "rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_name",
+                        "rooms_type"
+                    ],
+                    "ORDER": "rooms_name",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+
+    it("deliverable sort url test", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+                    "IS": {
+                        "rooms_address": "*Agrono*"
+                    }
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_href"
+                    ],
+                    "ORDER": "rooms_href",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing seats", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+                    "GT": {
+                        "rooms_seats": 100
+                    }
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_name"
+                    ],
+                    "ORDER": "rooms_name",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing specific furniture", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+                    "IS": {
+                        "rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+                    }
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_name"
+                    ],
+                    "ORDER": "rooms_name",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing leslie", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+
+                    "IS": {
+                        "rooms_address": "6331 Crescent Road*"
+                    }
+
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_address","rooms_lon","rooms_lat"
+                    ],
+                    "ORDER": "rooms_address",
                     "FORM": "TABLE"
                 }
             }).then(function (InF: InsightResponse) {

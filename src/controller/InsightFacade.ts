@@ -291,6 +291,14 @@ export default class InsightFacade implements IInsightFacade {
                 reject(response);
                 return;
             }
+            let key = Object.keys(dataStructure);
+            if (key.length == 0){
+                console.log("dataset is empty");
+                response.code = 424;
+                response.body = {"error": "nothing found in dataset"};
+                reject(response);
+                return;
+            }
 
             var keyArray = queryJsonOptions.COLUMNS;
             var courseRoomCheck = keyArray[0];

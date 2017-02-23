@@ -290,15 +290,15 @@ export default class InsightFacade implements IInsightFacade {
                 response.body = {"error": "invalid query OPTIONS"};
                 reject(response);
                 return;
-            }
-            let key = Object.keys(dataStructure);
-            if (key.length == 0){
-                console.log("dataset is empty");
-                response.code = 424;
-                response.body = {"error": "nothing found in dataset"};
-                reject(response);
-                return;
-            }
+             }
+            // let key = Object.keys(dataStructure);
+            // if (key.length == 0){
+            //     console.log("dataset is empty");
+            //     response.code = 424;
+            //     response.body = {"error": "nothing found in dataset"};
+            //     reject(response);
+            //     return;
+            // }
 
             var keyArray = queryJsonOptions.COLUMNS;
             var courseRoomCheck = keyArray[0];
@@ -306,7 +306,7 @@ export default class InsightFacade implements IInsightFacade {
                 if (!dataStructure.hasOwnProperty('rooms')) {
                     console.log("no rooms found in dataset");
                     response.code = 424;
-                    response.body = {"error": "no rooms found in dataset"};
+                    response.body = {"missing": ["rooms"]};
                     reject(response);
                     return;
                 }
@@ -314,7 +314,7 @@ export default class InsightFacade implements IInsightFacade {
                 if (!dataStructure.hasOwnProperty('courses')) {
                     console.log("no courses found in dataset");
                     response.code = 424;
-                    response.body = {"error": "no courses found in dataset"};
+                    response.body = {"missing": ["courses"]};
                 }
             }
             if (!that.multipleKeysWhere(queryJson.WHERE, courseRoomCheck) || !that.multipleKeysColums(queryJson.OPTIONS.COLUMNS, courseRoomCheck)) {

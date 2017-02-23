@@ -110,7 +110,17 @@ describe("roomSpec", function () {
                 },
                 "OPTIONS": {
                     "COLUMNS": [
-                        "rooms_name"
+                        "rooms_fullname",
+                        "rooms_shortname",
+                        "rooms_number",
+                        "rooms_name",
+                        "rooms_address",
+                        "rooms_lat",
+                        "rooms_lon",
+                        "rooms_seats",
+                        "rooms_type",
+                        "rooms_furniture",
+                        "rooms_href"
                     ],
                     "ORDER": "rooms_name",
                     "FORM": "TABLE"
@@ -139,8 +149,19 @@ describe("roomSpec", function () {
                 },
                 "OPTIONS": {
                     "COLUMNS": [
-                        "rooms_address", "rooms_name", "rooms_lat", "rooms_lon"
+                        "rooms_fullname",
+                        "rooms_shortname",
+                        "rooms_number",
+                        "rooms_name",
+                        "rooms_address",
+                        "rooms_lat",
+                        "rooms_lon",
+                        "rooms_seats",
+                        "rooms_type",
+                        "rooms_furniture",
+                        "rooms_href"
                     ],
+                    "ORDER" : "rooms_name",
                     "FORM": "TABLE"
                 }
             }).then(function (InF: InsightResponse) {
@@ -696,6 +717,84 @@ describe("roomSpec", function () {
                         "rooms_address","rooms_lon","rooms_lat"
                     ],
                     "ORDER": "rooms_address",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing returning courses year", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("courses.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("courses", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+                    "IS": {
+                        "courses_dept": "biol"
+                    }
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "courses_year"
+                    ],
+                    "ORDER": "courses_year",
+                    "FORM": "TABLE"
+                }
+            }).then(function (InF: InsightResponse) {
+                //var t=JSON.parse(JSON.stringify(InF.body));
+                console.log(JSON.stringify(InF.body));
+            })
+        }).catch(function (err: any) {
+            console.log(err);
+            expect.fail();
+        });
+        //return;
+    });
+    it("testing bounding box", function () {
+        console.log("+++TEST: simple query from spec");
+        zipContent = fs.readFileSync("rooms.zip").toString("base64");
+        var thisIsIt = facade;
+
+        return facade.addDataset("rooms", zipContent).then(function () {
+            return facade.performQuery({
+                "WHERE": {
+
+                    "AND": [{
+                        "GT": {
+                            "rooms_lat": 49.2612
+                        }
+                    },
+                        {
+                            "LT": {
+                                "rooms_lat": 49.26129
+                            }
+                        },
+                        {
+                            "LT": {
+                                "rooms_lon": -123.2480
+                            }
+                        },
+                        {
+                            "GT": {
+                                "rooms_lon": -123.24809
+                            }
+                        }
+                    ]
+
+                },
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_name"
+                    ],
+                    "ORDER": "rooms_name",
                     "FORM": "TABLE"
                 }
             }).then(function (InF: InsightResponse) {

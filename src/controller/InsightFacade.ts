@@ -383,6 +383,10 @@ export default class InsightFacade implements IInsightFacade {
                         keyArray.forEach(function (k: any) {
                             resultObject[k] = null;
                         });
+                        if (courseTermData["Section"] == "overall"){
+                            courseTermData["Year"] = 1900;
+                        }
+                        courseTermData["Year"] = Number(courseTermData["Year"]);
 
 
                         var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
@@ -534,16 +538,19 @@ export default class InsightFacade implements IInsightFacade {
                     let val = toCompareObject[prop.toString()];
                     if ((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
                         throw {code: 400, body: {"error": "EQ value should be a number"}};
-                    } else if (prop == "Year") {
-                        if (!(filterObject.EQ[underscore] === Number(val))) {
-                            return false;
-                        }
+                    //} else if (prop == "lat" || prop == "lon") {
+                      //  if (!toCompareObject.hasO)
+                        //if (!(filterObject.EQ[underscore] === val)) {
+                          //  return false;
+                        //}
                     } else {
                         let id = that.underscoreManager(underscore, 'id');
                         if (!(filterObject.EQ[underscore] === val)) {
                             return false;
                         }
                     }
+                }else {
+                    return false;
                 }
             }
             return true; //all keys pass equality test at this point (can apply to strings too?)
@@ -561,13 +568,18 @@ export default class InsightFacade implements IInsightFacade {
                         if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    } else if (prop == "Year") {
-                        if (filterObject.GT[underscore] >= Number(val)) { //if lower bound(greaterThan) is greater the val
-                            return false;
-                        }
+                    //} else if (prop == "lat" || prop == "lon") {
+                      //  if (!toCompareObject.hasOwnProperty(prop)){
+                        //    return false;
+                        //}
+                        //if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
+                        //    return false;
+                        //}
                     } else {
                         throw {code: 400, body: {"error": "GT value should be a number"}};
                     }
+                }else {
+                    return false;
                 }
             }
             return true; //all keys pass comparison test at this point
@@ -585,13 +597,18 @@ export default class InsightFacade implements IInsightFacade {
                         if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    } else if (prop == "Year") {
-                        if (filterObject.LT[underscore] <= Number(val)) { //if lower bound(greaterThan) is greater the val
-                            return false;
-                        }
+                    //} else if (prop == "lat"|| prop == "lon") {
+                      //  if (!toCompareObject.hasOwnProperty(prop)){
+                        //    return false
+                        //}
+                        //if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
+                        //    return false;
+                        //}
                     } else {
                         throw {code: 400, body: {"error": "LT value should be a number"}};
                     }
+                }else {
+                    return false;
                 }
             }
             return true; //all keys pass comparison test at this point

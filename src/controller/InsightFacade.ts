@@ -326,6 +326,14 @@ export default class InsightFacade implements IInsightFacade {
             }
 
             sortingOrderKey = queryJsonOptions.ORDER;
+            if(sortingOrderKey){
+                try {
+                    that.keyToJsonKey(that.underscoreManager(sortingOrderKey, 'key'))
+                }
+                catch (e){
+                    reject(e);
+                }
+            }
             //if (!keyArray.includes(sortingOrderKey)) {
             //   response.code = 400;
             //    response.body = {"error": "Order key needs to be included in columns"};

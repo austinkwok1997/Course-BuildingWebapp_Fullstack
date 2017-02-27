@@ -1,5 +1,5 @@
 Final test pass rate:80
-coverage rate: 69
+coverage rate: 70
 
 implemented addDataset d2:
   -use of parse5 api to parse through can html document

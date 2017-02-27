@@ -1,6 +1,6 @@
 Final Test Rate: 80
 
-Coverage Rate: 69
+Coverage Rate: 70
 
 Created Test for preformQuery d2
 

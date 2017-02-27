@@ -1,12 +1,11 @@
-Final Test Rate: 
+Final Test Rate: 80
 
-Coverage Rate: +++++++++++
+Coverage Rate: 69
 
 Created Test for preformQuery d2
 
-implemented preformQuery ...
-
-debugged preformQuery
+implemented preformQuery to take both rooms and courses
+fixed bugs found by autotest
 
 
 Key Commits
@@ -17,4 +16,6 @@ https://github.com/CS310-2017Jan/cpsc310project_team154/commit/12bf422ea80f19d60
 
 Looking Back In Retrospec:
 
-...
+I think a big hurdle that we faced in d1 was the fact that we couldn't get autotest running within 5 minutes.
+As a result, we didn't get any feedback from the bot's test. I felt once we got past that problem and could see
+the autobot's results we started to make progress at a much faster pace.

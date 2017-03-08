@@ -344,15 +344,18 @@ export default class InsightFacade implements IInsightFacade {
             var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
             var idSet: any = new Set();
-
-            that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
-            for (let i = 0; i < keyArray.length; i++) {
-                let idToBeChecked = that.underscoreManager(keyArray[i], 'id');
-                if (!dataStructure.hasOwnProperty(idToBeChecked)) {
-                    missingIdArr.push(idToBeChecked);
+            if (queryWhereObject != {}) {
+                that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
+                for (let i = 0; i < keyArray.length; i++) {
+                    let idToBeChecked = that.underscoreManager(keyArray[i], 'id');
+                    if (!dataStructure.hasOwnProperty(idToBeChecked)) {
+                        missingIdArr.push(idToBeChecked);
+                    }
                 }
             }
-
+            if (queryWhereObject == {}){
+                
+            }
             if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
                 let setOfRooms = dataStructure['rooms'];
                 for (let building of setOfRooms) {

@@ -6,7 +6,9 @@
 import restify = require("restify");
 import fs =require('fs');
 
-import InsightFacade=require('../controller/InsightFacade');
+//import InsightFacade=require('../controller/InsightFacade');
+import InsightFacade from "../controller/InsightFacade";
+
 
 import Log from "../Util";
 import {InsightResponse} from "../controller/IInsightFacade";
@@ -53,6 +55,8 @@ export default class Server {
             try {
                 Log.info('Server::start() - start');
 
+                var facade:InsightFacade = new InsightFacade();
+
                 that.rest = restify.createServer({
                     name: 'insightUBC'
                 });
@@ -65,40 +69,42 @@ export default class Server {
 
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
-//todo test
                 that.rest.put('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    if (!req.body.hasOwnProperty('id')) {
-                        res.send(400);
-                    }
                     try {
-                        let zipContent = fs.readFileSync(req.body['id']).toString("base64");
-                        let inResponse=this.addDataset(req.body.id, zipContent);
-                        res.json(inResponse.code, inResponse.body);
+                        let dataStr = new Buffer(req.params.body).toString('base64');
+                        let valu=req.params.id;//for debugger view
+                        facade.addDataset(req.params.id, dataStr).then(function(inResponse:any){
+                            console.log("put result is "+inResponse);
+                            res.json(inResponse.code, inResponse.body);
+                        }).catch(function(err){
+                            console.log("adddataset err "+err.code +" " + err.body);
+                            //res.send(err.code);
+                        });
+
                     }catch(err){
                         console.log(err.code +" " + err.body);
                         res.send(err.code);
                     }
                     return next();
                 });
-//todo test
                 that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    if (!req.body.hasOwnProperty('id')) {
-                        res.send(400);
-                    }
                     try {
-                        let inResponse=this.removeDataset(req.body.id);
-                        res.json(inResponse.code, inResponse.body);
+                        facade.removeDataset(req.body.id).then(function(inResponse:any){
+                            console.log("put result is "+inResponse);
+                            res.json(inResponse.code, inResponse.body);
+                        });
                     }catch(err){
                         console.log(err.code +" " + err.body);
                         res.send(err.code);
                     }
                     return next();
                 });
-//todo test
                 that.rest.post('/query',function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     try {
-                        let inResponse=this.preformQuery(req.body);
-                        res.json(inResponse.code, inResponse.body);
+                        facade.performQuery(req.body).then(function(inResponse:any){
+                            console.log("put result is "+inResponse);
+                            res.json(inResponse.code, inResponse.body);
+                        });
                     }catch(err){
                         console.log(err.code +" " + err.body);
                         res.send(err.code);

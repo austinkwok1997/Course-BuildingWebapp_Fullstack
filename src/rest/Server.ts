@@ -3,7 +3,10 @@
  * Restify is configured here.
  */
 
-import restify = require('restify');
+import restify = require("restify");
+import fs =require('fs');
+
+import InsightFacade=require('../controller/InsightFacade');
 
 import Log from "../Util";
 import {InsightResponse} from "../controller/IInsightFacade";
@@ -53,7 +56,8 @@ export default class Server {
                 that.rest = restify.createServer({
                     name: 'insightUBC'
                 });
-
+                that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));
+//todo
                 that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     res.send(200);
                     return next();
@@ -61,9 +65,46 @@ export default class Server {
 
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
-                that.rest.get('/echo/:msg', Server.echo);
-
-                // Other endpoints will go here
+//todo test
+                that.rest.put('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    if (!req.body.hasOwnProperty('id')) {
+                        res.send(400);
+                    }
+                    try {
+                        let zipContent = fs.readFileSync(req.body['id']).toString("base64");
+                        let inResponse=this.addDataset(req.body.id, zipContent);
+                        res.json(inResponse.code, inResponse.body);
+                    }catch(err){
+                        console.log(err.code +" " + err.body);
+                        res.send(err.code);
+                    }
+                    return next();
+                });
+//todo test
+                that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    if (!req.body.hasOwnProperty('id')) {
+                        res.send(400);
+                    }
+                    try {
+                        let inResponse=this.removeDataset(req.body.id);
+                        res.json(inResponse.code, inResponse.body);
+                    }catch(err){
+                        console.log(err.code +" " + err.body);
+                        res.send(err.code);
+                    }
+                    return next();
+                });
+//todo test
+                that.rest.post('/query',function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    try {
+                        let inResponse=this.preformQuery(req.body);
+                        res.json(inResponse.code, inResponse.body);
+                    }catch(err){
+                        console.log(err.code +" " + err.body);
+                        res.send(err.code);
+                    }
+                    return next();
+                });
 
                 that.rest.listen(that.port, function () {
                     Log.info('Server::start() - restify listening: ' + that.rest.url);

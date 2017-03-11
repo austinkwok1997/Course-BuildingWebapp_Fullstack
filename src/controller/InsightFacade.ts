@@ -424,7 +424,7 @@ export default class InsightFacade implements IInsightFacade {
                 } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
                     if (JSON.stringify(queryJson.WHERE) == "{}"){
-                        response.code = 424;
+                        response.code = 400;
                         response.body = {"missing": ["rooms"]};
                         reject(response);
                         return;
@@ -1120,6 +1120,12 @@ export default class InsightFacade implements IInsightFacade {
                 }
             }
             return count;
+        }
+        if (applyLookfor == "SUM"){
+             let sum = 0
+            for (let element of groupArray){
+                 sum += element[sectiontype];
+            }
         }
         throw {code: 400, body: {"error": "no valid filter found"}};
     }

@@ -78,7 +78,7 @@ export default class Server {
                             res.json(inResponse.code, inResponse.body);
                         }).catch(function(err){
                             console.log("adddataset err "+err.code +" " + err.body);
-                            //res.send(err.code);
+                            res.send(err.code);
                         });
 
                     }catch(err){
@@ -89,9 +89,12 @@ export default class Server {
                 });
                 that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     try {
-                        facade.removeDataset(req.body.id).then(function(inResponse:any){
+                        facade.removeDataset(req.params.id).then(function(inResponse:any){
                             console.log("put result is "+inResponse);
                             res.json(inResponse.code, inResponse.body);
+                        }).catch(function(err){
+                            console.log(err.code +" " + err.body.text);
+                            res.send(err.code);
                         });
                     }catch(err){
                         console.log(err.code +" " + err.body);
@@ -104,6 +107,9 @@ export default class Server {
                         facade.performQuery(req.body).then(function(inResponse:any){
                             console.log("put result is "+inResponse);
                             res.json(inResponse.code, inResponse.body);
+                        }).catch(function(err){
+                            console.log(err.code +" " + err.body.text);
+                            res.send(err.code);
                         });
                     }catch(err){
                         console.log(err.code +" " + err.body);

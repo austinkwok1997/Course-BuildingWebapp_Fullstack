@@ -401,9 +401,9 @@ export default class InsightFacade implements IInsightFacade {
                                         }
                                     }
                                     var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
-                                    if (insertindex != -1){
+                                    if (insertindex != -1) {
                                         transformationArray[insertindex].push(resultObject);
-                                    }else{
+                                    } else {
                                         var newArray = [resultObject];
                                         transformationArray.push(newArray);
                                     }
@@ -443,11 +443,11 @@ export default class InsightFacade implements IInsightFacade {
 
                             if (filterResult === true || queryWhereObject == {}) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
                                 //let missingIdArray:any=[];
-                                if (queryJson.hasOwnProperty("TRANSFORMATIONS")){
-                                    for (var underscoreWord in resultObject){
+                                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                                    for (var underscoreWord in resultObject) {
                                         var underscore = "_";
                                         var num = underscoreWord.indexOf(underscore);
-                                        if (num == -1){
+                                        if (num == -1) {
                                             var queryTransformations = queryJson.TRANSFORMATIONS;
                                             var index = that.applyChecker(underscoreWord, queryTransformations.APPLY);
                                             if (index == -1) {
@@ -460,16 +460,14 @@ export default class InsightFacade implements IInsightFacade {
                                                 var applyObject = queryTransformations.APPLY[index];
                                                 var key = Object.keys(applyObject[underscoreWord]);
                                                 var applyWord = applyObject[underscoreWord][key[0]];
-                                                let curId = that.underscoreManager(underscoreWord, 'id');
+                                                let curId = that.underscoreManager(applyWord, 'id');
                                                 idSet.add(curId);
-                                                let theKey = that.underscoreManager(underscoreWord, 'key');
-                                                if (underscoreWord === 'id') {
-                                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
-                                                } else {
+                                                let theKey = that.underscoreManager(applyWord, 'key');
+
                                                     resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
-                                                }
+
                                             }
-                                        }else {
+                                        } else {
                                             let curId = that.underscoreManager(underscoreWord, 'id');
                                             idSet.add(curId);
                                             let theKey = that.underscoreManager(underscoreWord, 'key');
@@ -479,18 +477,17 @@ export default class InsightFacade implements IInsightFacade {
                                                 resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
                                             }
                                         }
-                                        if (!uuidUniqueSet.has(courseTermData.id)) {//to account for repeating result objects bug TODO
-                                            uuidUniqueSet.add(courseTermData.id);
-                                            var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
-                                            if (insertindex != -1){
-                                                transformationArray[insertindex].push(resultObject);
-                                            }else{
-                                                var newArray = [resultObject];
-                                                transformationArray.push(newArray);
-                                            }
-                                        }
+
                                     }
-                                }else {
+                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
+                                        if (insertindex != -1) {
+                                            transformationArray[insertindex].push(resultObject);
+                                        } else {
+                                            var newArray = [resultObject];
+                                            transformationArray.push(newArray);
+                                        }
+
+                                } else {
 
                                     for (var underscoreWord in resultObject) {
                                         let curId = that.underscoreManager(underscoreWord, 'id');
@@ -519,6 +516,16 @@ export default class InsightFacade implements IInsightFacade {
                     if (dataStructure.hasOwnProperty(missingIdArr[i])) {
                         missingIdArr.splice(i);
                     }
+                    if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                        let transformations = queryJson.TRANSFORMATIONS;
+                        let apply = transformations.APPLY;
+                        for (let element of apply){
+                            if( element.hasOwnProperty(missingIdArr[i])){
+                                missingIdArr.splice(i);
+                            }
+                        }
+
+                    }
                 }
                 if (missingIdArr.length > 0) {//for 424
                     let missingIdArray = Array.from(missingIdArr);
@@ -529,8 +536,8 @@ export default class InsightFacade implements IInsightFacade {
                     return;
                 }
 
-                if (queryJson.hasOwnProperty("TRANSFORMATIONS")){
-                    for (let groupArray of transformationArray){
+                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                    for (let groupArray of transformationArray) {
                         var finalItem = that.applyHandler(groupArray, queryJson.TRANSFORMATIONS);
                         responseObject['result'].push(finalItem);
                     }
@@ -544,7 +551,7 @@ export default class InsightFacade implements IInsightFacade {
                             render: 'TABLE',
                             result: that.sortByKey(sortingOrderKey, responseObject, idSet)
                         };
-                    }else{
+                    } else {
                         let options = queryJson.OPTIONS;
                         let order = options.ORDER;
                         let keys = order.keys;
@@ -554,7 +561,7 @@ export default class InsightFacade implements IInsightFacade {
                                 render: 'TABLE',
                                 result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
                             }
-                        }else if (dir == "DOWN"){
+                        } else if (dir == "DOWN") {
                             response['body'] = {
                                 render: 'TABLE',
                                 result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
@@ -593,7 +600,7 @@ export default class InsightFacade implements IInsightFacade {
             throw "wrong type for underscore manager";
         }
     }
-    
+
     sortByKeyTransformationsDown(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
         let that = this;
         var index = 0;
@@ -602,12 +609,12 @@ export default class InsightFacade implements IInsightFacade {
         let idArr = Array.from(idSet);
 
         for (let id = 0; id < idArr.length; id++) {
-            var objectCompare = function kek (ObjA: any, ObjB: any):any {
+            var objectCompare = function kek(ObjA: any, ObjB: any): any {
                 if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
                     return -1;
                 if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
                     return 1;
-                if (index < sortingOrder.length-1){
+                if (index < sortingOrder.length - 1) {
                     index++;
                     sortingOrderKey = sortingOrder[index];
                     return kek(ObjA, ObjB);
@@ -619,6 +626,7 @@ export default class InsightFacade implements IInsightFacade {
         ;
         return arrayToSort;
     }
+
     sortByKeyTransformationsUp(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
         let that = this;
         var index = 0;
@@ -627,12 +635,12 @@ export default class InsightFacade implements IInsightFacade {
         let idArr = Array.from(idSet);
 
         for (let id = 0; id < idArr.length; id++) {
-            var objectCompare = function kek (ObjA: any, ObjB: any):any {
+            var objectCompare = function kek(ObjA: any, ObjB: any): any {
                 if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
                     return -1;
                 if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
                     return 1;
-                if (index < sortingOrder.length-1){
+                if (index < sortingOrder.length - 1) {
                     index++;
                     sortingOrderKey = sortingOrder[index];
                     return kek(ObjA, ObjB);
@@ -673,7 +681,7 @@ export default class InsightFacade implements IInsightFacade {
     filterManager(filterObject: any, toCompare: Object, fourTwoFourChecker: boolean): boolean {
         let that = this;
         let keys = Object.keys(filterObject);
-        if (keys.length == 0){
+        if (keys.length == 0) {
             return true;
         }
 
@@ -984,28 +992,30 @@ export default class InsightFacade implements IInsightFacade {
         if (key[0] == "IS" || key[0] == "LT" || key[0] == "GT" || key[0] == "EQ") {
             let innerKey = Object.keys(query[key[0]]);
             return (that.underscoreManager(innerKey[0], 'id') == that.underscoreManager(id, 'id'));
-        }else if (key[0] == "AND" || key[0] == "OR"){
+        } else if (key[0] == "AND" || key[0] == "OR") {
             let AndOrArray = query[key[0]];
-            for (let element of AndOrArray){
-                if (!that.multipleKeysWhere(element, id)){
+            for (let element of AndOrArray) {
+                if (!that.multipleKeysWhere(element, id)) {
                     return false;
                 }
             }
             return true;
-        }else if (key[0] == "NOT"){
+        } else if (key[0] == "NOT") {
             return this.multipleKeysWhere(query[key[0]], id);
         }
         return false;
     }
-    multipleKeysColums(IDarray: any, id: string): boolean{
+
+    multipleKeysColums(IDarray: any, id: string): boolean {
         let that = this;
-        for (let element of IDarray){
-            if (that.underscoreManager(element, 'id') != that.underscoreManager(id, 'id')){
+        for (let element of IDarray) {
+            if (that.underscoreManager(element, 'id') != that.underscoreManager(id, 'id')) {
                 return false
             }
         }
         return true;
     }
+
     applyChecker(keyWord: string, applyArray: any): number {
         for (var i = 0; i < applyArray.length; i++) {
             if (applyArray[i].hasOwnProperty(keyWord)) {
@@ -1014,37 +1024,40 @@ export default class InsightFacade implements IInsightFacade {
         }
         return -1;
     }
-    groupCheckerhelper(compareObject:any, resultObject:any, groupArray:any): boolean {
-        for (var requirement of groupArray){
-            if (compareObject[requirement] != resultObject[requirement]){
+
+    groupCheckerhelper(compareObject: any, resultObject: any, groupArray: any): boolean {
+        for (var requirement of groupArray) {
+            if (compareObject[requirement] != resultObject[requirement]) {
                 return false;
             }
         }
         return true;
     }
-    groupChecker(groupArray: any, resultObject:any, transformationArray:any): number {
+
+    groupChecker(groupArray: any, resultObject: any, transformationArray: any): number {
         let that = this;
-        if (transformationArray.length == 0){
+        if (transformationArray.length == 0) {
             return -1;
         }
-        for (var i=0; i<transformationArray.length; i++){
+        for (var i = 0; i < transformationArray.length; i++) {
             var innerArray = transformationArray[i];
-            if (that.groupCheckerhelper(innerArray[0], resultObject, groupArray)){
+            if (that.groupCheckerhelper(innerArray[0], resultObject, groupArray)) {
                 return i;
             }
         }
         return -1;
     }
-    applyHandler(groupArray:any, transformation:any): any {
+
+    applyHandler(groupArray: any, transformation: any): any {
         let that = this;
-        let roomObject:any = {};
+        let roomObject: any = {};
         let sample = groupArray[0];
         let transGroup = transformation.GROUP;
         let transApply = transformation.APPLY;
-        for (let group of transGroup){
+        for (let group of transGroup) {
             roomObject[group] = sample[group];
         }
-        for (let applySection of transApply){
+        for (let applySection of transApply) {
             let key = Object.keys(applySection);
             let sectiontype = key[0];
             let key2 = Object.keys(applySection[sectiontype]);
@@ -1054,31 +1067,32 @@ export default class InsightFacade implements IInsightFacade {
         }
         return roomObject;
     }
-    getTransformationValue(groupArray:any, sectiontype:string, applyLookfor:any): number{
-        if (applyLookfor == "MAX"){
+
+    getTransformationValue(groupArray: any, sectiontype: string, applyLookfor: any): number {
+        if (applyLookfor == "MAX") {
             let firstElement = groupArray[0];
             let max = firstElement[sectiontype];
-            for (let element of groupArray){
-                if (element[sectiontype] > max){
+            for (let element of groupArray) {
+                if (element[sectiontype] > max) {
                     max = element[sectiontype];
                 }
             }
             return max;
         }
-        if (applyLookfor == "MIN"){
+        if (applyLookfor == "MIN") {
             let firstElement = groupArray[0];
             let min = firstElement[sectiontype];
-            for (let element of groupArray){
-                if (element[sectiontype] < min){
+            for (let element of groupArray) {
+                if (element[sectiontype] < min) {
                     min = element[sectiontype];
                 }
             }
             return min;
         }
-        if (applyLookfor == "AVG"){
+        if (applyLookfor == "AVG") {
             let total = 0;
             let numRows = groupArray.length;
-            for (let element of groupArray){
+            for (let element of groupArray) {
                 let x = element[sectiontype];
                 x = x * 10;
                 x = Number(x.toFixed(0));

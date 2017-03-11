@@ -1104,6 +1104,18 @@ export default class InsightFacade implements IInsightFacade {
             return res;
 
         }
+         if (applyLookfor == "COUNT"){
+            let history:any = [];
+            let count = 0;
+            for (let element of groupArray){
+                if (history.contains(element[sectiontype])){
+                    count++;
+                    history.push(element[sectiontype]);
+                }
+            }
+            return count;
+        }
+        throw {code: 400, body: {"error": "no valid filter found"}};
     }
 
 }

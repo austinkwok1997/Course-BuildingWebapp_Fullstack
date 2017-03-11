@@ -423,6 +423,12 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
+                    if (JSON.stringify(queryJson.WHERE) == "{}"){
+                        response.code = 424;
+                        response.body = {"missing": ["rooms"]};
+                        reject(response);
+                        return;
+                    }
 
                     for (var course in setOfCourses) {
                         let resultArray: any = [];

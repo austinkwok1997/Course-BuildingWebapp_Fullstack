@@ -1065,6 +1065,31 @@ export default class InsightFacade implements IInsightFacade {
             }
             return max;
         }
+        if (applyLookfor == "MIN"){
+            let firstElement = groupArray[0];
+            let min = firstElement[sectiontype];
+            for (let element of groupArray){
+                if (element[sectiontype] < min){
+                    min = element[sectiontype];
+                }
+            }
+            return min;
+        }
+        if (applyLookfor == "AVG"){
+            let total = 0;
+            let numRows = groupArray.length;
+            for (let element of groupArray){
+                let x = element[sectiontype];
+                x = x * 10;
+                x = Number(x.toFixed(0));
+                total += x;
+            }
+            var avg = total / numRows;
+            var avg = avg / 10;
+            var res = Number(avg.toFixed(2));
+            return res;
+
+        }
     }
 
 }

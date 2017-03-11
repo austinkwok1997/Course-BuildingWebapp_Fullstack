@@ -268,6 +268,7 @@ export default class InsightFacade implements IInsightFacade {
         var queryJson: any = query;//convert to a JS object (convert object to JSON String)????????
         var response: InsightResponse = {code: 777, body: {}};
         var responseObject = {render: 'TABLE', result: <any>[]};
+        var transformationArray: any = [];
 
         var sortingOrderKey: string;
 
@@ -275,184 +276,301 @@ export default class InsightFacade implements IInsightFacade {
         var mainPromise: Promise <InsightResponse> = new Promise(function (fulfill, reject) {
 
 
-            if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
-                console.log("invalid query");
-                response.code = 400;
-                response.body = {"error": "Missing WHERE or OPTIONS"};
-                reject(response);
-                return;
-            }
-
-            var queryJsonOptions = queryJson.OPTIONS;
-            if (!that.hasValidOptions(queryJsonOptions)) {//checks for proper options format
-                console.log("invalid query options");
-                response.code = 400;
-                response.body = {"error": "invalid query OPTIONS"};
-                reject(response);
-                return;
-             }
-            // let key = Object.keys(dataStructure);
-            // if (key.length == 0){
-            //     console.log("dataset is empty");
-            //     response.code = 424;
-            //     response.body = {"error": "nothing found in dataset"};
-            //     reject(response);
-            //     return;
-            // }
-
-            var keyArray = queryJsonOptions.COLUMNS;
-            var courseRoomCheck = keyArray[0];
-            if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
-                if (!dataStructure.hasOwnProperty('rooms')) {
-                    console.log("no rooms found in dataset");
-                    response.code = 424;
-                    response.body = {"missing": ["rooms"]};
+                if (!queryJson.hasOwnProperty('WHERE') || !queryJson.hasOwnProperty('OPTIONS')) { //checks for where and options
+                    console.log("invalid query");
+                    response.code = 400;
+                    response.body = {"error": "Missing WHERE or OPTIONS"};
                     reject(response);
                     return;
                 }
-            } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
-                if (!dataStructure.hasOwnProperty('courses')) {
-                    console.log("no courses found in dataset");
-                    response.code = 424;
-                    response.body = {"missing": ["courses"]};
-                }
-            }
-            if (!that.multipleKeysWhere(queryJson.WHERE, courseRoomCheck) || !that.multipleKeysColums(queryJson.OPTIONS.COLUMNS, courseRoomCheck)) {
-                console.log("found different keys in query");
-                response.code = 400;
-                response.body = {"error": "invalid query with multiple keys"};
-                reject(response);
-                return;
-            }
 
-            sortingOrderKey = queryJsonOptions.ORDER;
-            if(sortingOrderKey){
-                try {
-                    that.keyToJsonKey(that.underscoreManager(sortingOrderKey, 'key'))
+                var queryJsonOptions = queryJson.OPTIONS;
+                if (!that.hasValidOptions(queryJsonOptions)) {//checks for proper options format
+                    console.log("invalid query options");
+                    response.code = 400;
+                    response.body = {"error": "invalid query OPTIONS"};
+                    reject(response);
+                    return;
                 }
-                catch (e){
-                    reject(e);
+                // let key = Object.keys(dataStructure);
+                // if (key.length == 0){
+                //     console.log("dataset is empty");
+                //     response.code = 424;
+                //     response.body = {"error": "nothing found in dataset"};
+                //     reject(response);
+                //     return;
+                // }
+                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                    var queryTransformations = queryJson.TRANSFORMATIONS;
+                    var keyArray = queryJsonOptions.COLUMNS;
+                    var arraycheck = queryTransformations.GROUP;
+                    var courseRoomCheck = arraycheck[0];
+                } else {
+
+                    var keyArray = queryJsonOptions.COLUMNS;
+                    var courseRoomCheck = keyArray[0];
                 }
-            }
-            //if (!keyArray.includes(sortingOrderKey)) {
-            //   response.code = 400;
-            //    response.body = {"error": "Order key needs to be included in columns"};
-            //     reject(response);
-            //     return;
-            //  }
-
-            var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
-
-            var idSet: any = new Set();
-            if (queryWhereObject != {}) {
-                that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
-                for (let i = 0; i < keyArray.length; i++) {
-                    let idToBeChecked = that.underscoreManager(keyArray[i], 'id');
-                    if (!dataStructure.hasOwnProperty(idToBeChecked)) {
-                        missingIdArr.push(idToBeChecked);
+                if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+                    if (!dataStructure.hasOwnProperty('rooms')) {
+                        console.log("no rooms found in dataset");
+                        response.code = 424;
+                        response.body = {"missing": ["rooms"]};
+                        reject(response);
+                        return;
+                    }
+                } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                    if (!dataStructure.hasOwnProperty('courses')) {
+                        console.log("no courses found in dataset");
+                        response.code = 424;
+                        response.body = {"missing": ["courses"]};
                     }
                 }
-            }
-            if (queryWhereObject == {}){
-                
-            }
-            if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
-                let setOfRooms = dataStructure['rooms'];
-                for (let building of setOfRooms) {
-                    let resultArray: any = [];
-                    resultArray = building['result'];
-                    for (let room of resultArray) {
-                        let resultObject: any = {};
-                        keyArray.forEach(function (k: any) {
-                            resultObject[k] = null;
-                        });
-                        var filterResult = that.filterManager(queryWhereObject, room, false);
 
-                        if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                            //let missingIdArray:any=[];
 
-                            for (var underscoreWord in resultObject) {
-                                let curId = that.underscoreManager(underscoreWord, 'id');
-                                idSet.add(curId);
-                                let theKey = that.underscoreManager(underscoreWord, 'key');
-                                resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
-                            }
-                            responseObject['result'].push(resultObject);
+                sortingOrderKey = queryJsonOptions.ORDER;
+                // if (sortingOrderKey) {
+                //     try {
+                //         that.keyToJsonKey(that.underscoreManager(sortingOrderKey, 'key'))
+                //     }
+                //     catch (e) {
+                //         reject(e);
+                //     }
+                // }
+                //if (!keyArray.includes(sortingOrderKey)) {
+                //   response.code = 400;
+                //    response.body = {"error": "Order key needs to be included in columns"};
+                //     reject(response);
+                //     return;
+                //  }
+
+                var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
+
+                var idSet: any = new Set();
+                if (queryWhereObject != {}) {
+                    that.filterManager(queryWhereObject, {}, true); //adds filter id to missing id list for 424
+                    for (let i = 0; i < keyArray.length; i++) {
+                        let idToBeChecked = that.underscoreManager(keyArray[i], 'id');
+                        if (!dataStructure.hasOwnProperty(idToBeChecked)) {
+                            missingIdArr.push(idToBeChecked);
                         }
                     }
-
                 }
-            } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
-                let setOfCourses = dataStructure["courses"];
 
-                for (var course in setOfCourses) {
-                    let resultArray: any = [];
-                    resultArray = setOfCourses[course.toString()]['result'];
+                if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+                    let setOfRooms = dataStructure['rooms'];
+                    for (let building of setOfRooms) {
+                        let resultArray: any = [];
+                        resultArray = building['result'];
+                        for (let room of resultArray) {
+                            let resultObject: any = {};
+                            keyArray.forEach(function (k: any) {
+                                resultObject[k] = null;
+                            });
+                            var filterResult = that.filterManager(queryWhereObject, room, false);
 
-                    for (let courseTermData of resultArray) {
-                        let resultObject: any = {};
-                        keyArray.forEach(function (k: any) {
-                            resultObject[k] = null;
-                        });
-                        if (courseTermData["Section"] == "overall"){
-                            courseTermData["Year"] = 1900;
-                        }
-                        courseTermData["Year"] = Number(courseTermData["Year"]);
-
-
-                        var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
-
-                        if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                            //let missingIdArray:any=[];
-
-                            for (var underscoreWord in resultObject) {
-                                let curId = that.underscoreManager(underscoreWord, 'id');
-                                idSet.add(curId);
-                                let theKey = that.underscoreManager(underscoreWord, 'key');
-                                if (underscoreWord === 'id') {
-                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                            if (filterResult === true || queryWhereObject == {}) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                                //let missingIdArray:any=[];
+                                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                                    for (var underscoreWord in resultObject) {
+                                        var underscore = "_";
+                                        var num = underscoreWord.indexOf(underscore);
+                                        if (num == -1) {
+                                            var queryTransformations = queryJson.TRANSFORMATIONS;
+                                            var index = that.applyChecker(underscoreWord, queryTransformations.APPLY);
+                                            if (index == -1) {
+                                                console.log("key in columns couldn't be found");
+                                                response.code = 400;
+                                                response.body = {"error": "invalid query"};
+                                                reject(response);
+                                                return;
+                                            } else {
+                                                var applyObject = queryTransformations.APPLY[index];
+                                                var key = Object.keys(applyObject[underscoreWord]);
+                                                var applyWord = applyObject[underscoreWord][key[0]];
+                                                let curId = that.underscoreManager(applyWord, 'id');
+                                                idSet.add(curId);
+                                                let theKey = that.underscoreManager(applyWord, 'key');
+                                                resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
+                                            }
+                                        }
+                                        else {
+                                            let curId = that.underscoreManager(underscoreWord, 'id');
+                                            idSet.add(curId);
+                                            let theKey = that.underscoreManager(underscoreWord, 'key');
+                                            resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
+                                        }
+                                    }
+                                    var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
+                                    if (insertindex != -1){
+                                        transformationArray[insertindex].push(resultObject);
+                                    }else{
+                                        var newArray = [resultObject];
+                                        transformationArray.push(newArray);
+                                    }
                                 } else {
-                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+
+                                    for (var underscoreWord in resultObject) {
+                                        let curId = that.underscoreManager(underscoreWord, 'id');
+                                        idSet.add(curId);
+                                        let theKey = that.underscoreManager(underscoreWord, 'key');
+                                        resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
+                                    }
+                                    responseObject['result'].push(resultObject);
                                 }
                             }
-                            if (!uuidUniqueSet.has(courseTermData.id)) {//to account for repeating result objects bug TODO
-                                uuidUniqueSet.add(courseTermData.id);
-                                responseObject['result'].push(resultObject);
+
+                        }
+                    }
+                } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                    let setOfCourses = dataStructure["courses"];
+
+                    for (var course in setOfCourses) {
+                        let resultArray: any = [];
+                        resultArray = setOfCourses[course.toString()]['result'];
+
+                        for (let courseTermData of resultArray) {
+                            let resultObject: any = {};
+                            keyArray.forEach(function (k: any) {
+                                resultObject[k] = null;
+                            });
+                            if (courseTermData["Section"] == "overall") {
+                                courseTermData["Year"] = 1900;
                             }
+                            courseTermData["Year"] = Number(courseTermData["Year"]);
+
+
+                            var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
+
+                            if (filterResult === true || queryWhereObject == {}) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                                //let missingIdArray:any=[];
+                                if (queryJson.hasOwnProperty("TRANSFORMATIONS")){
+                                    for (var underscoreWord in resultObject){
+                                        var underscore = "_";
+                                        var num = underscoreWord.indexOf(underscore);
+                                        if (num == -1){
+                                            var queryTransformations = queryJson.TRANSFORMATIONS;
+                                            var index = that.applyChecker(underscoreWord, queryTransformations.APPLY);
+                                            if (index == -1) {
+                                                console.log("key in columns couldn't be found");
+                                                response.code = 400;
+                                                response.body = {"error": "invalid query"};
+                                                reject(response);
+                                                return;
+                                            } else {
+                                                var applyObject = queryTransformations.APPLY[index];
+                                                var key = Object.keys(applyObject[underscoreWord]);
+                                                var applyWord = applyObject[underscoreWord][key[0]];
+                                                let curId = that.underscoreManager(underscoreWord, 'id');
+                                                idSet.add(curId);
+                                                let theKey = that.underscoreManager(underscoreWord, 'key');
+                                                if (underscoreWord === 'id') {
+                                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                                } else {
+                                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+                                                }
+                                            }
+                                        }else {
+                                            let curId = that.underscoreManager(underscoreWord, 'id');
+                                            idSet.add(curId);
+                                            let theKey = that.underscoreManager(underscoreWord, 'key');
+                                            if (underscoreWord === 'id') {
+                                                resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                            } else {
+                                                resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+                                            }
+                                        }
+                                        if (!uuidUniqueSet.has(courseTermData.id)) {//to account for repeating result objects bug TODO
+                                            uuidUniqueSet.add(courseTermData.id);
+                                            var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
+                                            if (insertindex != -1){
+                                                transformationArray[insertindex].push(resultObject);
+                                            }else{
+                                                var newArray = [resultObject];
+                                                transformationArray.push(newArray);
+                                            }
+                                        }
+                                    }
+                                }else {
+
+                                    for (var underscoreWord in resultObject) {
+                                        let curId = that.underscoreManager(underscoreWord, 'id');
+                                        idSet.add(curId);
+                                        let theKey = that.underscoreManager(underscoreWord, 'key');
+                                        if (underscoreWord === 'id') {
+                                            resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(that.underscoreManager(underscoreWord, 'key'))].toString; //special case if keyArray element is id we need to turn the int into a string
+                                        } else {
+                                            resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+                                        }
+                                    }
+                                    if (!uuidUniqueSet.has(courseTermData.id)) {//to account for repeating result objects bug TODO
+                                        uuidUniqueSet.add(courseTermData.id);
+                                        responseObject['result'].push(resultObject);
+                                    }
+                                }
+                            }
+
                         }
 
                     }
-
                 }
-            }
 
 
-            for (let i = 0; i < missingIdArr.length; i++) {
-                if (dataStructure.hasOwnProperty(missingIdArr[i])) {
-                    missingIdArr.splice(i);
+                for (let i = 0; i < missingIdArr.length; i++) {
+                    if (dataStructure.hasOwnProperty(missingIdArr[i])) {
+                        missingIdArr.splice(i);
+                    }
                 }
-            }
-            if (missingIdArr.length > 0) {//for 424
-                let missingIdArray = Array.from(missingIdArr);
-                response.code = 424;
-                response.body = {"Missing": missingIdArray};
+                if (missingIdArr.length > 0) {//for 424
+                    let missingIdArray = Array.from(missingIdArr);
+                    response.code = 424;
+                    response.body = {"Missing": missingIdArray};
+                    missingIdArr = [];
+                    reject(response);
+                    return;
+                }
+
+                if (queryJson.hasOwnProperty("TRANSFORMATIONS")){
+                    for (let groupArray of transformationArray){
+                        var finalItem = that.applyHandler(groupArray, queryJson.TRANSFORMATIONS);
+                        responseObject['result'].push(finalItem);
+                    }
+                }
+
+                response['code'] = 200;
+
+                if (sortingOrderKey != null) {
+                    if (typeof sortingOrderKey == "string") {
+                        response['body'] = {
+                            render: 'TABLE',
+                            result: that.sortByKey(sortingOrderKey, responseObject, idSet)
+                        };
+                    }else{
+                        let options = queryJson.OPTIONS;
+                        let order = options.ORDER;
+                        let keys = order.keys;
+                        let dir = order.dir;
+                        if (dir == "UP") {
+                            response['body'] = {
+                                render: 'TABLE',
+                                result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
+                            }
+                        }else if (dir == "DOWN"){
+                            response['body'] = {
+                                render: 'TABLE',
+                                result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
+                            }
+                        }
+                    }
+                } else {
+                    response['body'] = {render: 'TABLE', result: responseObject['result']};
+                }
+                console.log("# of items in result: " + responseObject['result'].length);
                 missingIdArr = [];
-                reject(response);
+                fulfill(response);
                 return;
-            }
 
-            response['code'] = 200;
-            if (sortingOrderKey != null) {
-                response['body'] = {render: 'TABLE', result: that.sortByKey(sortingOrderKey, responseObject, idSet)};
-            } else {
-                response['body'] = {render: 'TABLE', result: responseObject['result']};
             }
-            console.log("# of items in result: " + responseObject['result'].length);
-            missingIdArr = [];
-            fulfill(response);
-            return;
-
-        }).catch(function (err) {
+        ).catch(function (err) {
             return new Promise(function (resolve, reject) {
                 missingIdArr = [];
                 reject(err);
@@ -475,7 +593,57 @@ export default class InsightFacade implements IInsightFacade {
             throw "wrong type for underscore manager";
         }
     }
+    
+    sortByKeyTransformationsDown(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
+        let that = this;
+        var index = 0;
+        var sortingOrderKey = sortingOrder[0];
+        let arrayToSort = responseObject['result'];
+        let idArr = Array.from(idSet);
 
+        for (let id = 0; id < idArr.length; id++) {
+            var objectCompare = function kek (ObjA: any, ObjB: any):any {
+                if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
+                    return -1;
+                if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
+                    return 1;
+                if (index < sortingOrder.length-1){
+                    index++;
+                    sortingOrderKey = sortingOrder[index];
+                    return kek(ObjA, ObjB);
+                }
+                return 0;
+            }
+            arrayToSort.sort(objectCompare);
+        }
+        ;
+        return arrayToSort;
+    }
+    sortByKeyTransformationsUp(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
+        let that = this;
+        var index = 0;
+        var sortingOrderKey = sortingOrder[0];
+        let arrayToSort = responseObject['result'];
+        let idArr = Array.from(idSet);
+
+        for (let id = 0; id < idArr.length; id++) {
+            var objectCompare = function kek (ObjA: any, ObjB: any):any {
+                if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
+                    return -1;
+                if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
+                    return 1;
+                if (index < sortingOrder.length-1){
+                    index++;
+                    sortingOrderKey = sortingOrder[index];
+                    return kek(ObjA, ObjB);
+                }
+                return 0;
+            }
+            arrayToSort.sort(objectCompare);
+        }
+        ;
+        return arrayToSort;
+    }
 
     sortByKey(sortingOrder: string, responseObject: any, idSet: Set<any>): Array<Object> {
         let that = this;
@@ -504,6 +672,10 @@ export default class InsightFacade implements IInsightFacade {
 
     filterManager(filterObject: any, toCompare: Object, fourTwoFourChecker: boolean): boolean {
         let that = this;
+        let keys = Object.keys(filterObject);
+        if (keys.length == 0){
+            return true;
+        }
 
         //LOGICCOMPARISON => recursive calls
         if (filterObject.hasOwnProperty('OR')) {
@@ -549,10 +721,10 @@ export default class InsightFacade implements IInsightFacade {
                     let val = toCompareObject[prop.toString()];
                     if ((typeof filterObject.EQ[underscore] !== 'number') || !(that.isKeyWithNumType(that.underscoreManager(underscore, 'key')))) {
                         throw {code: 400, body: {"error": "EQ value should be a number"}};
-                    //} else if (prop == "lat" || prop == "lon") {
-                      //  if (!toCompareObject.hasO)
+                        //} else if (prop == "lat" || prop == "lon") {
+                        //  if (!toCompareObject.hasO)
                         //if (!(filterObject.EQ[underscore] === val)) {
-                          //  return false;
+                        //  return false;
                         //}
                     } else {
                         let id = that.underscoreManager(underscore, 'id');
@@ -560,7 +732,7 @@ export default class InsightFacade implements IInsightFacade {
                             return false;
                         }
                     }
-                }else {
+                } else {
                     return false;
                 }
             }
@@ -579,8 +751,8 @@ export default class InsightFacade implements IInsightFacade {
                         if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    //} else if (prop == "lat" || prop == "lon") {
-                      //  if (!toCompareObject.hasOwnProperty(prop)){
+                        //} else if (prop == "lat" || prop == "lon") {
+                        //  if (!toCompareObject.hasOwnProperty(prop)){
                         //    return false;
                         //}
                         //if (filterObject.GT[underscore] >= val) { //if lower bound(greaterThan) is greater the val
@@ -589,7 +761,7 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         throw {code: 400, body: {"error": "GT value should be a number"}};
                     }
-                }else {
+                } else {
                     return false;
                 }
             }
@@ -608,8 +780,8 @@ export default class InsightFacade implements IInsightFacade {
                         if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
                             return false;
                         }
-                    //} else if (prop == "lat"|| prop == "lon") {
-                      //  if (!toCompareObject.hasOwnProperty(prop)){
+                        //} else if (prop == "lat"|| prop == "lon") {
+                        //  if (!toCompareObject.hasOwnProperty(prop)){
                         //    return false
                         //}
                         //if (filterObject.LT[underscore] <= val) { //if lower bound(greaterThan) is greater the val
@@ -618,7 +790,7 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         throw {code: 400, body: {"error": "LT value should be a number"}};
                     }
-                }else {
+                } else {
                     return false;
                 }
             }
@@ -834,6 +1006,65 @@ export default class InsightFacade implements IInsightFacade {
         }
         return true;
     }
-
+    applyChecker(keyWord: string, applyArray: any): number {
+        for (var i = 0; i < applyArray.length; i++) {
+            if (applyArray[i].hasOwnProperty(keyWord)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    groupCheckerhelper(compareObject:any, resultObject:any, groupArray:any): boolean {
+        for (var requirement of groupArray){
+            if (compareObject[requirement] != resultObject[requirement]){
+                return false;
+            }
+        }
+        return true;
+    }
+    groupChecker(groupArray: any, resultObject:any, transformationArray:any): number {
+        let that = this;
+        if (transformationArray.length == 0){
+            return -1;
+        }
+        for (var i=0; i<transformationArray.length; i++){
+            var innerArray = transformationArray[i];
+            if (that.groupCheckerhelper(innerArray[0], resultObject, groupArray)){
+                return i;
+            }
+        }
+        return -1;
+    }
+    applyHandler(groupArray:any, transformation:any): any {
+        let that = this;
+        let roomObject:any = {};
+        let sample = groupArray[0];
+        let transGroup = transformation.GROUP;
+        let transApply = transformation.APPLY;
+        for (let group of transGroup){
+            roomObject[group] = sample[group];
+        }
+        for (let applySection of transApply){
+            let key = Object.keys(applySection);
+            let sectiontype = key[0];
+            let key2 = Object.keys(applySection[sectiontype]);
+            let applyLookFor = key2[0];
+            let value = that.getTransformationValue(groupArray, sectiontype, applyLookFor);
+            roomObject[sectiontype] = value;
+        }
+        return roomObject;
+    }
+    getTransformationValue(groupArray:any, sectiontype:string, applyLookfor:any): number{
+        if (applyLookfor == "MAX"){
+            let firstElement = groupArray[0];
+            let max = firstElement[sectiontype];
+            for (let element of groupArray){
+                if (element[sectiontype] > max){
+                    max = element[sectiontype];
+                }
+            }
+            return max;
+        }
+    }
 
 }

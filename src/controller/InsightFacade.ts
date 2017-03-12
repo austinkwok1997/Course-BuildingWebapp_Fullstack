@@ -400,6 +400,7 @@ export default class InsightFacade implements IInsightFacade {
                                             resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
                                         }
                                     }
+                                    var queryTransformations = queryJson.TRANSFORMATIONS;
                                     var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
                                     if (insertindex != -1) {
                                         var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
@@ -479,7 +480,7 @@ export default class InsightFacade implements IInsightFacade {
                                         }
 
                                     }
-                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
+                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
                                         if (insertindex != -1) {
                                             var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
                                             responseObject['result'][insertindex] = finalObject;
@@ -1051,9 +1052,8 @@ export default class InsightFacade implements IInsightFacade {
         if (transformationArray.length == 0) {
             return -1;
         }
-        for (var i = 0; i < transformationArray.length; i++) {
-            var innerArray = transformationArray[i];
-            if (that.groupCheckerhelper(innerArray, resultObject, groupArray)) {
+        for (var i=0; i < transformationArray.length; i++) {
+            if (that.groupCheckerhelper(transformationArray[i], resultObject, groupArray)) {
                 return i;
             }
         }
@@ -1061,6 +1061,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     applyHandler(Apply: any, resultObject: any, currentObject: any): any {
+        let returnObject = currentObject;
         for (let applySection of Apply) {
             let key = Object.keys(applySection);
             let sectiontype = key[0];
@@ -1068,33 +1069,34 @@ export default class InsightFacade implements IInsightFacade {
             let applyLookFor = key2[0];
             if (applyLookFor == "MAX") {
                 if (resultObject[sectiontype] > currentObject[sectiontype]) {
-                    currentObject[sectiontype] = resultObject[sectiontype];
+                    returnObject[sectiontype] = resultObject[sectiontype];
                 }
-                return currentObject;
+                return returnObject;
             }else if (applyLookFor == "MIN") {
                 if (resultObject[sectiontype] < currentObject[sectiontype]) {
-                    currentObject[sectiontype] = resultObject[sectiontype];
+                    returnObject[sectiontype] = resultObject[sectiontype];
                 }
-                return currentObject;
+                return returnObject;
             }else if (applyLookFor == "SUM"){
                 var tmp = currentObject[sectiontype];
                 tmp += resultObject[sectiontype];
-                currentObject[sectiontype] = tmp;
-                return currentObject;
+               returnObject[sectiontype] = tmp;
+                return returnObject;
             }else if (applyLookFor == "AVG" || applyLookFor == "COUNT"){
                 if (currentObject[sectiontype] instanceof Array){
-                    currentObject[sectiontype].push(resultObject[sectiontype]);
+                    returnObject[sectiontype].push(resultObject[sectiontype]);
                 }else{
                     var arrayValue = [currentObject[sectiontype]];
                     arrayValue.push(resultObject[sectiontype]);
-                    currentObject[sectiontype]= arrayValue;
+                    returnObject[sectiontype]= arrayValue;
                 }
-                return currentObject;
+                return returnObject;
             }else{
                 throw {code: 400, body: {"error": "no valid filter found"}};
             }
 
         }
+        return returnObject;
     }
 
     getTransformationValue(groupArray: any, sectiontype: string, applyLookfor: any): number {

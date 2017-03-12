@@ -400,12 +400,12 @@ export default class InsightFacade implements IInsightFacade {
                                             resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
                                         }
                                     }
-                                    var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
+                                    var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
                                     if (insertindex != -1) {
-                                        transformationArray[insertindex].push(resultObject);
+                                        var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
+                                        responseObject['result'][insertindex] = finalObject;
                                     } else {
-                                        var newArray = [resultObject];
-                                        transformationArray.push(newArray);
+                                        responseObject['result'].push(resultObject);
                                     }
                                 } else {
 
@@ -423,12 +423,6 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
-                    if (JSON.stringify(queryJson.WHERE) == "{}"){
-                        response.code = 400;
-                        response.body = {"missing": ["rooms"]};
-                        reject(response);
-                        return;
-                    }
 
                     for (var course in setOfCourses) {
                         let resultArray: any = [];
@@ -487,10 +481,10 @@ export default class InsightFacade implements IInsightFacade {
                                     }
                                         var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, transformationArray);
                                         if (insertindex != -1) {
-                                            transformationArray[insertindex].push(resultObject);
+                                            var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
+                                            responseObject['result'][insertindex] = finalObject;
                                         } else {
-                                            var newArray = [resultObject];
-                                            transformationArray.push(newArray);
+                                            responseObject['result'].push(resultObject);
                                         }
 
                                 } else {
@@ -543,9 +537,21 @@ export default class InsightFacade implements IInsightFacade {
                 }
 
                 if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
-                    for (let groupArray of transformationArray) {
-                        var finalItem = that.applyHandler(groupArray, queryJson.TRANSFORMATIONS);
-                        responseObject['result'].push(finalItem);
+                    let queryTransformations = queryJson.TRANSFORMATIONS;
+                    let applyList = queryTransformations.APPLY;
+                    let avgCountitems = [];
+                    for (let applyObject of applyList){
+                        var key = Object.keys(applyObject);
+                        var key2 = Object.keys(applyObject[key[0]]);
+                        if (key2[0] == "AVG" || key2[0] == "COUNT"){
+                            avgCountitems.push(applyObject);
+                        }
+                    }
+                    if (avgCountitems.length > 0){
+                        for (var i=0; i<responseObject['result'];i++){
+                            var newCourse = that.avgCountHandler(avgCountitems, responseObject['result'][i]);
+                            responseObject['result'][i] = newCourse;
+                        }
                     }
                 }
 
@@ -1047,31 +1053,48 @@ export default class InsightFacade implements IInsightFacade {
         }
         for (var i = 0; i < transformationArray.length; i++) {
             var innerArray = transformationArray[i];
-            if (that.groupCheckerhelper(innerArray[0], resultObject, groupArray)) {
+            if (that.groupCheckerhelper(innerArray, resultObject, groupArray)) {
                 return i;
             }
         }
         return -1;
     }
 
-    applyHandler(groupArray: any, transformation: any): any {
-        let that = this;
-        let roomObject: any = {};
-        let sample = groupArray[0];
-        let transGroup = transformation.GROUP;
-        let transApply = transformation.APPLY;
-        for (let group of transGroup) {
-            roomObject[group] = sample[group];
-        }
-        for (let applySection of transApply) {
+    applyHandler(Apply: any, resultObject: any, currentObject: any): any {
+        for (let applySection of Apply) {
             let key = Object.keys(applySection);
             let sectiontype = key[0];
             let key2 = Object.keys(applySection[sectiontype]);
             let applyLookFor = key2[0];
-            let value = that.getTransformationValue(groupArray, sectiontype, applyLookFor);
-            roomObject[sectiontype] = value;
+            if (applyLookFor == "MAX") {
+                if (resultObject[sectiontype] > currentObject[sectiontype]) {
+                    currentObject[sectiontype] = resultObject[sectiontype];
+                }
+                return currentObject;
+            }else if (applyLookFor == "MIN") {
+                if (resultObject[sectiontype] < currentObject[sectiontype]) {
+                    currentObject[sectiontype] = resultObject[sectiontype];
+                }
+                return currentObject;
+            }else if (applyLookFor == "SUM"){
+                var tmp = currentObject[sectiontype];
+                tmp += resultObject[sectiontype];
+                currentObject[sectiontype] = tmp;
+                return currentObject;
+            }else if (applyLookFor == "AVG" || applyLookFor == "COUNT"){
+                if (currentObject[sectiontype] instanceof Array){
+                    currentObject[sectiontype].push(resultObject[sectiontype]);
+                }else{
+                    var arrayValue = [currentObject[sectiontype]];
+                    arrayValue.push(resultObject[sectiontype]);
+                    currentObject[sectiontype]= arrayValue;
+                }
+                return currentObject;
+            }else{
+                throw {code: 400, body: {"error": "no valid filter found"}};
+            }
+
         }
-        return roomObject;
     }
 
     getTransformationValue(groupArray: any, sectiontype: string, applyLookfor: any): number {
@@ -1128,6 +1151,39 @@ export default class InsightFacade implements IInsightFacade {
             }
         }
         throw {code: 400, body: {"error": "no valid filter found"}};
+    }
+    avgCountHandler(apply:any, resultObject:any):any{
+        for (let applyObject of apply){
+            let key = Object.keys(applyObject);
+            let key2 = Object.keys(applyObject[key[0]]);
+            if (key2[0] == "AVG"){
+                let avgArray = resultObject[key[0]];
+                let sum = 0;
+                for (let x of avgArray){
+                    x = x * 10;
+                    x = Number(x.toFixed(0));
+                    sum += x;
+                }
+                var avg = sum / avgArray.length();
+                avg = avg / 10;
+                var res = Number(avg.toFixed(2));
+                resultObject[key[0]] = res;
+            }else if (key2[0] == "COUNT"){
+                let termmemory:any = [];
+                let count = 0;
+                let countTerms = resultObject[key[0]];
+                for (let term of countTerms){
+                    if (termmemory.contains(term)){
+                        termmemory.push(term);
+                        count++;
+                    }
+                }
+                resultObject[key[0]] = count;
+            }else{
+                throw {code: 400, body: {"error": "no valid filter found"}};
+            }
+        }
+        return resultObject;
     }
 
 }

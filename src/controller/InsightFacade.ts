@@ -751,9 +751,6 @@ export default class InsightFacade implements IInsightFacade {
 
     filterManager(filterObject: any, toCompare: Object, fourTwoFourChecker: boolean): boolean {
         let tc: any = toCompare;
-        if (tc['shortname'] == "MGYM" || tc['shortname'] == "MAUD" || tc['shortname'] == "NIT") { //for some room bug??
-            return false
-        }
         let that = this;
         let keys = Object.keys(filterObject);
         if (keys.length == 0) {

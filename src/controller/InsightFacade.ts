@@ -389,7 +389,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     }
                 }
-/*
+
                 if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
                     let setOfRooms = dataStructure['rooms'];
                     for (let building of setOfRooms) {
@@ -459,7 +459,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
                     }
-                } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+ /*               } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
 
                     for (var course in setOfCourses) {
@@ -577,7 +577,7 @@ export default class InsightFacade implements IInsightFacade {
                     reject(response);
                     return;
                 }
-
+*/
                 if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
                     let queryTransformations = queryJson.TRANSFORMATIONS;
                     let applyList = queryTransformations.APPLY;
@@ -598,7 +598,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
                     }
-                } */
+                } 
 
                 response['code'] = 200;
 

@@ -1239,7 +1239,7 @@ export default class InsightFacade implements IInsightFacade {
             let countTerms = resultObject[key[0]];
             if (countTerms instanceof Array) {
                 for (let term of countTerms) {
-                    if (termmemory.includes(term)) {
+                    if (!termmemory.includes(term)) {
                         termmemory.push(term);
                         count++;
                     }

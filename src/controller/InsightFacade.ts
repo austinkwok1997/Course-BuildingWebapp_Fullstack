@@ -539,8 +539,10 @@ export default class InsightFacade implements IInsightFacade {
                                         }
 
                                     }
-                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
-                                        if (insertindex != -1) {
+                                        if (!queryTransformations.GROUP.includes("courses_uuid")) {
+                                            var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
+                                        }
+                                        if (!queryTransformations.GROUP.includes("courses_uuid") ||insertindex != -1) {
                                             var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
                                             responseObject['result'][insertindex] = finalObject;
                                         } else {

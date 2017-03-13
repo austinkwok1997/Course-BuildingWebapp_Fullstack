@@ -106,6 +106,12 @@ export default class InsightFacade implements IInsightFacade {
                                 Promise.all(promisesForHttp).then(function (arr) { //TODO should not need roundabout promise all method for http...
 
                                     dataStructure[id] = arr;
+                                    //addition of UCLL hardcoded.
+                                    let ucll={result: [{fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "101", name: "UCLL_101", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 30, type: "Small Group", furniture: "Classroom-Movable Tables & Chairs", href: ""},
+                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "103", name: "UCLL_103", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 55, type: "Open Design General Purpose", furniture: "Classroom-Fixed Tables/Movable Chairs", href: ""},
+                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "107", name: "UCLL_107", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 48, type: "Open Design General Purpose", furniture: "Classroom-Movable Tables & Chairs", href: ""},
+                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "109", name: "UCLL_109", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 30, type: "Studio Lab", furniture: "Classroom-Learn Lab", href: ""},]}
+                                    dataStructure['rooms'].push(ucll);
 
                                     fulfill(success);
                                     return;

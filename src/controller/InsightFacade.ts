@@ -390,7 +390,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 }
 
- /*               if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+                if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
                     let setOfRooms = dataStructure['rooms'];
                     for (let building of setOfRooms) {
                         let resultArray: any = [];
@@ -458,8 +458,8 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                             }
                         }
-                    }}*/
-                 if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                    }}
+                 else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
 
                     for (var course in setOfCourses) {

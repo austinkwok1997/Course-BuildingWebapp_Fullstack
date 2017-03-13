@@ -542,7 +542,7 @@ export default class InsightFacade implements IInsightFacade {
                                         if (!queryTransformations.GROUP.includes("courses_uuid")) {
                                             var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
                                         }else{
-                                            insertindex = -1;
+                                            var insertindex = -1;
                                         }
                                         if (insertindex != -1) {
                                             var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);

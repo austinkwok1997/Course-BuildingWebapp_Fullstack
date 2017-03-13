@@ -20,7 +20,6 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace('InsightFacadeImpl::init()');
 
     }
-
     addDataset(id: string, content: string): Promise<InsightResponse> {
 //TODO: not add empty zip file
         let that = this;
@@ -153,7 +152,6 @@ export default class InsightFacade implements IInsightFacade {
             }
         }
     }
-
     arrayOfRoomsInHtmlObject(htmlObj: any): Promise<Object> {
         //TODO: Clean up the calls:should not need to access htmlObj for every variable for every room
         // maybe return an array of objects if we need object for everyroom in a building
@@ -224,7 +222,6 @@ export default class InsightFacade implements IInsightFacade {
             })
         })
     }
-
     removeDataset(id: string): Promise<InsightResponse> {
 
 
@@ -258,20 +255,13 @@ export default class InsightFacade implements IInsightFacade {
 
 
     }
-
     performQuery(query: QueryRequest): Promise <InsightResponse> {
-
-
         let that = this;
-
         var uuidUniqueSet = new Set();
         var queryJson: any = query;//convert to a JS object (convert object to JSON String)????????
         var response: InsightResponse = {code: 777, body: {}};
         var responseObject = {render: 'TABLE', result: <any>[]};
-        var transformationArray: any = [];
-
         var sortingOrderKey: string;
-
 
         var mainPromise: Promise <InsightResponse> = new Promise(function (fulfill, reject) {
 
@@ -387,21 +377,6 @@ export default class InsightFacade implements IInsightFacade {
 
 
                 sortingOrderKey = queryJsonOptions.ORDER;
-                // if (sortingOrderKey) {
-                //     try {
-                //         that.keyToJsonKey(that.underscoreManager(sortingOrderKey, 'key'))
-                //     }
-                //     catch (e) {
-                //         reject(e);
-                //     }
-                // }
-                //if (!keyArray.includes(sortingOrderKey)) {
-                //   response.code = 400;
-                //    response.body = {"error": "Order key needs to be included in columns"};
-                //     reject(response);
-                //     return;
-                //  }
-
                 var queryWhereObject = JSON.parse(JSON.stringify(queryJson.WHERE));//should return where key??
 
                 var idSet: any = new Set();
@@ -414,71 +389,73 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     }
                 }
-
+/*
                 if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
                     let setOfRooms = dataStructure['rooms'];
                     for (let building of setOfRooms) {
                         let resultArray: any = [];
                         resultArray = building['result'];
                         for (let room of resultArray) {
-                            if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
-                            let resultObject: any = {};
-                            keyArray.forEach(function (k: any) {
-                                resultObject[k] = null;
-                            });
-                            var filterResult = that.filterManager(queryWhereObject, room, false);
 
-                            if (filterResult === true || queryWhereObject == {}) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
-                                //let missingIdArray:any=[];
-                                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
-                                    for (var underscoreWord in resultObject) {
-                                        var underscore = "_";
-                                        var num = underscoreWord.indexOf(underscore);
-                                        if (num == -1) {
-                                            var queryTransformations = queryJson.TRANSFORMATIONS;
-                                            var index = that.applyChecker(underscoreWord, queryTransformations.APPLY);
-                                            if (index == -1) {
-                                                console.log("key in columns couldn't be found");
-                                                response.code = 400;
-                                                response.body = {"error": "invalid query"};
-                                                reject(response);
-                                                return;
-                                            } else {
-                                                var applyObject = queryTransformations.APPLY[index];
-                                                var key = Object.keys(applyObject[underscoreWord]);
-                                                var applyWord = applyObject[underscoreWord][key[0]];
-                                                let curId = that.underscoreManager(applyWord, 'id');
+                            if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
+
+                                let resultObject: any = {};
+                                keyArray.forEach(function (k: any) {
+                                    resultObject[k] = null;
+                                });
+                                var filterResult = that.filterManager(queryWhereObject, room, false);
+
+                                if (filterResult === true) {//if entry passes the where queries add to our resulting structure that will parse into InsightResponse body
+                                    //let missingIdArray:any=[];
+                                    if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                                        for (var underscoreWord in resultObject) {
+                                            var underscore = "_";
+                                            var num = underscoreWord.indexOf(underscore);
+                                            if (num == -1) {
+                                                var queryTransformations = queryJson.TRANSFORMATIONS;
+                                                var index = that.applyChecker(underscoreWord, queryTransformations.APPLY);
+                                                if (index == -1) {
+                                                    console.log("key in columns couldn't be found");
+                                                    response.code = 400;
+                                                    response.body = {"error": "invalid query"};
+                                                    reject(response);
+                                                    return;
+                                                } else {
+                                                    var applyObject = queryTransformations.APPLY[index];
+                                                    var key = Object.keys(applyObject[underscoreWord]);
+                                                    var applyWord = applyObject[underscoreWord][key[0]];
+                                                    let curId = that.underscoreManager(applyWord, 'id');
+                                                    idSet.add(curId);
+                                                    let theKey = that.underscoreManager(applyWord, 'key');
+                                                    resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
+                                                }
+                                            }
+                                            else {
+                                                let curId = that.underscoreManager(underscoreWord, 'id');
                                                 idSet.add(curId);
-                                                let theKey = that.underscoreManager(applyWord, 'key');
+                                                let theKey = that.underscoreManager(underscoreWord, 'key');
                                                 resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
                                             }
                                         }
-                                        else {
+                                        var queryTransformations = queryJson.TRANSFORMATIONS;
+                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
+                                        if (insertindex != -1) {
+                                            var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
+                                            responseObject['result'][insertindex] = finalObject;
+                                        } else {
+                                            responseObject['result'].push(resultObject);
+                                        }
+                                    } else {
+
+                                        for (var underscoreWord in resultObject) {
                                             let curId = that.underscoreManager(underscoreWord, 'id');
                                             idSet.add(curId);
                                             let theKey = that.underscoreManager(underscoreWord, 'key');
                                             resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
                                         }
-                                    }
-                                    var queryTransformations = queryJson.TRANSFORMATIONS;
-                                    var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
-                                    if (insertindex != -1) {
-                                        var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
-                                        responseObject['result'][insertindex] = finalObject;
-                                    } else {
                                         responseObject['result'].push(resultObject);
                                     }
-                                } else {
-
-                                    for (var underscoreWord in resultObject) {
-                                        let curId = that.underscoreManager(underscoreWord, 'id');
-                                        idSet.add(curId);
-                                        let theKey = that.underscoreManager(underscoreWord, 'key');
-                                        resultObject[underscoreWord] = room[that.keyToJsonKey(theKey)];
-                                    }
-                                    responseObject['result'].push(resultObject);
                                 }
-                            }
                             }
                         }
                     }
@@ -525,7 +502,7 @@ export default class InsightFacade implements IInsightFacade {
                                                 idSet.add(curId);
                                                 let theKey = that.underscoreManager(applyWord, 'key');
 
-                                                    resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
+                                                resultObject[underscoreWord] = courseTermData[that.keyToJsonKey(theKey)];
 
                                             }
                                         } else {
@@ -540,17 +517,17 @@ export default class InsightFacade implements IInsightFacade {
                                         }
 
                                     }
-                                        if (!queryTransformations.GROUP.includes("courses_uuid")) {
-                                            var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
-                                        }else{
-                                            var insertindex = -1;
-                                        }
-                                        if (insertindex != -1) {
-                                            var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
-                                            responseObject['result'][insertindex] = finalObject;
-                                        } else {
-                                            responseObject['result'].push(resultObject);
-                                        }
+                                    if (!queryTransformations.GROUP.includes("courses_uuid")) {
+                                        var insertindex = that.groupChecker(queryTransformations.GROUP, resultObject, responseObject['result']);
+                                    }else{
+                                        var insertindex = -1;
+                                    }
+                                    if (insertindex != -1) {
+                                        var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
+                                        responseObject['result'][insertindex] = finalObject;
+                                    } else {
+                                        responseObject['result'].push(resultObject);
+                                    }
 
                                 } else {
 
@@ -621,7 +598,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
                     }
-                }
+                } */
 
                 response['code'] = 200;
 
@@ -1147,7 +1124,7 @@ export default class InsightFacade implements IInsightFacade {
             }else if (applyLookFor == "SUM"){
                 var tmp = currentObject[sectiontype];
                 tmp += resultObject[sectiontype];
-               returnObject[sectiontype] = tmp;
+                returnObject[sectiontype] = tmp;
                 return returnObject;
             }else if (applyLookFor == "AVG" || applyLookFor == "COUNT"){
                 if (currentObject[sectiontype] instanceof Array){
@@ -1202,7 +1179,7 @@ export default class InsightFacade implements IInsightFacade {
             return res;
 
         }
-         if (applyLookfor == "COUNT"){
+        if (applyLookfor == "COUNT"){
             let history:any = [];
             let count = 0;
             for (let element of groupArray){
@@ -1214,9 +1191,9 @@ export default class InsightFacade implements IInsightFacade {
             return count;
         }
         if (applyLookfor == "SUM"){
-             let sum = 0
+            let sum = 0
             for (let element of groupArray){
-                 sum += element[sectiontype];
+                sum += element[sectiontype];
             }
         }
         throw {code: 400, body: {"error": "no valid filter found"}};

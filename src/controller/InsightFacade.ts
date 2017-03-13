@@ -305,6 +305,65 @@ export default class InsightFacade implements IInsightFacade {
                     var keyArray = queryJsonOptions.COLUMNS;
                     var arraycheck = queryTransformations.GROUP;
                     var courseRoomCheck = arraycheck[0];
+                    if (!queryTransformations.hasOwnProperty("GROUP")|| !queryTransformations.hasOwnProperty("APPLY")){
+                        console.log("invalid query group or apply");
+                        response.code = 400;
+                        response.body = {"error": "invalid query GROUP or APPLY"};
+                        reject(response);
+                        return;
+                    }
+                    if (arraycheck.length == 0){
+                        console.log("invalid query group");
+                        response.code = 400;
+                        response.body = {"error": "invalid query GROUP has nothing in it"};
+                        reject(response);
+                        return;
+                    }
+                    for (let element of arraycheck){
+                        if (!keyArray.includes(element)){
+                            console.log("invalid query group");
+                            response.code = 400;
+                            response.body = {"error": "invalid query GROUP element not found in columns"};
+                            reject(response);
+                            return;
+                        }
+                    }
+                    var applyCheck = queryTransformations.APPLY;
+                    var underscore = "_";
+                    for (let applyObject of applyCheck){
+                        var key = Object.keys(applyObject);
+                        var testvalue = key[0].indexOf(underscore);
+                        if (testvalue != -1){
+                            console.log("invalid query underscore in apply");
+                            response.code = 400;
+                            response.body = {"error": "invalid query underscore found in APPLY"};
+                            reject(response);
+                            return;
+                        }
+                    }
+                    for (let element of applyCheck){
+                        let key = Object.keys(element);
+                        if (!keyArray.includes(key[0])){
+                            console.log("invalid query underscore in apply");
+                            response.code = 400;
+                            response.body = {"error": "invalid query APPLY element not found in columns"};
+                            reject(response);
+                            return;
+                        }
+                        let maxminavgChecker = element[key[0]];
+                        let key2 = Object.keys(maxminavgChecker);
+                        if (key2[0] == "MAX" || key2[0] == "MIN" || key2[0] == "AVG" || key2[0] == "SUM"){
+                            let searchValue = maxminavgChecker[key2[0]];
+                            if (!that.isKeyWithNumType(that.underscoreManager(searchValue, 'key'))){
+                                console.log("invalid query non number type with MAX MIN AVG SUM");
+                                response.code = 400;
+                                response.body = {"error": "invalid query non number type with MAX MIN AVG SUM"};
+                                reject(response);
+                                return;
+                            }
+                        }
+                    }
+
                 } else {
 
                     var keyArray = queryJsonOptions.COLUMNS;

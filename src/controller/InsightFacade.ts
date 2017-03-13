@@ -603,18 +603,21 @@ export default class InsightFacade implements IInsightFacade {
                 if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
                     let queryTransformations = queryJson.TRANSFORMATIONS;
                     let applyList = queryTransformations.APPLY;
-                    let avgCountitems = [];
-                    for (let applyObject of applyList){
-                        var key = Object.keys(applyObject);
-                        var key2 = Object.keys(applyObject[key[0]]);
-                        if (key2[0] == "AVG" || key2[0] == "COUNT"){
-                            avgCountitems.push(applyObject);
+                    let groupList = queryTransformations.GROUP;
+                    if (!groupList.includes("courses_uuid")) {
+                        let avgCountitems = [];
+                        for (let applyObject of applyList) {
+                            var key = Object.keys(applyObject);
+                            var key2 = Object.keys(applyObject[key[0]]);
+                            if (key2[0] == "AVG" || key2[0] == "COUNT") {
+                                avgCountitems.push(applyObject);
+                            }
                         }
-                    }
-                    if (avgCountitems.length > 0){
-                        for (var i=0; i<responseObject['result'];i++){
-                            var newCourse = that.avgCountHandler(avgCountitems, responseObject['result'][i]);
-                            responseObject['result'][i] = newCourse;
+                        if (avgCountitems.length > 0) {
+                            for (var i = 0; i < responseObject['result']; i++) {
+                                var newCourse = that.avgCountHandler(avgCountitems, responseObject['result'][i]);
+                                responseObject['result'][i] = newCourse;
+                            }
                         }
                     }
                 }

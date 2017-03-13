@@ -390,7 +390,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                 }
 
-                if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
+ /*               if (that.underscoreManager(courseRoomCheck, 'id') == "rooms") {
                     let setOfRooms = dataStructure['rooms'];
                     for (let building of setOfRooms) {
                         let resultArray: any = [];
@@ -458,8 +458,8 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                             }
                         }
-                    }
- /*               } else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
+                    }}*/
+                 if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
 
                     for (var course in setOfCourses) {
@@ -554,6 +554,7 @@ export default class InsightFacade implements IInsightFacade {
                 }
 
 
+
                 for (let i = 0; i < missingIdArr.length; i++) {
                     if (dataStructure.hasOwnProperty(missingIdArr[i])) {
                         missingIdArr.splice(i);
@@ -577,7 +578,7 @@ export default class InsightFacade implements IInsightFacade {
                     reject(response);
                     return;
                 }
-*/
+
                 if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
                     let queryTransformations = queryJson.TRANSFORMATIONS;
                     let applyList = queryTransformations.APPLY;
@@ -598,7 +599,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
                     }
-                } 
+                }
 
                 response['code'] = 200;
 

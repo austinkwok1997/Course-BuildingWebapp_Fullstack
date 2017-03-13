@@ -1232,6 +1232,8 @@ export default class InsightFacade implements IInsightFacade {
                 avg = avg / 10;
                 var res = Number(avg.toFixed(2));
                 return res;
+            }else{
+                return resultObject[key[0]];
             }
         } else if (key2[0] == "COUNT") {
             let termmemory: any = [];

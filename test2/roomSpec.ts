@@ -1339,40 +1339,40 @@ describe("roomSpec", function () {
         });
         //return;
     });
-    it("testing another piazza post", function () {
-        console.log("+++TEST: simple query from spec");
-        zipContent = fs.readFileSync("courses.zip").toString("base64");
-        var thisIsIt = facade;
-
-        return facade.addDataset("courses", zipContent).then(function () {
-            return facade.performQuery({
-                "WHERE": {},
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "courses_dept", "courses_year", "courses_id", "courses_avg", "courses_instructor",
-                        "courses_title", "minGrade"
-                    ],
-                    "ORDER": "courses_dept",
-                    "FORM": "TABLE"
-                },
-                "TRANSFORMATIONS": {
-                    "GROUP": ["courses_dept", "courses_year", "courses_id", "courses_avg", "courses_instructor", "courses_title"],
-                    "APPLY": [
-                        {
-                            "minGrade": {
-                                "MIN": "courses_avg"
-                            }
-                        }
-                    ]
-                }
-            }).then(function (InF: InsightResponse) {
-                //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-        //return;
-    });
+    // it("testing another piazza post", function () {
+    //     console.log("+++TEST: simple query from spec");
+    //     zipContent = fs.readFileSync("courses.zip").toString("base64");
+    //     var thisIsIt = facade;
+    //
+    //     return facade.addDataset("courses", zipContent).then(function () {
+    //         return facade.performQuery({
+    //             "WHERE": {},
+    //             "OPTIONS": {
+    //                 "COLUMNS": [
+    //                     "courses_dept", "courses_year", "courses_id", "courses_avg", "courses_instructor",
+    //                     "courses_title", "minGrade"
+    //                 ],
+    //                 "ORDER": "courses_dept",
+    //                 "FORM": "TABLE"
+    //             },
+    //             "TRANSFORMATIONS": {
+    //                 "GROUP": ["courses_dept", "courses_year", "courses_id", "courses_avg", "courses_instructor", "courses_title"],
+    //                 "APPLY": [
+    //                     {
+    //                         "minGrade": {
+    //                             "MIN": "courses_avg"
+    //                         }
+    //                     }
+    //                 ]
+    //             }
+    //         }).then(function (InF: InsightResponse) {
+    //             //var t=JSON.parse(JSON.stringify(InF.body));
+    //             console.log(JSON.stringify(InF.body));
+    //         })
+    //     }).catch(function (err: any) {
+    //         console.log(err);
+    //         expect.fail();
+    //     });
+    //     //return;
+    // });
 });

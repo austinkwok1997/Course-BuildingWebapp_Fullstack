@@ -587,7 +587,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //     var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
                                     //     responseObject['result'][insertindex] = finalObject;
                                     // } else {
-                                    //     responseObject['result'].push(resultObject);
+                                         responseObject['result'].push(resultObject);
                                     // }
 
                                 } else {

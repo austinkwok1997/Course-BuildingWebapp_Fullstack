@@ -3,7 +3,7 @@
  */
 import {IInsightFacade, InsightResponse, QueryRequest} from "./IInsightFacade";
 
-import Log from "..\/Util";
+import Log from "../Util";
 import {queryParser} from "restify";
 import {stringify} from "querystring";
 import {type} from "os";
@@ -457,7 +457,7 @@ export default class InsightFacade implements IInsightFacade {
                         resultArray = building['result'];
                         for (let room of resultArray) {
 
-                            if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
+                            //if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
 
                                 let resultObject: any = {};
                                 keyArray.forEach(function (k: any) {
@@ -516,7 +516,7 @@ export default class InsightFacade implements IInsightFacade {
                                         responseObject['result'].push(resultObject);
                                     }
                                 }
-                            }
+                            //}
                         }
                     }
                 }
@@ -587,7 +587,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //     var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
                                     //     responseObject['result'][insertindex] = finalObject;
                                     // } else {
-                                         responseObject['result'].push(resultObject);
+                                    //     responseObject['result'].push(resultObject);
                                     // }
 
                                 } else {
@@ -785,14 +785,14 @@ export default class InsightFacade implements IInsightFacade {
         let that = this;
         let arrayToSort = responseObject['result'];
 
-        var objectCompare = function (ObjA: any, ObjB: any) {
-            if (ObjA[sortingOrder] < ObjB[sortingOrder])
-                return -1;
-            if (ObjA[sortingOrder] > ObjB[sortingOrder])
-                return 1;
-            return 0;
-        }
-        arrayToSort.sort(objectCompare);
+            var objectCompare = function (ObjA: any, ObjB: any) {
+                if (ObjA[sortingOrder] < ObjB[sortingOrder])
+                    return -1;
+                if (ObjA[sortingOrder] > ObjB[sortingOrder])
+                    return 1;
+                return 0;
+            }
+            arrayToSort.sort(objectCompare);
 
         ;
         return arrayToSort;

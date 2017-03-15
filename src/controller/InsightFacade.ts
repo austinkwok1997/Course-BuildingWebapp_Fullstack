@@ -457,7 +457,7 @@ export default class InsightFacade implements IInsightFacade {
                         resultArray = building['result'];
                         for (let room of resultArray) {
 
-                            //if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
+                            if (room.shortname != 'MAUD' && room.shortname != 'NIT') {
 
                                 let resultObject: any = {};
                                 keyArray.forEach(function (k: any) {
@@ -516,7 +516,7 @@ export default class InsightFacade implements IInsightFacade {
                                         responseObject['result'].push(resultObject);
                                     }
                                 }
-                            //}
+                            }
                         }
                     }
                 }

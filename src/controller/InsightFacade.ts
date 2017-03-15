@@ -583,12 +583,12 @@ export default class InsightFacade implements IInsightFacade {
                                     } else {
                                         var insertindex = -1;
                                     }
-                                    if (insertindex != -1) {
-                                        var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
-                                        responseObject['result'][insertindex] = finalObject;
-                                    } else {
-                                        responseObject['result'].push(resultObject);
-                                    }
+                                    // if (insertindex != -1) {
+                                    //     var finalObject = that.applyHandler(queryTransformations.APPLY, resultObject, responseObject['result'][insertindex]);
+                                    //     responseObject['result'][insertindex] = finalObject;
+                                    // } else {
+                                    //     responseObject['result'].push(resultObject);
+                                    // }
 
                                 } else {
 

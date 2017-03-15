@@ -656,11 +656,11 @@ export default class InsightFacade implements IInsightFacade {
                             let resultArray = responseObject['result'];
                             for (var i = 0; i < resultArray.length; i++) {
                                 let groupObject = resultArray[i];
-                                for (let applyItem of avgCountitems) {
-                                    let key = Object.keys(applyItem);
-                                    var newNumber = that.avgCountHandler(applyItem, groupObject);
-                                    groupObject[key[0]] = newNumber;
-                                }
+                                // for (let applyItem of avgCountitems) {
+                                //     let key = Object.keys(applyItem);
+                                //     var newNumber = that.avgCountHandler(applyItem, groupObject);
+                                //     groupObject[key[0]] = newNumber;
+                                // }
                                 resultArray[i] = groupObject;
                             }
                             responseObject['result'] = resultArray;

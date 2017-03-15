@@ -99,7 +99,7 @@ describe("D3 AutoBot Sim", function() {
                 }
             ).then(function (InF: InsightResponse) {
                 //console.log(InF.code + ": " + JSON.stringify(InF.body));
-                
+
                 expect(InF['code']).to.eql(200);
 
             })
@@ -145,47 +145,48 @@ describe("D3 AutoBot Sim", function() {
     });
     it("Revolution+ Ritchie: Should be able to sort using D3 syntax. + Royal: Apply: MAX should be supported => QUERY A FROM SPEC" , function() {
         return facade.addDataset("rooms", zipContentr).then(function () {
-        return facade.performQuery(
-            {
-                "WHERE": {
-                    "AND": [{
-                        "IS": {
-                            "rooms_furniture": "*Tables*"
-                        }
-                    }, {
-                        "GT": {
-                            "rooms_seats": 300
-                        }
-                    }]
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "rooms_shortname",
-                        "maxSeats"
-                    ],
-                    "ORDER": {
-                        "dir": "DOWN",
-                        "keys": ["maxSeats"]
+            return facade.performQuery(
+                {
+                    "WHERE": {
+                        "AND": [{
+                            "IS": {
+                                "rooms_furniture": "*Tables*"
+                            }
+                        }, {
+                            "GT": {
+                                "rooms_seats": 300
+                            }
+                        }]
                     },
-                    "FORM": "TABLE"
-                },
-                "TRANSFORMATIONS": {
-                    "GROUP": ["rooms_shortname"],
-                    "APPLY": [{
-                        "maxSeats": {
-                            "MAX": "rooms_seats"
-                        }
-                    }]
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "rooms_shortname",
+                            "maxSeats"
+                        ],
+                        "ORDER": {
+                            "dir": "DOWN",
+                            "keys": ["maxSeats"]
+                        },
+                        "FORM": "TABLE"
+                    },
+                    "TRANSFORMATIONS": {
+                        "GROUP": ["rooms_shortname"],
+                        "APPLY": [{
+                            "maxSeats": {
+                                "MAX": "rooms_seats"
+                            }
+                        }]
+                    }
                 }
-            }
-        ).then(function (InF: InsightResponse) {
+            ).then(function (InF: InsightResponse) {
 //             console.log(InF.code+": "+JSON.stringify(InF.body));
 //             let bd:any=InF.body;
 //             expect(bd.result).to.eql([{"rooms_shortname":"OSBO","maxSeats":442},{"rooms_shortname":"HEBB","maxSeats":375},{"rooms_shortname":"LSC","maxSeats":350}]);
 //             expect(InF['code']).to.eql(200);})
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
     });
     it("Riviera: Should be able to sort on multiple keys. + Romeo: Should be able to sort on multiple keys in reverse order.+Snacktacular: Empty APPLY should be valid and supported.", function() {
@@ -248,27 +249,27 @@ describe("D3 AutoBot Sim", function() {
                             }
                         }]
                     },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "rooms_shortname",
-                            "minSeats"
-                        ],
-                        "ORDER": {
-                            "dir": "DOWN",
-                            "keys": ["minSeats"]
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_shortname",
+                                "minSeats"
+                            ],
+                            "ORDER": {
+                                "dir": "DOWN",
+                                "keys": ["minSeats"]
+                            },
+                            "FORM": "TABLE"
                         },
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_shortname"],
-                        "APPLY": [{
-                            "minSeats": {
-                                "MIN": "rooms_seats"
-                            }
-                        }]
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_shortname"],
+                            "APPLY": [{
+                                "minSeats": {
+                                    "MIN": "rooms_seats"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"rooms_shortname": "OSBO", "minSeats": 442}, {
@@ -294,49 +295,49 @@ describe("D3 AutoBot Sim", function() {
 //                         "minSeats": 112
 //                     }, {"rooms_shortname": "BUCH", "minSeats": 108}]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    it("Sahara: Apply: AVG should be supported", function() {
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                        "AND": [{
-                            "IS": {
-                                "rooms_furniture": "*Tables*"
-                            }
-                        }, {
-                            "GT": {
-                                "rooms_seats": 100
-                            }
-                        }]
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "rooms_shortname",
-                            "avgSeats"
-                        ],
-                        "ORDER": {
-                            "dir": "DOWN",
-                            "keys": ["avgSeats"]
+        it("Sahara: Apply: AVG should be supported", function() {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                            "AND": [{
+                                "IS": {
+                                    "rooms_furniture": "*Tables*"
+                                }
+                            }, {
+                                "GT": {
+                                    "rooms_seats": 100
+                                }
+                            }]
                         },
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_shortname"],
-                        "APPLY": [{
-                            "avgSeats": {
-                                "AVG": "rooms_seats"
-                            }
-                        }]
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_shortname",
+                                "avgSeats"
+                            ],
+                            "ORDER": {
+                                "dir": "DOWN",
+                                "keys": ["avgSeats"]
+                            },
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_shortname"],
+                            "APPLY": [{
+                                "avgSeats": {
+                                    "AVG": "rooms_seats"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"rooms_shortname": "OSBO", "avgSeats": 442}, {
@@ -363,49 +364,49 @@ describe("D3 AutoBot Sim", function() {
 //                     }, {"rooms_shortname": "BUCH", "avgSeats": 108}]
 //                 );
 //                 expect(InF['code']).to.eql(200);
-               
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    it("Sacrilicious: Apply: SUM should be supported", function() {
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                        "AND": [{
-                            "IS": {
-                                "rooms_furniture": "*Tables*"
-                            }
-                        }, {
-                            "GT": {
-                                "rooms_seats": 100
-                            }
-                        }]
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "rooms_shortname",
-                            "sumSeats"
-                        ],
-                        "ORDER": {
-                            "dir": "DOWN",
-                            "keys": ["sumSeats"]
+        it("Sacrilicious: Apply: SUM should be supported", function() {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                            "AND": [{
+                                "IS": {
+                                    "rooms_furniture": "*Tables*"
+                                }
+                            }, {
+                                "GT": {
+                                    "rooms_seats": 100
+                                }
+                            }]
                         },
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_shortname"],
-                        "APPLY": [{
-                            "sumSeats": {
-                                "SUM": "rooms_seats"
-                            }
-                        }]
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_shortname",
+                                "sumSeats"
+                            ],
+                            "ORDER": {
+                                "dir": "DOWN",
+                                "keys": ["sumSeats"]
+                            },
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_shortname"],
+                            "APPLY": [{
+                                "sumSeats": {
+                                    "SUM": "rooms_seats"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"rooms_shortname": "SRC", "sumSeats": 897}, {
@@ -431,49 +432,49 @@ describe("D3 AutoBot Sim", function() {
 //                         "sumSeats": 200
 //                     }, {"rooms_shortname": "FRDM", "sumSeats": 160}]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    it("Sagittarius: Apply: COUNT should be supported", function() {
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                        "AND": [{
-                            "IS": {
-                                "rooms_furniture": "*Tables*"
-                            }
-                        }, {
-                            "GT": {
-                                "rooms_seats": 100
-                            }
-                        }]
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "rooms_shortname",
-                            "countSeats"
-                        ],
-                        "ORDER": {
-                            "dir": "DOWN",
-                            "keys": ["countSeats"]
+        it("Sagittarius: Apply: COUNT should be supported", function() {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                            "AND": [{
+                                "IS": {
+                                    "rooms_furniture": "*Tables*"
+                                }
+                            }, {
+                                "GT": {
+                                    "rooms_seats": 100
+                                }
+                            }]
                         },
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_shortname"],
-                        "APPLY": [{
-                            "countSeats": {
-                                "COUNT": "rooms_seats"
-                            }
-                        }]
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_shortname",
+                                "countSeats"
+                            ],
+                            "ORDER": {
+                                "dir": "DOWN",
+                                "keys": ["countSeats"]
+                            },
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_shortname"],
+                            "APPLY": [{
+                                "countSeats": {
+                                    "COUNT": "rooms_seats"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"rooms_shortname": "SWNG", "countSeats": 3}, {
@@ -499,148 +500,148 @@ describe("D3 AutoBot Sim", function() {
 //                         "countSeats": 1
 //                     }, {"rooms_shortname": "WOOD", "countSeats": 1}]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    //RUN TEST SUIT d1 and d2
-    //Sirius: D1/D2 style sorting should be supported.
-    it("deliverable 1st test", function () {
+        //RUN TEST SUIT d1 and d2
+        //Sirius: D1/D2 style sorting should be supported.
+        it("deliverable 1st test", function () {
 
-        var thisIsIt = facade;
+            var thisIsIt = facade;
 
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery({
-                "WHERE": {
-                    "IS": {
-                        "rooms_name": "DMP_*"
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "rooms_name"
-                    ],
-                    "ORDER": "rooms_name",
-                    "FORM": "TABLE"
-                }
-            }).then(function (InF: InsightResponse) {
-                //var t=JSON.parse(JSON.stringify(InF.body));
-                //console.log(JSON.stringify(InF.body));
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-        //return;
-    });
-    it("deliverable 2nd test", function () {
-        var thisIsIt = facade;
-
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery({
-                "WHERE": {
-                    "IS": {
-                        "rooms_address": "*Agrono*"
-                    }
-                },
-                "OPTIONS": {
-                    "COLUMNS": [
-                        "rooms_address", "rooms_name"
-                    ],
-                    "FORM": "TABLE"
-                }
-            }).then(function (InF: InsightResponse) {
-                //var t=JSON.parse(JSON.stringify(InF.body));
-               // console.log(JSON.stringify(InF.body));
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
-        });
-        //return;
-    });
-
-
-    it("Stringer: Should be able to query with many APPLY keys and sort over them.+Stratos: Should be able to query with many APPLY keys.+SteamedHam: Should be able to query with more than one APPLY key.", function() {
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery(
-                {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery({
                     "WHERE": {
-                        "AND": [{
-                            "IS": {
-                                "rooms_furniture": "*Tables*"
-                            }
-                        }, {
-                            "GT": {
-                                "rooms_seats": 300
-                            }
-                        }]
+                        "IS": {
+                            "rooms_name": "DMP_*"
+                        }
                     },
                     "OPTIONS": {
                         "COLUMNS": [
-                            "rooms_shortname",
-                            "maxSeats",
-                            "minSeats",
-                            "avgSeats"
+                            "rooms_name"
                         ],
-                        "ORDER": {
-                            "dir": "DOWN",
-                            "keys": ["maxSeats"]
+                        "ORDER": "rooms_name",
+                        "FORM": "TABLE"
+                    }
+                }).then(function (InF: InsightResponse) {
+                    //var t=JSON.parse(JSON.stringify(InF.body));
+                    //console.log(JSON.stringify(InF.body));
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
+            //return;
+        });
+        it("deliverable 2nd test", function () {
+            var thisIsIt = facade;
+
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery({
+                    "WHERE": {
+                        "IS": {
+                            "rooms_address": "*Agrono*"
+                        }
+                    },
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "rooms_address", "rooms_name"
+                        ],
+                        "FORM": "TABLE"
+                    }
+                }).then(function (InF: InsightResponse) {
+                    //var t=JSON.parse(JSON.stringify(InF.body));
+                    // console.log(JSON.stringify(InF.body));
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
+            //return;
+        });
+
+
+        it("Stringer: Should be able to query with many APPLY keys and sort over them.+Stratos: Should be able to query with many APPLY keys.+SteamedHam: Should be able to query with more than one APPLY key.", function() {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                            "AND": [{
+                                "IS": {
+                                    "rooms_furniture": "*Tables*"
+                                }
+                            }, {
+                                "GT": {
+                                    "rooms_seats": 300
+                                }
+                            }]
                         },
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_shortname"],
-                        "APPLY": [{
-                            "maxSeats": {
-                                "MAX": "rooms_seats"
-                            }},
-                            {"minSeats": {
-                                "MIN": "rooms_seats"
-                            }},
-                            {"avgSeats": {
-                                "AVG": "rooms_seats"
-                            }}
-                        ]
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_shortname",
+                                "maxSeats",
+                                "minSeats",
+                                "avgSeats"
+                            ],
+                            "ORDER": {
+                                "dir": "DOWN",
+                                "keys": ["maxSeats"]
+                            },
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_shortname"],
+                            "APPLY": [{
+                                "maxSeats": {
+                                    "MAX": "rooms_seats"
+                                }},
+                                {"minSeats": {
+                                    "MIN": "rooms_seats"
+                                }},
+                                {"avgSeats": {
+                                    "AVG": "rooms_seats"
+                                }}
+                            ]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
-               // console.log(InF.code + ": " + JSON.stringify(InF.body));
-                
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                ).then(function (InF: InsightResponse) {
+                    // console.log(InF.code + ": " + JSON.stringify(InF.body));
+
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    it("Taurus: Should be able to find the average of all courses within a department", function() {
-        return facade.addDataset("courses", zipContentc).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "courses_dept",
-                            "avgGrade"
-                        ],
-                        "ORDER": "courses_dept",
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["courses_dept"],
-                        "APPLY": [{
-                            "avgGrade": {
-                                "AVG": "courses_avg"
-                            }
-                        }]
+        it("Taurus: Should be able to find the average of all courses within a department", function() {
+            return facade.addDataset("courses", zipContentc).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                        },
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "courses_dept",
+                                "avgGrade"
+                            ],
+                            "ORDER": "courses_dept",
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["courses_dept"],
+                            "APPLY": [{
+                                "avgGrade": {
+                                    "AVG": "courses_avg"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"courses_dept": "aanb", "avgGrade": 91.1}, {
@@ -927,38 +928,38 @@ describe("D3 AutoBot Sim", function() {
 //                         "avgGrade": 70.29
 //                     }, {"courses_dept": "zool", "avgGrade": 89}]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    //CAREFUL THERE IS A ROOMS-TYPE WITH NULLSTRING FOR Tin TEST
-    it("Tin: Should be able to find the total seats of each different room type", function() {
-        return facade.addDataset("rooms", zipContentr).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "rooms_type",
-                            "totSeat"
-                        ],
-                        "ORDER": "totSeat",
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["rooms_type"],
-                        "APPLY": [{
-                            "totSeat": {
-                                "SUM": "rooms_seats"
-                            }
-                        }]
+        //CAREFUL THERE IS A ROOMS-TYPE WITH NULLSTRING FOR Tin TEST
+        it("Tin: Should be able to find the total seats of each different room type", function() {
+            return facade.addDataset("rooms", zipContentr).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                        },
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "rooms_type",
+                                "totSeat"
+                            ],
+                            "ORDER": "totSeat",
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["rooms_type"],
+                            "APPLY": [{
+                                "totSeat": {
+                                    "SUM": "rooms_seats"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{"rooms_type": "", "totSeat": 60}, {
@@ -975,41 +976,41 @@ describe("D3 AutoBot Sim", function() {
 //                         "totSeat": 12306
 //                     }]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    it("Titanium: Should be able to find the number of unique instructors that have taught each course, sorted", function() {
-        return facade.addDataset("courses", zipContentc).then(function () {
-            return facade.performQuery(
-                {
-                    "WHERE": {
-                        "GT":{
-                            "courses_avg":97
-                        }
-                    },
-                    "OPTIONS": {
-                        "COLUMNS": [
-                            "courses_dept",
-                            "courses_id",
-                            "numUniqueTeachersThatTaughtTheCourse"
-                        ],
-                        "ORDER": "courses_dept",
-                        "FORM": "TABLE"
-                    },
-                    "TRANSFORMATIONS": {
-                        "GROUP": ["courses_dept","courses_id"],
-                        "APPLY": [{
-                            "numUniqueTeachersThatTaughtTheCourse": {
-                                "COUNT": "courses_instructor"
+        it("Titanium: Should be able to find the number of unique instructors that have taught each course, sorted", function() {
+            return facade.addDataset("courses", zipContentc).then(function () {
+                return facade.performQuery(
+                    {
+                        "WHERE": {
+                            "GT":{
+                                "courses_avg":97
                             }
-                        }]
+                        },
+                        "OPTIONS": {
+                            "COLUMNS": [
+                                "courses_dept",
+                                "courses_id",
+                                "numUniqueTeachersThatTaughtTheCourse"
+                            ],
+                            "ORDER": "courses_dept",
+                            "FORM": "TABLE"
+                        },
+                        "TRANSFORMATIONS": {
+                            "GROUP": ["courses_dept","courses_id"],
+                            "APPLY": [{
+                                "numUniqueTeachersThatTaughtTheCourse": {
+                                    "COUNT": "courses_instructor"
+                                }
+                            }]
+                        }
                     }
-                }
-            ).then(function (InF: InsightResponse) {
+                ).then(function (InF: InsightResponse) {
 //                 console.log(InF.code + ": " + JSON.stringify(InF.body));
 //                 let bd:any=InF.body;
 //                 expect(bd.result).to.eql([{
@@ -1086,23 +1087,23 @@ describe("D3 AutoBot Sim", function() {
 //                         "numUniqueTeachersThatTaughtTheCourse": 2
 //                     }, {"courses_dept": "spph", "courses_id": "300", "numUniqueTeachersThatTaughtTheCourse": 2}]
 //                 );
-                expect(InF['code']).to.eql(200);
-            })
-        }).catch(function (err: any) {
-            console.log(err);
-            expect.fail();
+                    expect(InF['code']).to.eql(200);
+                })
+            }).catch(function (err: any) {
+                console.log(err);
+                expect.fail();
+            });
         });
-    });
-    //TODO ??? "Tomacco: Should be able to perform a valid query, even if it makes no sense"
-    //TODO ??? Virgo: Deeply nested query should be supported.
-    //INHERINTLY TESTED TESTS
+        //TODO ??? "Tomacco: Should be able to perform a valid query, even if it makes no sense"
+        //TODO ??? Virgo: Deeply nested query should be supported.
+        //INHERINTLY TESTED TESTS
 //     Tungsten: Valid query (keys) should result in 200.
 //     Turing: Valid query (values) should result in 200.
 //     Unpossible: APPLY should be supported.
 //     Vanadium: Sorting should be supported.
 //     Voyager: Should be able to query with group and apply.
 //     Vulcan: Should be able to order with multiple keys.\
-});
+    });
 
 
 

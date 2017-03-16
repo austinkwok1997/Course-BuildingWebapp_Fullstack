@@ -9,3 +9,4 @@ https://github.com/CS310-2017Jan/cpsc310project_team154/commit/da85af4d7a46c8cd6
 
 Retrospective:
 Needed to be more vigilant of timeout errors and refactor so code is more readable
+Need to focus more on the effiency of the code instead of just making sure it works.

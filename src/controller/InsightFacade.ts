@@ -646,12 +646,12 @@ export default class InsightFacade implements IInsightFacade {
 
 
                 response['code'] = 200;
-
+                var sortingOrderKey = queryJsonOptions.ORDER;
                 if (sortingOrderKey != null) {
                     if (typeof sortingOrderKey == "string") {
                         response['body'] = {
                             render: 'TABLE',
-                            result: that.sortByKey(sortingOrderKey, responseObject, idSet)
+                            result: that.sortByKey(sortingOrderKey, responseObject)
                         };
                     } else {
                         let options = queryJson.OPTIONS;
@@ -661,12 +661,12 @@ export default class InsightFacade implements IInsightFacade {
                         if (dir == "UP") {
                             response['body'] = {
                                 render: 'TABLE',
-                                result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
+                                result: that.sortByKeyTransformationsUp(keys, responseObject)
                             }
                         } else if (dir == "DOWN") {
                             response['body'] = {
                                 render: 'TABLE',
-                                result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
+                                result: that.sortByKeyTransformationsDown(keys, responseObject)
                             }
                         }
                     }
@@ -703,74 +703,71 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    sortByKeyTransformationsDown(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
-        let that = this;
+    sortByKeyTransformationsDown(queryOrderKeyArr: any, responseObject: any): Array<Object> {
         var index = 0;
-        var sortingOrderKey = sortingOrder[0];
+        var sortingOrderKey = queryOrderKeyArr[index];
         let arrayToSort = responseObject['result'];
-        let idArr = Array.from(idSet);
 
-        for (let id = 0; id < idArr.length; id++) {
-            var objectCompare = function kek(ObjA: any, ObjB: any): any {
-                if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
-                    return -1;
-                if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
-                    return 1;
-                if (index < sortingOrder.length - 1) {
+        var objectCompare = function kek(ObjA: any, ObjB: any): any {
+            if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
+                return -1;
+            else if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
+                return 1;
+            else {
+                if (queryOrderKeyArr.length>1) {
                     index++;
-                    sortingOrderKey = sortingOrder[index];
-                    return kek(ObjA, ObjB);
+                    if (ObjA[queryOrderKeyArr[index]] > ObjB[queryOrderKeyArr[index]])
+                        return -1;
+                    if (ObjA[queryOrderKeyArr[index]] < ObjB[queryOrderKeyArr[index]])
+                        return 1;
                 }
                 return 0;
+
             }
-            arrayToSort.sort(objectCompare);
         }
+        arrayToSort.sort(objectCompare);
+
+        return arrayToSort;
+    }
+
+    sortByKeyTransformationsUp(queryOrderKeyArr: any, responseObject: any): Array<Object> {
+        var index = 0;
+        var sortingOrderKey = queryOrderKeyArr[index];
+        let arrayToSort = responseObject['result'];
+
+        var objectCompare = function kek(ObjA: any, ObjB: any): any {
+            if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
+                return -1;
+            else if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
+                return 1;
+            else {
+                if (queryOrderKeyArr.length>1) {
+                    index++;
+                    if (ObjA[queryOrderKeyArr[index]] < ObjB[queryOrderKeyArr[index]])
+                        return -1;
+                    if (ObjA[queryOrderKeyArr[index]] > ObjB[queryOrderKeyArr[index]])
+                        return 1;
+                }return 0;
+            }
+        }
+        arrayToSort.sort(objectCompare);
         ;
         return arrayToSort;
     }
 
-    sortByKeyTransformationsUp(sortingOrder: any, responseObject: any, idSet: Set<any>): Array<Object> {
+    sortByKey(sortingOrder: string, responseObject: any): Array<Object> {
         let that = this;
-        var index = 0;
-        var sortingOrderKey = sortingOrder[0];
         let arrayToSort = responseObject['result'];
-        let idArr = Array.from(idSet);
 
-        for (let id = 0; id < idArr.length; id++) {
-            var objectCompare = function kek(ObjA: any, ObjB: any): any {
-                if (ObjA[sortingOrderKey] < ObjB[sortingOrderKey])
-                    return -1;
-                if (ObjA[sortingOrderKey] > ObjB[sortingOrderKey])
-                    return 1;
-                if (index < sortingOrder.length - 1) {
-                    index++;
-                    sortingOrderKey = sortingOrder[index];
-                    return kek(ObjA, ObjB);
-                }
-                return 0;
-            }
-            arrayToSort.sort(objectCompare);
+        var objectCompare = function (ObjA: any, ObjB: any) {
+            if (ObjA[sortingOrder] < ObjB[sortingOrder])
+                return -1;
+            if (ObjA[sortingOrder] > ObjB[sortingOrder])
+                return 1;
+            return 0;
         }
-        ;
-        return arrayToSort;
-    }
+        arrayToSort.sort(objectCompare);
 
-    sortByKey(sortingOrder: string, responseObject: any, idSet: Set<any>): Array<Object> {
-        let that = this;
-        var sortingOrderKey = that.underscoreManager(sortingOrder, 'key');
-        let arrayToSort = responseObject['result'];
-        let idArr = Array.from(idSet);
-
-        for (let id = 0; id < idArr.length; id++) {
-            var objectCompare = function (ObjA: any, ObjB: any) {
-                if (ObjA[idArr[id] + '_' + sortingOrderKey] < ObjB[idArr[id] + '_' + sortingOrderKey])
-                    return -1;
-                if (ObjA[idArr[id] + '_' + sortingOrderKey] > ObjB[idArr[id] + '_' + sortingOrderKey])
-                    return 1;
-                return 0;
-            }
-            arrayToSort.sort(objectCompare);
-        }
         ;
         return arrayToSort;
     }
@@ -782,7 +779,7 @@ export default class InsightFacade implements IInsightFacade {
 
     filterManager(filterObject: any, toCompare: Object, fourTwoFourChecker: boolean): boolean {
         let tc: any = toCompare;
-        if (tc['shortname'] == "MGYM" || tc['shortname'] == "MAUD" || tc['shortname'] == "NIT") { //for some room bug??
+        if (tc['shortname'] == "MAUD" || tc['shortname'] == "NIT") { //for some room bug??
             return false
         }
         let that = this;
@@ -1261,10 +1258,11 @@ export default class InsightFacade implements IInsightFacade {
             return count;
         }
         if (applyLookfor == "SUM") {
-            let sum = 0
+            let sum = 0;
             for (let element of groupArray) {
                 sum += element[sectiontype];
             }
+
         }
         throw {code: 400, body: {"error": "no valid filter found"}};
     }

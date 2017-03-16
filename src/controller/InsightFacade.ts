@@ -20,6 +20,7 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace('InsightFacadeImpl::init()');
 
     }
+
     addDataset(id: string, content: string): Promise<InsightResponse> {
 //TODO: not add empty zip file
         let that = this;
@@ -107,10 +108,60 @@ export default class InsightFacade implements IInsightFacade {
 
                                     dataStructure[id] = arr;
                                     //addition of UCLL hardcoded.
-                                    let ucll={result: [{fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "101", name: "UCLL_101", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 30, type: "Small Group", furniture: "Classroom-Movable Tables & Chairs", href: ""},
-                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "103", name: "UCLL_103", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 55, type: "Open Design General Purpose", furniture: "Classroom-Fixed Tables/Movable Chairs", href: ""},
-                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "107", name: "UCLL_107", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 48, type: "Open Design General Purpose", furniture: "Classroom-Movable Tables & Chairs", href: ""},
-                                        {fullname: "The Leon and Thea Koerner University Centre",shortname: "UCLL",number: "109", name: "UCLL_109", address: "6331 Crescent Road V6T 1Z1", lat: 49.26867, lon: -123.25692, seats: 30, type: "Studio Lab", furniture: "Classroom-Learn Lab", href: ""},]}
+                                    let ucll = {
+                                        result: [{
+                                            fullname: "The Leon and Thea Koerner University Centre",
+                                            shortname: "UCLL",
+                                            number: "101",
+                                            name: "UCLL_101",
+                                            address: "6331 Crescent Road V6T 1Z1",
+                                            lat: 49.26867,
+                                            lon: -123.25692,
+                                            seats: 30,
+                                            type: "Small Group",
+                                            furniture: "Classroom-Movable Tables & Chairs",
+                                            href: ""
+                                        },
+                                            {
+                                                fullname: "The Leon and Thea Koerner University Centre",
+                                                shortname: "UCLL",
+                                                number: "103",
+                                                name: "UCLL_103",
+                                                address: "6331 Crescent Road V6T 1Z1",
+                                                lat: 49.26867,
+                                                lon: -123.25692,
+                                                seats: 55,
+                                                type: "Open Design General Purpose",
+                                                furniture: "Classroom-Fixed Tables/Movable Chairs",
+                                                href: ""
+                                            },
+                                            {
+                                                fullname: "The Leon and Thea Koerner University Centre",
+                                                shortname: "UCLL",
+                                                number: "107",
+                                                name: "UCLL_107",
+                                                address: "6331 Crescent Road V6T 1Z1",
+                                                lat: 49.26867,
+                                                lon: -123.25692,
+                                                seats: 48,
+                                                type: "Open Design General Purpose",
+                                                furniture: "Classroom-Movable Tables & Chairs",
+                                                href: ""
+                                            },
+                                            {
+                                                fullname: "The Leon and Thea Koerner University Centre",
+                                                shortname: "UCLL",
+                                                number: "109",
+                                                name: "UCLL_109",
+                                                address: "6331 Crescent Road V6T 1Z1",
+                                                lat: 49.26867,
+                                                lon: -123.25692,
+                                                seats: 30,
+                                                type: "Studio Lab",
+                                                furniture: "Classroom-Learn Lab",
+                                                href: ""
+                                            },]
+                                    }
                                     dataStructure['rooms'].push(ucll);
 
                                     fulfill(success);
@@ -158,6 +209,7 @@ export default class InsightFacade implements IInsightFacade {
             }
         }
     }
+
     arrayOfRoomsInHtmlObject(htmlObj: any): Promise<Object> {
         //TODO: Clean up the calls:should not need to access htmlObj for every variable for every room
         // maybe return an array of objects if we need object for everyroom in a building
@@ -228,6 +280,7 @@ export default class InsightFacade implements IInsightFacade {
             })
         })
     }
+
     removeDataset(id: string): Promise<InsightResponse> {
 
 
@@ -261,6 +314,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
     }
+
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         let that = this;
         var uuidUniqueSet = new Set();
@@ -301,22 +355,22 @@ export default class InsightFacade implements IInsightFacade {
                     var keyArray = queryJsonOptions.COLUMNS;
                     var arraycheck = queryTransformations.GROUP;
                     var courseRoomCheck = arraycheck[0];
-                    if (!queryTransformations.hasOwnProperty("GROUP")|| !queryTransformations.hasOwnProperty("APPLY")){
+                    if (!queryTransformations.hasOwnProperty("GROUP") || !queryTransformations.hasOwnProperty("APPLY")) {
                         console.log("invalid query group or apply");
                         response.code = 400;
                         response.body = {"error": "invalid query GROUP or APPLY"};
                         reject(response);
                         return;
                     }
-                    if (arraycheck.length == 0){
+                    if (arraycheck.length == 0) {
                         console.log("invalid query group");
                         response.code = 400;
                         response.body = {"error": "invalid query GROUP has nothing in it"};
                         reject(response);
                         return;
                     }
-                    for (let element of arraycheck){
-                        if (!keyArray.includes(element)){
+                    for (let element of arraycheck) {
+                        if (!keyArray.includes(element)) {
                             console.log("invalid query group");
                             response.code = 400;
                             response.body = {"error": "invalid query GROUP element not found in columns"};
@@ -326,10 +380,10 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     var applyCheck = queryTransformations.APPLY;
                     var underscore = "_";
-                    for (let applyObject of applyCheck){
+                    for (let applyObject of applyCheck) {
                         var key = Object.keys(applyObject);
                         var testvalue = key[0].indexOf(underscore);
-                        if (testvalue != -1){
+                        if (testvalue != -1) {
                             console.log("invalid query underscore in apply");
                             response.code = 400;
                             response.body = {"error": "invalid query underscore found in APPLY"};
@@ -337,9 +391,9 @@ export default class InsightFacade implements IInsightFacade {
                             return;
                         }
                     }
-                    for (let element of applyCheck){
+                    for (let element of applyCheck) {
                         let key = Object.keys(element);
-                        if (!keyArray.includes(key[0])){
+                        if (!keyArray.includes(key[0])) {
                             console.log("invalid query underscore in apply");
                             response.code = 400;
                             response.body = {"error": "invalid query APPLY element not found in columns"};
@@ -348,9 +402,9 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         let maxminavgChecker = element[key[0]];
                         let key2 = Object.keys(maxminavgChecker);
-                        if (key2[0] == "MAX" || key2[0] == "MIN" || key2[0] == "AVG" || key2[0] == "SUM"){
+                        if (key2[0] == "MAX" || key2[0] == "MIN" || key2[0] == "AVG" || key2[0] == "SUM") {
                             let searchValue = maxminavgChecker[key2[0]];
-                            if (!that.isKeyWithNumType(that.underscoreManager(searchValue, 'key'))){
+                            if (!that.isKeyWithNumType(that.underscoreManager(searchValue, 'key'))) {
                                 console.log("invalid query non number type with MAX MIN AVG SUM");
                                 response.code = 400;
                                 response.body = {"error": "invalid query non number type with MAX MIN AVG SUM"};
@@ -458,7 +512,8 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                             }
                         }
-                    }}
+                    }
+                }
                 else if (that.underscoreManager(courseRoomCheck, 'id') == "courses") {
                     let setOfCourses = dataStructure["courses"];
 
@@ -545,7 +600,6 @@ export default class InsightFacade implements IInsightFacade {
                 }
 
 
-
                 for (let i = 0; i < missingIdArr.length; i++) {
                     if (dataStructure.hasOwnProperty(missingIdArr[i])) {
                         missingIdArr.splice(i);
@@ -553,8 +607,8 @@ export default class InsightFacade implements IInsightFacade {
                     if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
                         let transformations = queryJson.TRANSFORMATIONS;
                         let apply = transformations.APPLY;
-                        for (let element of apply){
-                            if( element.hasOwnProperty(missingIdArr[i])){
+                        for (let element of apply) {
+                            if (element.hasOwnProperty(missingIdArr[i])) {
                                 missingIdArr.splice(i);
                             }
                         }
@@ -574,44 +628,51 @@ export default class InsightFacade implements IInsightFacade {
                 if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
                     let queryTransformations = queryJson.TRANSFORMATIONS;
                     let groupList = queryTransformations.GROUP;
-                    responseObject['result'] = that.groupBy(responseObject['result'], function(item:any)
-                    {
+                    let applyList = queryTransformations.APPLY;
+                    responseObject['result'] = that.groupBy(responseObject['result'], function (item: any) {
                         var returnArray = [];
-                        for (let group of groupList){
+                        for (let group of groupList) {
                             returnArray.push(item[group]);
                         }
                         return returnArray;
                     });
+                    var listwithapply = [];
+                    for (let item of responseObject['result']) {
+                        var newObject = that.applyHandler(applyList, item);
+                        listwithapply.push(newObject);
+                    }
+                    responseObject['result'] = listwithapply;
                 }
+
 
                 response['code'] = 200;
 
-                // if (sortingOrderKey != null) {
-                //     if (typeof sortingOrderKey == "string") {
-                //         response['body'] = {
-                //             render: 'TABLE',
-                //             result: that.sortByKey(sortingOrderKey, responseObject, idSet)
-                //         };
-                //     } else {
-                //         let options = queryJson.OPTIONS;
-                //         let order = options.ORDER;
-                //         let keys = order.keys;
-                //         let dir = order.dir;
-                //         if (dir == "UP") {
-                //             response['body'] = {
-                //                 render: 'TABLE',
-                //                 result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
-                //             }
-                //         } else if (dir == "DOWN") {
-                //             response['body'] = {
-                //                 render: 'TABLE',
-                //                 result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
-                //             }
-                //         }
-                //     }
-                // } else {
-                     response['body'] = {render: 'TABLE', result: responseObject['result']};
-                // }
+                if (sortingOrderKey != null) {
+                    if (typeof sortingOrderKey == "string") {
+                        response['body'] = {
+                            render: 'TABLE',
+                            result: that.sortByKey(sortingOrderKey, responseObject, idSet)
+                        };
+                    } else {
+                        let options = queryJson.OPTIONS;
+                        let order = options.ORDER;
+                        let keys = order.keys;
+                        let dir = order.dir;
+                        if (dir == "UP") {
+                            response['body'] = {
+                                render: 'TABLE',
+                                result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
+                            }
+                        } else if (dir == "DOWN") {
+                            response['body'] = {
+                                render: 'TABLE',
+                                result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
+                            }
+                        }
+                    }
+                } else {
+                response['body'] = {render: 'TABLE', result: responseObject['result']};
+                }
                 console.log("# of items in result: " + responseObject['result'].length);
                 missingIdArr = [];
                 fulfill(response);
@@ -1084,7 +1145,7 @@ export default class InsightFacade implements IInsightFacade {
         if (transformationArray.length == 0) {
             return -1;
         }
-        for (var i=0; i < transformationArray.length; i++) {
+        for (var i = 0; i < transformationArray.length; i++) {
             if (that.groupCheckerhelper(transformationArray[i], resultObject, groupArray)) {
                 return i;
             }
@@ -1092,41 +1153,62 @@ export default class InsightFacade implements IInsightFacade {
         return -1;
     }
 
-    applyHandler(Apply: any, resultObject: any, currentObject: any): any {
-        let returnObject = currentObject;
-        for (let applySection of Apply) {
-            let key = Object.keys(applySection);
-            let sectiontype = key[0];
-            let key2 = Object.keys(applySection[sectiontype]);
-            let applyLookFor = key2[0];
-            if (applyLookFor == "MAX") {
-                if (resultObject[sectiontype] > currentObject[sectiontype]) {
-                    returnObject[sectiontype] = resultObject[sectiontype];
+    applyHandler(Applylist: any, resultObject: any): any {
+        let returnObject = resultObject[0];
+        if (Applylist.length == 0){
+            return returnObject;
+        }
+        for (let applyObject of Applylist){
+            let key = Object.keys(applyObject);
+            let key2 = Object.keys(applyObject[key[0]]);
+            if (key2[0] == "MAX"){
+                var max = resultObject[0][key[0]];
+                for (let element of resultObject){
+                    if (element[key[0]] > max){
+                        max = element[key[0]];
+                    }
                 }
-                return returnObject;
-            }else if (applyLookFor == "MIN") {
-                if (resultObject[sectiontype] < currentObject[sectiontype]) {
-                    returnObject[sectiontype] = resultObject[sectiontype];
+                returnObject[key[0]] = max;
+            }else if (key2[0] == "MIN"){
+                var min = resultObject[0][key[0]];
+                for (let element of resultObject){
+                    if (element[key[0]] < min){
+                        min = element[key[0]];
+                    }
                 }
-                return returnObject;
-            }else if (applyLookFor == "SUM"){
-                var tmp = currentObject[sectiontype];
-                tmp += resultObject[sectiontype];
-                returnObject[sectiontype] = tmp;
-                return returnObject;
-            }else if (applyLookFor == "AVG" || applyLookFor == "COUNT"){
-                if (currentObject[sectiontype] instanceof Array){
-                    returnObject[sectiontype].push(resultObject[sectiontype]);
-                }else{
-                    var arrayValue = [currentObject[sectiontype]];
-                    arrayValue.push(resultObject[sectiontype]);
-                    returnObject[sectiontype]= arrayValue;
+                returnObject[key[0]] = min;
+            }else if (key2[0] == "SUM"){
+                var sum = 0;
+                for (let element of resultObject){
+                    sum += element[key[0]];
                 }
-                return returnObject;
+                returnObject[key[0]] = sum;
+            }else if (key2[0] == "AVG"){
+                var total = 0;
+                for (let element of resultObject){
+                    var x = element[key[0]];
+                    x = x * 10;
+                    x = Number(x.toFixed(0));
+                    total += x;
+                }
+                var avg = total / resultObject.length;
+                var avg = avg / 10;
+                var res = Number(avg.toFixed(2));
+                returnObject[key[0]] = res;
+            }else if (key2[0] == "COUNT"){
+                var count = 0;
+                var countMemory: any = [];
+                for (let element of resultObject){
+                    if (countMemory.includes(element[key[0]])){
+                        count++;
+                        countMemory.push(element[key[0]]);
+                    }
+                }
+                returnObject[key[0]] = count;
+
             }else{
                 throw {code: 400, body: {"error": "no valid filter found"}};
             }
-
         }
         return returnObject;
     }
@@ -1167,25 +1249,26 @@ export default class InsightFacade implements IInsightFacade {
             return res;
 
         }
-        if (applyLookfor == "COUNT"){
-            let history:any = [];
+        if (applyLookfor == "COUNT") {
+            let history: any = [];
             let count = 0;
-            for (let element of groupArray){
-                if (history.contains(element[sectiontype])){
+            for (let element of groupArray) {
+                if (history.contains(element[sectiontype])) {
                     count++;
                     history.push(element[sectiontype]);
                 }
             }
             return count;
         }
-        if (applyLookfor == "SUM"){
+        if (applyLookfor == "SUM") {
             let sum = 0
-            for (let element of groupArray){
+            for (let element of groupArray) {
                 sum += element[sectiontype];
             }
         }
         throw {code: 400, body: {"error": "no valid filter found"}};
     }
+
     avgCountHandler(apply: any, resultObject: any): any {
         let key = Object.keys(apply);
         let key2 = Object.keys(apply[key[0]]);
@@ -1202,7 +1285,7 @@ export default class InsightFacade implements IInsightFacade {
                 avg = avg / 10;
                 var res = Number(avg.toFixed(2));
                 return res;
-            }else{
+            } else {
                 return resultObject[key[0]];
             }
         } else if (key2[0] == "COUNT") {
@@ -1224,17 +1307,17 @@ export default class InsightFacade implements IInsightFacade {
             throw {code: 400, body: {"error": "no valid filter found"}};
         }
     }
-    groupBy( array:any , f:any ):any
-    {
-        var groups:any = {};
-        array.forEach( function( o:any )
-        {
-            var group = JSON.stringify( f(o) );
+
+    // code by Alexey Lebedev. from stack exchange. posted by konijn
+    // code from http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
+    groupBy(array: any, f: any): any {
+        var groups: any = {};
+        array.forEach(function (o: any) {
+            var group = JSON.stringify(f(o));
             groups[group] = groups[group] || [];
-            groups[group].push( o );
+            groups[group].push(o);
         });
-        return Object.keys(groups).map( function( group )
-        {
+        return Object.keys(groups).map(function (group) {
             return groups[group];
         })
     }

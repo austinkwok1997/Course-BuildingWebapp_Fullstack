@@ -570,63 +570,48 @@ export default class InsightFacade implements IInsightFacade {
                     return;
                 }
 
-                // if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
-                //     let queryTransformations = queryJson.TRANSFORMATIONS;
-                //     let applyList = queryTransformations.APPLY;
-                //     let groupList = queryTransformations.GROUP;
-                //     if (!groupList.includes("courses_uuid")) {
-                //         let avgCountitems = [];
-                //         for (let applyObject of applyList) {
-                //             var key = Object.keys(applyObject);
-                //             var key2 = Object.keys(applyObject[key[0]]);
-                //             if (key2[0] == "AVG" || key2[0] == "COUNT") {
-                //                 avgCountitems.push(applyObject);
-                //             }
-                //         }
-                //         if (avgCountitems.length > 0) {
-                //             let resultArray = responseObject['result'];
-                //             for (var i = 0; i < resultArray.length; i++) {
-                //                 let groupObject = resultArray[i];
-                //                 for (let applyItem of avgCountitems) {
-                //                     let key = Object.keys(applyItem);
-                //                     var newNumber = that.avgCountHandler(applyItem, groupObject);
-                //                     groupObject[key[0]] = newNumber;
-                //                 }
-                //                 resultArray[i] = groupObject;
-                //             }
-                //             responseObject['result'] = resultArray;
-                //         }
-                //     }
-                // }
+
+                if (queryJson.hasOwnProperty("TRANSFORMATIONS")) {
+                    let queryTransformations = queryJson.TRANSFORMATIONS;
+                    let groupList = queryTransformations.GROUP;
+                    responseObject['result'] = that.groupBy(responseObject['result'], function(item:any)
+                    {
+                        var returnArray = [];
+                        for (let group of groupList){
+                            returnArray.push(item[group]);
+                        }
+                        return returnArray;
+                    });
+                }
 
                 response['code'] = 200;
 
-                if (sortingOrderKey != null) {
-                    if (typeof sortingOrderKey == "string") {
-                        response['body'] = {
-                            render: 'TABLE',
-                            result: that.sortByKey(sortingOrderKey, responseObject, idSet)
-                        };
-                    } else {
-                        let options = queryJson.OPTIONS;
-                        let order = options.ORDER;
-                        let keys = order.keys;
-                        let dir = order.dir;
-                        if (dir == "UP") {
-                            response['body'] = {
-                                render: 'TABLE',
-                                result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
-                            }
-                        } else if (dir == "DOWN") {
-                            response['body'] = {
-                                render: 'TABLE',
-                                result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
-                            }
-                        }
-                    }
-                } else {
-                    response['body'] = {render: 'TABLE', result: responseObject['result']};
-                }
+                // if (sortingOrderKey != null) {
+                //     if (typeof sortingOrderKey == "string") {
+                //         response['body'] = {
+                //             render: 'TABLE',
+                //             result: that.sortByKey(sortingOrderKey, responseObject, idSet)
+                //         };
+                //     } else {
+                //         let options = queryJson.OPTIONS;
+                //         let order = options.ORDER;
+                //         let keys = order.keys;
+                //         let dir = order.dir;
+                //         if (dir == "UP") {
+                //             response['body'] = {
+                //                 render: 'TABLE',
+                //                 result: that.sortByKeyTransformationsUp(keys, responseObject, idSet)
+                //             }
+                //         } else if (dir == "DOWN") {
+                //             response['body'] = {
+                //                 render: 'TABLE',
+                //                 result: that.sortByKeyTransformationsDown(keys, responseObject, idSet)
+                //             }
+                //         }
+                //     }
+                // } else {
+                     response['body'] = {render: 'TABLE', result: responseObject['result']};
+                // }
                 console.log("# of items in result: " + responseObject['result'].length);
                 missingIdArr = [];
                 fulfill(response);
@@ -1239,5 +1224,20 @@ export default class InsightFacade implements IInsightFacade {
             throw {code: 400, body: {"error": "no valid filter found"}};
         }
     }
+    groupBy( array:any , f:any ):any
+    {
+        var groups:any = {};
+        array.forEach( function( o:any )
+        {
+            var group = JSON.stringify( f(o) );
+            groups[group] = groups[group] || [];
+            groups[group].push( o );
+        });
+        return Object.keys(groups).map( function( group )
+        {
+            return groups[group];
+        })
+    }
+
 
 }

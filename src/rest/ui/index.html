@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="uiToQueryCourses.js"></script>
+  <script src="uiToQueryRooms.js"></script>
+  <script src="jQuery.js"></script>
+  <script src="ui.js"></script>
+  <title>Cpsc 310</title>
+</head>
+<body>
+<div class="header">
+  <ul>
+    <li>Cpsc 310:</li>>
+    <li>PROJECT</li>
+  </ul>
+</div>
+<div class="main">
+  <div class="Apic">
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+</div>
+<div class="input">
+  <h1 class="container">UI</h1>
+  <div class="in">
+    <li class='inputUL'>
+      <li>COURSES</li>
+    <li><form>Section Size:<input type="text" id='Section_size'></form></textarea>
+      <select id="Section_size_expression">
+        <option value="EQ">Equal To</option>
+        <option value="GT">Greater Than</option>
+        <option value="LT">Less Than</option>
+      </select></li>
+
+      <li><form>Department:<input type="text" id='Department'></form></textarea>
+        <select id="Department_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Course number:<input type="text" id='Course_number'></form></textarea>
+        <select id="Course_number_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Instructor:<input type="text" id='Instructor'></form></textarea>
+        <select id="Instructor_expression">
+        <option value="Is">Is</option>
+        <option value="contains">Contains</option>
+        <option value="begins_with">Begins With</option>
+        <option value="ends_with">Ends With</option>
+      </select></li>
+
+      <li><form>Title:<input type="text" id='Title'></form></textarea>
+        <select id="Title_expression">
+        <option value="Is">Is</option>
+        <option value="contains">Contains</option>
+        <option value="begins_with">Begins With</option>
+        <option value="ends_with">Ends With</option>
+      </select></li>
+
+      <li>ORDER BY:<select id="courses_order_by">
+        <option value="Null">None</option>
+        <option value="OrderFail">Most Failing sutdents</option>
+        <option value="OrderPassing">Most Passing Students</option>
+        <option value="OrderHighestGrade">Highest Average Grade</option>
+        <option value="OrderLowestGrade">Lowest Average Grade</option>
+        <option value="OrderMostSections">Most Sections</option>
+      </select></li>
+    <li><button type="submit" class="btn-primary" id="postCourses">Submit Courses</button></li>
+    </ul>
+    <ul class='inputUL'>
+      <li>ROOMS</li>
+      <li><form>Building name:<input type="text" id='Building_name'></form></textarea>
+        <select id="Building_name_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Room number:<input type="text" id='Room_number'></form></textarea>
+        <select id="Room_number_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Room size:<input type="text" id='Room_size'></form></textarea>
+        <select id="Room_size_expression">
+          <option value="EQ">Equal To</option>
+          <option value="GT">Greater Than</option>
+          <option value="LT">Less Than</option>
+        </select></li>
+
+      <li><form>Room type:<input type="text" id='Room_type'></form></textarea>
+        <select id="Room_type_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Furniture type:<input type="text" id='Furniture_type'></form></textarea>
+        <select id="Furniture_type_expression">
+          <option value="Is">Is</option>
+          <option value="contains">Contains</option>
+          <option value="begins_with">Begins With</option>
+          <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Location:<input type="text" id='Location'></form></textarea></li>
+
+      <button type="submit" class="btn-primary" id="postRooms">Submit Rooms</button>
+    </ul>
+  </div>
+</div>
+<div class="input">
+  <table style="width:100%" id="chart_div" ><td>FIRST 100 RESULTS DISPLAYED HERE</td></table>
+</div>
+</body>
+</html>

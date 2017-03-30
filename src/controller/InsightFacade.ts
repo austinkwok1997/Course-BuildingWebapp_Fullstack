@@ -943,6 +943,8 @@ export default class InsightFacade implements IInsightFacade {
 
     keyToJsonKey(key: string): string {
         switch (key) {
+            case "Section":
+                return "Section";
             case "dept":
                 return "Subject";
             case "id":
@@ -993,6 +995,8 @@ export default class InsightFacade implements IInsightFacade {
 
     isKeyWithNumType(key: String): boolean {
         switch (key) {
+           case "Section":
+                return false;
             case "dept":
                 return false;
             case "id":

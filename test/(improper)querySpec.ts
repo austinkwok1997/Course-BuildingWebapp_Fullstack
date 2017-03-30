@@ -13,7 +13,7 @@ describe("(IMPROPER)querySpec", function() {
         console.time("dbsave");
         zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
         return facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             console.timeEnd("dbsave");
         }).catch(function(err:any){
             console.log(err);
@@ -47,7 +47,7 @@ describe("(IMPROPER)querySpec", function() {
             }
         }).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
             expect.fail();
         }).catch(function (err: any) {
             console.log("should have: error: GT requires a number key: WHAT IT IS :"+JSON.stringify(err));
@@ -75,7 +75,7 @@ describe("(IMPROPER)querySpec", function() {
             }
         }).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
             expect.fail();
         }).catch(function (err: any) {
             console.log("should have: error: not valid key in query: WHAT IT IS :"+JSON.stringify(err));
@@ -103,7 +103,7 @@ describe("(IMPROPER)querySpec", function() {
             }
         }).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
             expect.fail();
         }).catch(function (err: any) {
             console.log("should have: error: not valid key in query: WHAT IT IS :"+JSON.stringify(err));
@@ -131,7 +131,7 @@ describe("(IMPROPER)querySpec", function() {
             }
         }).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
             expect.fail();
         }).catch(function (err: any) {
             console.log("should have: error: not valid key in query: WHAT IT IS :"+JSON.stringify(err));
@@ -139,7 +139,7 @@ describe("(IMPROPER)querySpec", function() {
     });
 
     it("wrong key in recursive query from spec", function() {
-        console.log("+++TEST: complex query from spec");
+        //console.log("+++TEST: complex query from spec");
         return facade.performQuery(
             {
                 "WHERE":{
@@ -200,7 +200,7 @@ describe("(IMPROPER)querySpec", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
             expect.fail();
         }).catch(function (err: any) {
             console.log(err);

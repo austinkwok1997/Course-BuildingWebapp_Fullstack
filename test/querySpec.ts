@@ -50,7 +50,7 @@ describe("querySpec", function() {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -85,7 +85,7 @@ describe("querySpec", function() {
                 }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -123,7 +123,7 @@ describe("querySpec", function() {
                 }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -175,7 +175,7 @@ describe("querySpec", function() {
                 //var t=JSON.parse(JSON.stringify(InF.body));
                 console.timeEnd("timer");
                 console.time("dbsave");
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
                 console.timeEnd("dbsave");
             })
         }).catch(function (err: any) {
@@ -218,7 +218,7 @@ describe("querySpec", function() {
             }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -270,7 +270,7 @@ describe("querySpec", function() {
                 }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -321,7 +321,7 @@ describe("querySpec", function() {
                 }
         ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             })
         }).catch(function (err: any) {
             console.log(err);

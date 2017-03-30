@@ -49,12 +49,12 @@ describe("REST_Test", function() {
                 Log.trace('then:');
                 // some assertions
                 expect(res.status).to.be.eq(204);
-                console.log(res);
+                //console.log(res);
             })
             .catch(function (err:any) {
                 Log.trace('catch:');
                 // some assertions
-                console.log("wtf did u do: "+err);
+                //console.log("wtf did u do: "+err);
                 expect.fail();
             });
     });
@@ -66,7 +66,7 @@ describe("REST_Test", function() {
                 Log.trace('then:');
                 // some assertions
                 expect(res.status).to.be.eq(204);
-                console.log(res);
+                //console.log(res);
             })
             .catch(function (err:any) {
                 Log.trace('catch:');
@@ -83,7 +83,7 @@ describe("REST_Test", function() {
                 Log.trace('then:');
                 // some assertions
                 expect(res.status).to.be.eq(201);
-                console.log(res);
+                //console.log(res);
             })
             .catch(function (err:any) {
                 Log.trace('catch:');
@@ -100,7 +100,7 @@ describe("REST_Test", function() {
                 Log.trace('then:');
                 // some assertions
                 expect(res.status).to.be.eq(201);
-                console.log(res);
+                //console.log(res);
             })
             .catch(function (err:any) {
                 Log.trace('catch:');
@@ -137,13 +137,13 @@ describe("REST_Test", function() {
                 Log.trace('then:');
                 expect(res.status).to.be.eq(200);
                 // some assertions
-                console.log(res.body);
-                console.log(res);
+                //console.log(res.body);
+                //console.log(res);
             })
             .catch(function (err:any) {
                 Log.trace('catch:');
                 // some assertions
-                console.log(err);
+                //console.log(err);
                 expect.fail();
             });
     });
@@ -175,7 +175,7 @@ describe("REST_Test", function() {
             .then(function (res:any) {
                 Log.trace('then:');
                 // some assertions
-                console.log(res.body);
+                //console.log(res.body);
                 console.log(res);
                 expect.fail();
             })
@@ -183,7 +183,7 @@ describe("REST_Test", function() {
                 Log.trace('catch:');
                 expect(err.status).to.be.eq(404);
                 // some assertions
-                console.log(err);
+                //console.log(err);
 
             });
     });

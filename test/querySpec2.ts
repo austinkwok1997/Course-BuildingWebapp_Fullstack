@@ -13,7 +13,7 @@ describe("querySpec2:Preload dataStructure", function() {
         console.time("dbsave");
         zipContent = fs.readFileSync("courses.zip").toString("base64");
         facade.addDataset("courses", zipContent).then(function(InF:InsightResponse){
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             console.timeEnd("dbsave");
         }).catch(function(err:any){
             console.log(err);
@@ -47,7 +47,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
         }).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -80,7 +80,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -126,7 +126,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -163,7 +163,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
             ).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF));
+                //console.log(JSON.stringify(InF));
             }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -209,7 +209,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -255,7 +255,7 @@ describe("querySpec2:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(JSON.stringify(InF));
+            //console.log(JSON.stringify(InF));
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();

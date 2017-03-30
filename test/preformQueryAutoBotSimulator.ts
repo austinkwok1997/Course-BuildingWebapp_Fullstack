@@ -185,7 +185,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log("Barracuda: Invalid query should result in 400.");
+            //console.log("Barracuda: Invalid query should result in 400.");
         }).catch(function (err: any) {
             console.log(err);
             console.log("Barracuda: Invalid query should result in 400.");
@@ -214,7 +214,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
                 }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -242,7 +242,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -270,7 +270,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -302,7 +302,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -336,7 +336,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -370,7 +370,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -401,7 +401,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -429,7 +429,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -458,7 +458,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -485,7 +485,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -520,7 +520,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -555,7 +555,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -590,7 +590,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -626,7 +626,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -668,7 +668,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -710,7 +710,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();
@@ -747,7 +747,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
     });
 
@@ -783,7 +783,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
     });
 //TODO HOW TO HANDLE DOUBLE NEG?
@@ -812,7 +812,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
 
         }).catch(function (err: any) {
             console.log(err);
@@ -844,7 +844,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
     });
     //TODO WHAT DOE CHECK MATH OPERATIONS MEAN??
@@ -877,7 +877,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
 
         }).catch(function (err: any) {
             console.log(err);
@@ -907,7 +907,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -943,7 +943,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -979,7 +979,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1016,7 +1016,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1046,7 +1046,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1102,10 +1102,10 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1132,10 +1132,10 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1160,7 +1160,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
             console.log(err);
@@ -1187,10 +1187,10 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1214,10 +1214,10 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
             expect.fail();
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
 
         });
     });
@@ -1250,7 +1250,7 @@ describe("PreformQuery AutoBot Simulator:Preload dataStructure", function() {
             }
         ).then(function (InF: InsightResponse) {
             //var t=JSON.parse(JSON.stringify(InF.body));
-            console.log(InF['body']);
+            //console.log(InF['body']);
         }).catch(function (err: any) {
             console.log(err);
             expect.fail();

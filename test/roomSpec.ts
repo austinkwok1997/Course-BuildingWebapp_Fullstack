@@ -127,7 +127,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -166,7 +166,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -203,7 +203,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -244,7 +244,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+              //  console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -271,7 +271,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -300,7 +300,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -330,7 +330,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -359,7 +359,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -388,7 +388,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -417,7 +417,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -426,7 +426,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing with type", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -457,7 +457,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -518,7 +518,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+             //   console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -527,7 +527,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing with type", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -560,7 +560,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -569,7 +569,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing with studio", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -602,7 +602,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -632,7 +632,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -661,7 +661,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -690,7 +690,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -721,7 +721,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -730,7 +730,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing returning courses year", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("courses.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -750,7 +750,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -759,7 +759,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing bounding box", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -799,7 +799,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -808,7 +808,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing big courses", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("courses.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -837,7 +837,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -846,7 +846,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing rooms", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -875,7 +875,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+          //      console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -884,7 +884,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("3rd deliverable 1st query", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -922,7 +922,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+               // console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -931,7 +931,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("3rd deliverable 2nd query", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -960,7 +960,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing with underscore in apply", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1002,12 +1002,12 @@ describe("roomSpec", function () {
                 expect.fail()
             })
         }).catch(function (err: any) {
-            console.log(err);
+          //  console.log(err);
         });
         //return;
     });
     it("testing with no apply", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1031,12 +1031,12 @@ describe("roomSpec", function () {
                 expect.fail();
             })
         }).catch(function (err: any) {
-            console.log(err);
+           // console.log(err);
         });
         //return;
     });
     it("testing with no group", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1077,12 +1077,12 @@ describe("roomSpec", function () {
                 expect.fail();
             })
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
         //return;
     });
     it("testing with things in Group that is not in columns", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1123,12 +1123,12 @@ describe("roomSpec", function () {
                 expect.fail();
             })
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
         //return;
     });
     it("testing with things in Apply that aren't in columns", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1165,7 +1165,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
                 expect.fail();
             })
         }).catch(function (err: any) {
@@ -1174,7 +1174,7 @@ describe("roomSpec", function () {
         //return;
     });
     it("testing non number value in apply max", function () {
-        console.log("+++TEST: simple query from spec");
+        //console.log("+++TEST: simple query from spec");
         zipContent = fs.readFileSync("rooms.zip").toString("base64");
         var thisIsIt = facade;
 
@@ -1216,7 +1216,7 @@ describe("roomSpec", function () {
                 expect.fail();
             })
         }).catch(function (err: any) {
-            console.log(err);
+            //console.log(err);
         });
         //return;
     });
@@ -1296,7 +1296,7 @@ describe("roomSpec", function () {
 
         }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);
@@ -1331,7 +1331,7 @@ describe("roomSpec", function () {
                 }
             }).then(function (InF: InsightResponse) {
                 //var t=JSON.parse(JSON.stringify(InF.body));
-                console.log(JSON.stringify(InF.body));
+                //console.log(JSON.stringify(InF.body));
             })
         }).catch(function (err: any) {
             console.log(err);

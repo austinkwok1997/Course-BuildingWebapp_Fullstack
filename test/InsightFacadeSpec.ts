@@ -37,7 +37,7 @@ describe("addDatasetSpec", function() {
         zipContent = fs.readFileSync("coursesFewJson.zip").toString("base64");
         return facade.addDataset("coursesFewJson", zipContent).then(function(InF:InsightResponse){
             var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
+            //console.log(InF.code+t);
             console.log(" this is what dataStructure looks like right now: "+JSON.stringify(facade.getDataStructure()));
         }).catch(function(err:any){
             console.log(err);
@@ -47,7 +47,7 @@ describe("addDatasetSpec", function() {
     it("remove the first dataset", function() {
         facade.removeDataset("coursesFewJson").then(function(InF:InsightResponse){
             var t=JSON.stringify(InF.body);
-            console.log(InF.code+t);
+            //console.log(InF.code+t);
         }).catch(function(err:any){
             console.log(err);
             expect.fail();
@@ -57,8 +57,8 @@ describe("addDatasetSpec", function() {
     it("addDataset test 1 json file in zip", function() {
         zipContent = fs.readFileSync("oneJsonTest.zip").toString("base64");
         return facade.addDataset("oneJsonTest", zipContent).then(function(InF:InsightResponse){
-
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+//
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
         }).catch(function(err:any){
             console.log(err);
             expect.fail();
@@ -76,7 +76,7 @@ describe("addDatasetSpec", function() {
         zipContent = fs.readFileSync("courses.zip").toString("base64");
         return facade.addDataset("courses", zipContent).then(function(InF:InsightResponse){
 
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             console.timeEnd("dbsave");
         }).catch(function(err:any){
             console.log(err);
@@ -88,7 +88,7 @@ describe("addDatasetSpec", function() {
     it ('empty zip file', function() {
         zipContent = fs.readFileSync("empty.zip").toString("base64");
         return facade.addDataset("empty", zipContent).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
         }).catch(function(err:any) {
             console.log(err);
             expect.fail();
@@ -98,7 +98,7 @@ describe("addDatasetSpec", function() {
     it ('zipfile with empty JSON', function() {
         zipContent = fs.readFileSync("emptyJSON.zip").toString("base64");
         return facade.addDataset("emptyJSOM", zipContent).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+           // console.log(InF.code+": "+JSON.stringify(InF.body));
         }).catch(function(err:any) {
             console.log(err);
             expect.fail();
@@ -108,7 +108,7 @@ describe("addDatasetSpec", function() {
     it ('zipfile with empty Array', function() {
         zipContent = fs.readFileSync("emptyArray.zip").toString("base64");
         return facade.addDataset("emptyArray", zipContent).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);
@@ -119,7 +119,7 @@ describe("addDatasetSpec", function() {
     it ('zipfile with picture', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", zipContent).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);
@@ -129,7 +129,7 @@ describe("addDatasetSpec", function() {
     it ('Testing with null', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", null).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);
@@ -138,7 +138,7 @@ describe("addDatasetSpec", function() {
     it ('Testing with undefined', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", undefined).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);
@@ -147,7 +147,7 @@ describe("addDatasetSpec", function() {
     it ('Testing with empty string', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", "").then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);
@@ -156,7 +156,7 @@ describe("addDatasetSpec", function() {
     it ('base64 that is not found', function() {
         zipContent = fs.readFileSync("Picture.zip").toString("base64");
         return facade.addDataset("Picture", zipContent).then(function (InF: InsightResponse) {
-            console.log(InF.code+": "+JSON.stringify(InF.body));
+            //console.log(InF.code+": "+JSON.stringify(InF.body));
             expect.fail();
         }).catch(function(err:any) {
             console.log(err);

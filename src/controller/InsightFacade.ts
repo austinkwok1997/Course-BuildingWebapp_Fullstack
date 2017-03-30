@@ -1200,7 +1200,7 @@ export default class InsightFacade implements IInsightFacade {
                 var count = 0;
                 var countMemory: any = [];
                 for (let element of resultObject){
-                    if (countMemory.includes(element[key[0]])){
+                    if (!countMemory.includes(element[key[0]])){
                         count++;
                         countMemory.push(element[key[0]]);
                     }

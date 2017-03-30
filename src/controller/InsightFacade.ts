@@ -943,8 +943,6 @@ export default class InsightFacade implements IInsightFacade {
 
     keyToJsonKey(key: string): string {
         switch (key) {
-            case "Section":
-                return "Section";
             case "dept":
                 return "Subject";
             case "id":
@@ -995,8 +993,6 @@ export default class InsightFacade implements IInsightFacade {
 
     isKeyWithNumType(key: String): boolean {
         switch (key) {
-           case "Section":
-                return false;
             case "dept":
                 return false;
             case "id":
@@ -1093,35 +1089,35 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    multipleKeysWhere(query: any, id: string): boolean {
-        let that = this;
-        let key = Object.keys(query);
-        if (key[0] == "IS" || key[0] == "LT" || key[0] == "GT" || key[0] == "EQ") {
-            let innerKey = Object.keys(query[key[0]]);
-            return (that.underscoreManager(innerKey[0], 'id') == that.underscoreManager(id, 'id'));
-        } else if (key[0] == "AND" || key[0] == "OR") {
-            let AndOrArray = query[key[0]];
-            for (let element of AndOrArray) {
-                if (!that.multipleKeysWhere(element, id)) {
-                    return false;
-                }
-            }
-            return true;
-        } else if (key[0] == "NOT") {
-            return this.multipleKeysWhere(query[key[0]], id);
-        }
-        return false;
-    }
+    // multipleKeysWhere(query: any, id: string): boolean {
+    //     let that = this;
+    //     let key = Object.keys(query);
+    //     if (key[0] == "IS" || key[0] == "LT" || key[0] == "GT" || key[0] == "EQ") {
+    //         let innerKey = Object.keys(query[key[0]]);
+    //         return (that.underscoreManager(innerKey[0], 'id') == that.underscoreManager(id, 'id'));
+    //     } else if (key[0] == "AND" || key[0] == "OR") {
+    //         let AndOrArray = query[key[0]];
+    //         for (let element of AndOrArray) {
+    //             if (!that.multipleKeysWhere(element, id)) {
+    //                 return false;
+    //             }
+    //         }
+    //         return true;
+    //     } else if (key[0] == "NOT") {
+    //         return this.multipleKeysWhere(query[key[0]], id);
+    //     }
+    //     return false;
+    // }
 
-    multipleKeysColums(IDarray: any, id: string): boolean {
-        let that = this;
-        for (let element of IDarray) {
-            if (that.underscoreManager(element, 'id') != that.underscoreManager(id, 'id')) {
-                return false
-            }
-        }
-        return true;
-    }
+    // multipleKeysColums(IDarray: any, id: string): boolean {
+    //     let that = this;
+    //     for (let element of IDarray) {
+    //         if (that.underscoreManager(element, 'id') != that.underscoreManager(id, 'id')) {
+    //             return false
+    //         }
+    //     }
+    //     return true;
+    // }
 
     applyChecker(keyWord: string, applyArray: any): number {
         for (var i = 0; i < applyArray.length; i++) {
@@ -1214,101 +1210,101 @@ export default class InsightFacade implements IInsightFacade {
         return returnObject;
     }
 
-    getTransformationValue(groupArray: any, sectiontype: string, applyLookfor: any): number {
-        if (applyLookfor == "MAX") {
-            let firstElement = groupArray[0];
-            let max = firstElement[sectiontype];
-            for (let element of groupArray) {
-                if (element[sectiontype] > max) {
-                    max = element[sectiontype];
-                }
-            }
-            return max;
-        }
-        if (applyLookfor == "MIN") {
-            let firstElement = groupArray[0];
-            let min = firstElement[sectiontype];
-            for (let element of groupArray) {
-                if (element[sectiontype] < min) {
-                    min = element[sectiontype];
-                }
-            }
-            return min;
-        }
-        if (applyLookfor == "AVG") {
-            let total = 0;
-            let numRows = groupArray.length;
-            for (let element of groupArray) {
-                let x = element[sectiontype];
-                x = x * 10;
-                x = Number(x.toFixed(0));
-                total += x;
-            }
-            var avg = total / numRows;
-            var avg = avg / 10;
-            var res = Number(avg.toFixed(2));
-            return res;
+    // getTransformationValue(groupArray: any, sectiontype: string, applyLookfor: any): number {
+    //     if (applyLookfor == "MAX") {
+    //         let firstElement = groupArray[0];
+    //         let max = firstElement[sectiontype];
+    //         for (let element of groupArray) {
+    //             if (element[sectiontype] > max) {
+    //                 max = element[sectiontype];
+    //             }
+    //         }
+    //         return max;
+    //     }
+    //     if (applyLookfor == "MIN") {
+    //         let firstElement = groupArray[0];
+    //         let min = firstElement[sectiontype];
+    //         for (let element of groupArray) {
+    //             if (element[sectiontype] < min) {
+    //                 min = element[sectiontype];
+    //             }
+    //         }
+    //         return min;
+    //     }
+    //     if (applyLookfor == "AVG") {
+    //         let total = 0;
+    //         let numRows = groupArray.length;
+    //         for (let element of groupArray) {
+    //             let x = element[sectiontype];
+    //             x = x * 10;
+    //             x = Number(x.toFixed(0));
+    //             total += x;
+    //         }
+    //         var avg = total / numRows;
+    //         var avg = avg / 10;
+    //         var res = Number(avg.toFixed(2));
+    //         return res;
+    //
+    //     }
+    //     if (applyLookfor == "COUNT") {
+    //         let history: any = [];
+    //         let count = 0;
+    //         for (let element of groupArray) {
+    //             if (history.contains(element[sectiontype])) {
+    //                 count++;
+    //                 history.push(element[sectiontype]);
+    //             }
+    //         }
+    //         return count;
+    //     }
+    //     if (applyLookfor == "SUM") {
+    //         let sum = 0;
+    //         for (let element of groupArray) {
+    //             sum += element[sectiontype];
+    //         }
+    //
+    //     }
+    //     throw {code: 400, body: {"error": "no valid filter found"}};
+    // }
 
-        }
-        if (applyLookfor == "COUNT") {
-            let history: any = [];
-            let count = 0;
-            for (let element of groupArray) {
-                if (history.contains(element[sectiontype])) {
-                    count++;
-                    history.push(element[sectiontype]);
-                }
-            }
-            return count;
-        }
-        if (applyLookfor == "SUM") {
-            let sum = 0;
-            for (let element of groupArray) {
-                sum += element[sectiontype];
-            }
-
-        }
-        throw {code: 400, body: {"error": "no valid filter found"}};
-    }
-
-    avgCountHandler(apply: any, resultObject: any): any {
-        let key = Object.keys(apply);
-        let key2 = Object.keys(apply[key[0]]);
-        if (key2[0] == "AVG") {
-            let avgArray = resultObject[key[0]];
-            if (avgArray instanceof Array) {
-                let sum = 0;
-                for (let x of avgArray) {
-                    x = x * 10;
-                    x = Number(x.toFixed(0));
-                    sum += x;
-                }
-                var avg = sum / avgArray.length;
-                avg = avg / 10;
-                var res = Number(avg.toFixed(2));
-                return res;
-            } else {
-                return resultObject[key[0]];
-            }
-        } else if (key2[0] == "COUNT") {
-            let termmemory: any = [];
-            let count = 0;
-            let countTerms = resultObject[key[0]];
-            if (countTerms instanceof Array) {
-                for (let term of countTerms) {
-                    if (!termmemory.includes(term)) {
-                        termmemory.push(term);
-                        count++;
-                    }
-                }
-                return count;
-            } else {
-                return 1;
-            }
-        } else {
-            throw {code: 400, body: {"error": "no valid filter found"}};
-        }
-    }
+    // avgCountHandler(apply: any, resultObject: any): any {
+    //     let key = Object.keys(apply);
+    //     let key2 = Object.keys(apply[key[0]]);
+    //     if (key2[0] == "AVG") {
+    //         let avgArray = resultObject[key[0]];
+    //         if (avgArray instanceof Array) {
+    //             let sum = 0;
+    //             for (let x of avgArray) {
+    //                 x = x * 10;
+    //                 x = Number(x.toFixed(0));
+    //                 sum += x;
+    //             }
+    //             var avg = sum / avgArray.length;
+    //             avg = avg / 10;
+    //             var res = Number(avg.toFixed(2));
+    //             return res;
+    //         } else {
+    //             return resultObject[key[0]];
+    //         }
+    //     } else if (key2[0] == "COUNT") {
+    //         let termmemory: any = [];
+    //         let count = 0;
+    //         let countTerms = resultObject[key[0]];
+    //         if (countTerms instanceof Array) {
+    //             for (let term of countTerms) {
+    //                 if (!termmemory.includes(term)) {
+    //                     termmemory.push(term);
+    //                     count++;
+    //                 }
+    //             }
+    //             return count;
+    //         } else {
+    //             return 1;
+    //         }
+    //     } else {
+    //         throw {code: 400, body: {"error": "no valid filter found"}};
+    //     }
+    // }
 
     // code by Alexey Lebedev. from stack exchange. posted by konijn
     // code from http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties

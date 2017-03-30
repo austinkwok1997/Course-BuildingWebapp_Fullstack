@@ -530,7 +530,8 @@ export default class InsightFacade implements IInsightFacade {
                                 courseTermData["Year"] = 1900;
                             }
                             courseTermData["Year"] = Number(courseTermData["Year"]);
-
+                            var courses_Section_size=courseTermData['Pass']+courseTermData['Fail'];
+                            courseTermData['Size']=courses_Section_size;
 
                             var filterResult = that.filterManager(queryWhereObject, courseTermData, false);
 
@@ -927,6 +928,10 @@ export default class InsightFacade implements IInsightFacade {
 
     keyToJsonKey(key: string): string {
         switch (key) {
+            case 'Size':
+                return 'Size';
+            case "Section":
+                return "Section";
             case "dept":
                 return "Subject";
             case "id":
@@ -977,6 +982,10 @@ export default class InsightFacade implements IInsightFacade {
 
     isKeyWithNumType(key: String): boolean {
         switch (key) {
+            case 'Size':
+                return true;
+            case "Section":
+                return false;
             case "dept":
                 return false;
             case "id":

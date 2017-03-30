@@ -1,16 +1,4 @@
 queryTemplateCourses=function(byOrderOf){
-// courses keys:
-// 			"courses_dept",
-// 			"courses_id",
-// 			"courses_instructor",
-// 			"courses_title",
-// 			"courses_avg",
-// 			"courses_pass",
-// 			"courses_fail",
-// 			"courses_audit",
-// 			"courses_uuid"
-
-
 	var queryObject={
 		"WHERE": {
 
@@ -21,7 +9,10 @@ queryTemplateCourses=function(byOrderOf){
 			"courses_id",
 			"courses_instructor",
 			"courses_title",
-			"courses_avg"
+			"courses_avg",
+                "courses_pass",
+                "courses_fail",
+                "courses_Size"
 			],
 			"ORDER": "courses_dept",
 			"FORM": "TABLE"
@@ -32,7 +23,10 @@ queryTemplateCourses=function(byOrderOf){
 			"courses_id",
 			"courses_instructor",
 			"courses_title",
-			"courses_avg"
+			"courses_avg",
+                "courses_pass",
+                "courses_fail",
+                "courses_Size"
 			],
 			"APPLY": []
 		}
@@ -51,6 +45,9 @@ queryTemplateCourses=function(byOrderOf){
                         "courses_instructor",
                         "courses_title",
                         "courses_avg",
+                        "courses_pass",
+                        "courses_fail",
+                        "courses_Size",
                         "MostFails"
                     ],
                     "ORDER":{
@@ -60,7 +57,8 @@ queryTemplateCourses=function(byOrderOf){
                     "FORM": "TABLE"
                 },
                 "TRANSFORMATIONS": {
-                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_avg"],
+                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_avg","courses_pass","courses_fail",
+                        "courses_Size"],
                     "APPLY": [{
                         "MostFails": {
                             "MAX": "courses_fail"
@@ -81,6 +79,9 @@ queryTemplateCourses=function(byOrderOf){
                         "courses_instructor",
                         "courses_title",
                         "courses_avg",
+                        "courses_pass",
+                        "courses_fail",
+                        "courses_Size",
                         "MostPass"
                     ],
                     "ORDER":{
@@ -90,7 +91,8 @@ queryTemplateCourses=function(byOrderOf){
                     "FORM": "TABLE"
                 },
                 "TRANSFORMATIONS": {
-                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_avg"],
+                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_avg","courses_pass","courses_fail",
+                        "courses_Size"],
                     "APPLY": [{
                         "MostPasses": {
                             "MAX": "courses_pass"
@@ -110,6 +112,9 @@ queryTemplateCourses=function(byOrderOf){
                         "courses_id",
                         "courses_instructor",
                         "courses_title",
+                        "courses_pass",
+                        "courses_fail",
+                        "courses_Size",
                         "maxAvg"
                     ],
                     "ORDER":{
@@ -119,7 +124,8 @@ queryTemplateCourses=function(byOrderOf){
                     "FORM": "TABLE"
                 },
                 "TRANSFORMATIONS": {
-                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_title"],
+                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_title","courses_pass","courses_fail",
+                        "courses_Size"],
                     "APPLY": [{
                         "maxAvg": {
                             "MAX": "courses_avg"
@@ -139,6 +145,9 @@ queryTemplateCourses=function(byOrderOf){
                         "courses_id",
                         "courses_instructor",
                         "courses_title",
+                        "courses_pass",
+                        "courses_fail",
+                        "courses_Size",
                         "minAvg"
                     ],
                     "ORDER":{
@@ -148,7 +157,8 @@ queryTemplateCourses=function(byOrderOf){
                     "FORM": "TABLE"
                 },
                 "TRANSFORMATIONS": {
-                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_title"],
+                    "GROUP": ["courses_dept","courses_id","courses_instructor","courses_title","courses_pass","courses_fail",
+                        "courses_Size"],
                     "APPLY": [{
                         "minAvg": {
                             "MIN": "courses_avg"
@@ -158,31 +168,74 @@ queryTemplateCourses=function(byOrderOf){
             };
             break;
         case "OrderMostSections":
-            queryObject={
+            queryObject=
+                {
+                    "WHERE": {},
+                    "OPTIONS": {
+                        "COLUMNS": [
+                            "courses_dept",
+                            "courses_id",
+                            "courses_uuid",
+                            "courses_pass",
+                            "courses_fail",
+                            "numOfSections",
+                            "maxPasses",
+                            "maxFails",
+                            "courses_Size"
+                        ],
+                        "ORDER": {
+                            "dir": "DOWN",
+                            "keys": ["numOfSections"]
+                        },
+                        "FORM": "TABLE"
+                    },
+                    "TRANSFORMATIONS": {
+                        "GROUP": ["courses_dept", "courses_id"],
+                        "APPLY": [{
+                            "numOfSections": {
+                                "COUNT": "courses_uuid"
+                            }
+                        },
+                            {
+                                "maxPasses": {
+                                    "MAX": "courses_pass"
+                                }
+                            }, {
+                                "maxFails": {
+                                    "MIN": "courses_fail"
+                                }
+                            }]
+                    }
+                }
+            break;
+        case "schedule":
+            queryObject=  {
                 "WHERE": {
-
+                    "EQ":{"courses_year":2014}
                 },
                 "OPTIONS": {
                     "COLUMNS": [
                         "courses_dept",
                         "courses_id",
-                        "courses_instructor",
-                        "courses_title",
-                        "courses_avg",
-                        "courses_uuid",
-                        "numOfSections"
+                        "numOfSections",
+                        "courses_year",
+                        "maxSize"
                     ],
-                    "ORDER":{
-                        "dir": "DOWN",
-                        "keys": ["numOfSections"]
-                    } ,
+                    "ORDER": "courses_dept",
                     "FORM": "TABLE"
                 },
                 "TRANSFORMATIONS": {
-                    "GROUP": ["courses_title","courses_dept","courses_id","courses_instructor","courses_avg"],
+                    "GROUP": [
+                        "courses_dept",
+                        "courses_id","courses_year"
+                    ],
                     "APPLY": [{
                         "numOfSections": {
                             "COUNT": "courses_uuid"
+                        }
+                    }, {
+                        "maxSize": {
+                            "MAX": "courses_Size"
                         }
                     }]
                 }
@@ -192,6 +245,5 @@ queryTemplateCourses=function(byOrderOf){
 
     }
 
-	return queryObject;
+    return queryObject;
 }//end of queryTemplateCourses
-

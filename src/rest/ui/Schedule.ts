@@ -1,4 +1,7 @@
 /**
+ * Created by jacke on 3/29/2017.
+ */
+/**
  * Created by Austin on 2017-03-29.
  */
 // rooms must have rooms_seats, rooms_name
@@ -82,7 +85,7 @@ var checkIfEnoughSpaceinRoom = function (course: any, currentRoom: any, slotCoun
     return (course["numOfSections"] <= num_of_slots)
 };
 var checkIfCourseFits = function (course: any, currentRoom: any): boolean {
-    return (course["courses_Section_size"] <= currentRoom["rooms_seats"]);
+    return (course["courses_Size"] <= currentRoom["rooms_seats"]);
 };
 
 var getSmallestRoom = function (roomList: any): any {
@@ -95,55 +98,56 @@ var getSmallestRoom = function (roomList: any): any {
     return SmallestRoom;
 };
 
+
 var tObjectPerfectfit = Schedule([{
     "courses_dept": "cpsc",
     "courses_id": 110,
-    "courses_Section_size": 218,
+    "courses_Size": 218,
     "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 259,
-    "courses_Section_size": 216,
+    "courses_Size": 216,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 312,
-    "courses_Section_size": 159,
+    "courses_Size": 159,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 301,
-    "courses_Section_size": 156,
+    "courses_Size": 156,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 121,
-    "courses_Section_size": 156,
+    "courses_Size": 156,
     "numOfSections": 2
 }, {
     "courses_dept": "cpsc",
     "courses_id": 304,
-    "courses_Section_size": 156,
+    "courses_Size": 156,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 310,
-    "courses_Section_size": 156,
+    "courses_Size": 156,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 313,
-    "courses_Section_size": 153,
+    "courses_Size": 153,
     "numOfSections": 1
 }, {
     "courses_dept": "cpsc",
     "courses_id": 210,
-    "courses_Section_size": 148,
+    "courses_Size": 148,
     "numOfSections": 2
 }, {
     "courses_dept": "cpsc",
     "courses_id": 213,
-    "courses_Section_size": 148,
+    "courses_Size": 148,
     "numOfSections": 2
 }], [{"rooms_name": "BIOL_2000", "rooms_seats": 228}]);
 console.log(JSON.stringify(tObjectPerfectfit));

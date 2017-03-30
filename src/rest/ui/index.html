@@ -3,8 +3,10 @@
 <head>
   <link rel="stylesheet" href="style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="http://requirejs.org/docs/release/2.2.0/minified/require.js"></script>
   <script src="uiToQueryCourses.js"></script>
   <script src="uiToQueryRooms.js"></script>
+  <script src="caloriesFeature.js"></script>
   <script src="jQuery.js"></script>
   <script src="Schedule.js"></script>
   <script src="ui.js"></script>
@@ -119,7 +121,7 @@
           <option value="ends_with">Ends With</option>
         </select></li>
 
-      <li><form>Location:<input type="text" id='Location'></form></textarea></li>
+      <li><form>Location:<input type="text" id='Location'></form></li>
 
       <button type="submit" class="btn-primary" id="postRooms">Submit Rooms</button>
     </ul>
@@ -127,6 +129,45 @@
 </div>
 <div class="input">
   <table style="width:100%" id="chart_div" ><td>FIRST 100 RESULTS DISPLAYED HERE</td></table>
+</div>
+
+<div class="in">
+  <li class='inputUL'>
+  <li>Scheduling</li>
+  <li><form>Department:<input type="text" id='schedule_Department'></form></textarea>
+    <select id="schedule_Department_expression">
+      <option value="Is">Is</option>
+      <option value="contains">Contains</option>
+      <option value="begins_with">Begins With</option>
+      <option value="ends_with">Ends With</option>
+    </select></li>
+
+  <li><form>Course number:<input type="text" id='schedule_Course_number'></form></textarea>
+    <select id="schedule_Course_number_expression">
+      <option value="Is">Is</option>
+      <option value="contains">Contains</option>
+      <option value="begins_with">Begins With</option>
+      <option value="ends_with">Ends With</option>
+    </select></li>
+
+  <li><form>Your Location Lat:<input type="text" id='schedule_lat'></form>
+    <form>Your Location Lon:<input type="text" id='schedule_lon'></form>
+    <form>Distance(m):<input type="text" id='schedule_distance'></form></textarea>
+    <select id="schedule_distance_expression">
+      <option value="LT">Less Than</option>
+      <option value="GT">Greater Than</option>
+    </select></li>
+
+  <li><form>Building Name:<input type="text" id='schedule_Building_name'></form></textarea>
+    <select id="schedule_Building_name_expression">
+      <option value="Is">Is</option>
+      <option value="contains">Contains</option>
+      <option value="begins_with">Begins With</option>
+      <option value="ends_with">Ends With</option>
+    </select></li>
+
+  <li><button type="submit" class="btn-primary" id="postSchedule">Schedule</button></li>
+  </ul>
 </div>
 </body>
 </html>

@@ -62,9 +62,9 @@ export default class Server {
                 });
                 that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));
 //todo
-                that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    res.send(200);
-                    return next();
+                that.rest.get(/.*/, restify.serveStatic({
+                    'directory':'src/rest/ui',
+                    'default':'index.html'
                 });
 
                 // provides the echo service

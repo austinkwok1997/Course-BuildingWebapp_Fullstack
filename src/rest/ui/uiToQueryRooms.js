@@ -38,7 +38,8 @@ queryTemplateRooms=function(operation) {
                     'rooms_number',
                     'rooms_type',
                     'rooms_lat',
-                    'rooms_lon'
+                    'rooms_lon',
+                    "rooms_address"
                 ],
                 "ORDER": {
                     "dir": "DOWN",
@@ -53,7 +54,8 @@ queryTemplateRooms=function(operation) {
                     'rooms_number',
                     'rooms_type',
                     'rooms_lat',
-                    'rooms_lon'],
+                    'rooms_lon',
+                    "rooms_address"],
                 "APPLY": []
             }
         }
@@ -61,17 +63,18 @@ queryTemplateRooms=function(operation) {
     return queryObj;
 }
 
-compareAddressToFindLatAndLon=function(arrOfRooms,address){
+compareBuildingNameToFindLatAndLon=function(arrOfRooms,buildingName){
     for(var room in arrOfRooms){
-        if(arrOfRooms[room]['rooms_address']==address){
+        if(arrOfRooms[room]['rooms_fullname']==buildingName){
             return {lat:arrOfRooms[room]['rooms_lat'],
                 lon:arrOfRooms[room]['rooms_lon']};
         }
     }
+    alert("building Fullname not found")
     return {lat:0,lon:0};//no address found
 };
 
-createDistance=function(arrOfRoom,address){
+createDistance=function(arrOfRoom,buildingName){
     var queryObject={
         "WHERE": {
         },
@@ -79,7 +82,8 @@ createDistance=function(arrOfRoom,address){
             "COLUMNS": [
                 "rooms_address",
                 'rooms_lat',
-                'rooms_lon'
+                'rooms_lon',
+                'rooms_fullname'
             ],
             "ORDER": {
                 "dir": "DOWN",
@@ -90,7 +94,8 @@ createDistance=function(arrOfRoom,address){
         "TRANSFORMATIONS": {
             "GROUP": ["rooms_address",
                 'rooms_lat',
-                'rooms_lon'],
+                'rooms_lon',
+                'rooms_fullname'],
             "APPLY": []
         }
     };
@@ -101,9 +106,9 @@ createDistance=function(arrOfRoom,address){
         data: queryObjectStr,
         contentType: "application/json; charset=utf-8"
     }).done(function(Res){
-        var LatAndLonObjOfOriginAddress= compareAddressToFindLatAndLon(Res.result,address);
-        var originLat= LatAndLonObjOfOriginAddress.lat;
-        var originLon=LatAndLonObjOfOriginAddress.lon;
+        var LatAndLonObjOfOriginBuilding= compareBuildingNameToFindLatAndLon(Res.result,buildingName);
+        var originLat= LatAndLonObjOfOriginBuilding.lat;
+        var originLon=LatAndLonObjOfOriginBuilding.lon;
         for (var i = 0; i < arrOfRoom.length; i++) {
             var room=arrOfRoom[i];
             var toCompLat=room['rooms_lat'];
@@ -147,6 +152,7 @@ filterByDistance=function(arrOfRooms,schedule_distance,schedule_lat,schedule_lon
                 }
             }
             arrOfRooms=newArrOfRooms;
+            return arrOfRooms;
             break;
         case 'LT':
             for(var index in arrOfRooms){
@@ -157,6 +163,7 @@ filterByDistance=function(arrOfRooms,schedule_distance,schedule_lat,schedule_lon
                 }
             }
             arrOfRooms=newArrOfRooms;
+            return arrOfRooms;
             break;
     }
 };

@@ -63,7 +63,7 @@ export default class Server {
                 that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));
 //todo
                 that.rest.get(/.*/, restify.serveStatic({
-                    'directory':'src/rest/ui',
+                    'directory':'./rest/ui',
                     'default':'index.html'
                 });
 

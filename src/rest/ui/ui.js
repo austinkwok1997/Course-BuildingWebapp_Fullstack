@@ -30,6 +30,104 @@ displayTableOfArrayObj=function (objArray) {
         table.appendChild(row);
     }
 };
+displaySchedule=function (objSchedule) {
+    var table=document.getElementById('chart_schedule');
+    table.innerHTML="";
+    var rooms = Object.keys(objSchedule);
+    for (var i=0;i<rooms.length;i++){
+        if (rooms[i] != "Unscheduled Courses" &&  rooms[i] != "quality" ){
+
+            // // Putting a spacer inbetween rooms
+            // var spacer=document.createElement('tr');
+            // var spaceInside=document.createElement('td');
+            // spaceInside.innerHTML="_";
+            // spacer.appendChild(spaceInside);
+            // table.appendChild(spacer);
+
+            // Putting room Name at the top
+            var roomNameRow=document.createElement('tr');
+            var roomName=document.createElement('td');
+            roomName.innerHTML=rooms[i];
+            roomNameRow.appendChild(roomName);
+
+            // Getting the Room Schedule
+            var roomSchedule = objSchedule[rooms[i]];
+            var timeslots = Object.keys(roomSchedule);
+
+            // Adding Room Capacity at the top
+            var capacityString=document.createElement('td');
+            capacityString.innerHTML=timeslots[0];
+            roomNameRow.appendChild(capacityString);
+            var capacityNumber =document.createElement('td');
+            capacityNumber.innerHTML=roomSchedule[timeslots[0]];
+            roomNameRow.appendChild(capacityNumber);
+            table.appendChild(roomNameRow);
+
+            // Creating Row for MWF
+            var MWFRow=document.createElement('tr');
+            for (var j=1; j<=9;j++){
+                if (roomSchedule[timeslots[j]] != {}) {
+                    var courseTime = document.createElement('td');
+                    courseTime.innerHTML = timeslots[j];
+                    MWFRow.appendChild(courseTime);
+                    var course = document.createElement('td');
+                    var courseObject = roomSchedule[timeslots[j]];
+                    if (courseObject && courseObject["courses_dept"]) {
+                        var courseString = courseObject["courses_dept"] + "_" + courseObject["courses_id"] + " Size:" + courseObject["maxSize"] + " Sections:" + courseObject["numOfSections"];
+                        course.innerHTML = courseString;
+                        MWFRow.appendChild(course);
+                    }
+                }
+            }
+            table.appendChild(MWFRow);
+
+            // Creating Row for TT
+            var TTRow=document.createElement('tr');
+            for (var k=10; k<=15; k++){
+                if (roomSchedule[timeslots[k]] != {}) {
+                    var courseTime = document.createElement('td');
+                    courseTime.innerHTML = timeslots[k];
+                    TTRow.appendChild(courseTime);
+                    var course = document.createElement('td');
+                    var courseObject = roomSchedule[timeslots[k]];
+                    if (courseObject && courseObject["courses_dept"]) {
+                        var courseString = courseObject["courses_dept"] + "_" + courseObject["courses_id"] + " Size:" + courseObject["maxSize"] + " Sections:" + courseObject["numOfSections"];
+                        course.innerHTML = courseString;
+                        TTRow.appendChild(course);
+                    }
+                }
+            }
+            table.appendChild(TTRow);
+        }else if(rooms[i] == "Unscheduled Courses"){
+            // Putting in the Title
+            var Ucourses=document.createElement('tr');
+            var title=document.createElement('td');
+            title.innerHTML=rooms[i];
+            Ucourses.appendChild(title);
+
+            // Inserting the rooms
+            var UcourseArray = objSchedule[rooms[i]];
+            for (var l=0; l<UcourseArray.length; l++){
+                var course=document.createElement('td');
+                var courseObject = UcourseArray[l];
+                if (courseObject && courseObject != {}) {
+                    var courseString = courseObject["courses_dept"] + "_" + courseObject["courses_id"] + " Size:" + courseObject["maxSize"] + " Sections:" + courseObject["numOfSections"];
+                    course.innerHTML = courseString;
+                    Ucourses.appendChild(course);
+                }
+            }
+            table.appendChild(Ucourses);
+        }else if (rooms[i] == "quality") {
+            var qualityRow=document.createElement('tr');
+            var qualityCell = document.createElement('td');
+            var qualityString = "quality: " + objSchedule[rooms[i]];
+            qualityCell.innerHTML=qualityString;
+            qualityRow.appendChild(qualityCell);
+            table.appendChild(qualityRow);
+
+        }
+    }
+};
 
 stringUIToFilter=function(queryToEdit,keyString, uiString,IS_expression){
     if(uiString==""){

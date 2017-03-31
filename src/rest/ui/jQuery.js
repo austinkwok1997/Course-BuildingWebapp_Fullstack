@@ -48,6 +48,9 @@ $(function(){
         var Building_name=$('#Building_name').val();
         var Building_name_expression=$('#Building_name_expression').val();
 
+        var Building_distance=$('#Building_distance').val();
+        var Building_distance_expression=$('#Building_distance_expression').val();
+
         var Room_number=$('#Room_number').val();
         var Room_number_expression=$('#Room_number_expression').val();
 
@@ -60,11 +63,11 @@ $(function(){
         var Furniture_type=$('#Furniture_type').val();
         var Furniture_type_expression=$('#Furniture_type_expression').val();
 
-        var Location=$('#Location').val();
-
         var query=queryTemplateRooms(" ");
         //TODO Locations
-        stringUIToFilter(query,"rooms_fullname",Building_name,Building_name_expression);
+        if(!(Building_distance!=""&&Building_name!=""&&Building_name_expression=="Is")) {
+            stringUIToFilter(query,"rooms_fullname",Building_name,Building_name_expression);
+        }
         stringUIToFilter(query, 'rooms_number',Room_number,Room_number_expression);
         numberUIToFilter(query,'rooms_seats',Room_size,Room_size_expression);
         stringUIToFilter(query,'rooms_type',Room_type,Room_type_expression);
@@ -78,19 +81,27 @@ $(function(){
             data: queryObjectStr,
             contentType: "application/json; charset=utf-8"
         }).done(function(Res){
-            if(Location!=""){
-                createDistance(Res.result,Location).then(function(){
-                    if(Res.result.length==0){
-                        alert("nothing found");
+            if(Building_distance!=""){
+                //todo distance string to num
+                if(Building_name!=""&&Building_name_expression=="Is") {
+                    createDistance(Res.result, Building_name).then(function (ResOfAllRooms) {
+                        if (Res.result.length == 0) {
+                            alert("nothing found");
+                            return;
+                        }
+                        var LatAndLonObjOfOriginBuilding= compareBuildingNameToFindLatAndLon(ResOfAllRooms.result,Building_name);
+                        var filterByDistArrOfRooms=filterByDistance(Res.result,Building_distance,LatAndLonObjOfOriginBuilding['lat'],LatAndLonObjOfOriginBuilding['lon'],Building_distance_expression);
+                        displayTableOfArrayObj(filterByDistArrOfRooms);
+                        console.table(filterByDistArrOfRooms);
                         return;
-                    }
-                    displayTableOfArrayObj(Res.result);
-                    console.table(Res.result);
+                    }).catch(function (e) {
+                        console.log("finding distance error: " + e);
+                        return;
+                    })
+                }else{
+                    alert("need Building full name");
                     return;
-                }).catch(function(e){
-                    console.log("finding distance error: "+e);
-                    return;
-                })
+                }
             }
             displayTableOfArrayObj(Res.result);
             console.table(Res.result);
@@ -144,7 +155,9 @@ $(function(){
                     alert("no rooms or courses by those filters");
                     return;
                 }
-                filterByDistance(arrOfRooms,schedule_distance,schedule_lat,schedule_lon,schedule_distance_expression);
+                if(schedule_distance!=""&&schedule_lat!=""&&schedule_lon!="") {
+                    var arrOfRooms = filterByDistance(arrOfRooms, schedule_distance, schedule_lat, schedule_lon, schedule_distance_expression);
+                }
                 var courseAndRoomObject={courses:arrOfCourses,rooms:arrOfRooms};
                 console.table(courseAndRoomObject);
                 var scheObj = Schedule(arrOfCourses,arrOfRooms);
@@ -153,7 +166,6 @@ $(function(){
                 alert(xhr.status+": error");
             });
         }).fail(function(xhr,textstat,errorthrown){
-            //reject(xhr.status+": error");
             alert(xhr.status+": error");
         });
         return false;

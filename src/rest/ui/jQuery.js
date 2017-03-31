@@ -147,12 +147,14 @@ $(function(){
                 filterByDistance(arrOfRooms,schedule_distance,schedule_lat,schedule_lon,schedule_distance_expression);
                 var courseAndRoomObject={courses:arrOfCourses,rooms:arrOfRooms};
                 console.table(courseAndRoomObject);
-                Schedule(arrOfCourses,arrOfRooms);
+                var scheObj = Schedule(arrOfCourses,arrOfRooms);
+                displaySchedule(scheObj);
             }).fail(function(xhr,textstat,errorthrown){
                 alert(xhr.status+": error");
             });
         }).fail(function(xhr,textstat,errorthrown){
-            reject(xhr.status+": error");
+            //reject(xhr.status+": error");
+            alert(xhr.status+": error");
         });
         return false;
     })//end of click postSchedule

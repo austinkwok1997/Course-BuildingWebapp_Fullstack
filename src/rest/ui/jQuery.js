@@ -155,6 +155,13 @@ $(function(){
             reject(xhr.status+": error");
         });
         return false;
-    })//end of click postCourses
+    })//end of click postSchedule
 
+    $('#postCalories').click(function(){
+        var distance=0;
+        var query_rooms_string=$('#rooms_field').val();
+        caloriesFeature(query_rooms_string).then(function(distance){
+            displayCaloriesObjectArr(makeCaloriesObjectArr(distance));
+        });
+    })//end of click postCalories
 });

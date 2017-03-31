@@ -56,6 +56,10 @@ export default class Server {
                 Log.info('Server::start() - start');
 
                 var facade:InsightFacade = new InsightFacade();
+                var zipContentCourses = fs.readFileSync("../courses.zip").toString("base64");
+                var zipContentRooms = fs.readFileSync("../rooms.zip").toString("base64");
+                facade.addDataset("courses", zipContentCourses);
+                facade.addDataset("rooms", zipContentRooms);
 
                 that.rest = restify.createServer({
                     name: 'insightUBC'
@@ -65,7 +69,7 @@ export default class Server {
                 that.rest.get(/.*/, restify.serveStatic({
                     'directory':'./rest/ui',
                     'default':'index.html'
-                });
+                }));
 
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
@@ -104,13 +108,14 @@ export default class Server {
                 });
                 that.rest.post('/query',function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     try {
-                        facade.performQuery(req.body).then(function(inResponse:any){
-                            console.log("put result is "+inResponse);
-                            res.json(inResponse.code, inResponse.body);
-                        }).catch(function(err){
-                            console.log(err.code +" " + err.body.text);
-                            res.send(err.code);
-                        });
+
+                                facade.performQuery(req.body).then(function (inResponse: any) {
+                                    console.log("put result is " + inResponse);
+                                    res.json(inResponse.code, inResponse.body);
+                                }).catch(function (err) {
+                                    console.log(err.code + " " + err.body.text);
+                                    res.send(err.code);
+                                });
                     }catch(err){
                         console.log(err.code +" " + err.body);
                         res.send(err.code);

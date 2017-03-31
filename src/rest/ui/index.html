@@ -82,12 +82,18 @@
     </ul>
     <ul class='inputUL'>
       <li>ROOMS</li>
-      <li><form>Building name:<input type="text" id='Building_name'></form></textarea>
+      <li><form>Building exact fullname:<input type="text" id='Building_name'></form></textarea>
         <select id="Building_name_expression">
           <option value="Is">Is</option>
           <option value="contains">Contains</option>
           <option value="begins_with">Begins With</option>
           <option value="ends_with">Ends With</option>
+        </select></li>
+
+      <li><form>Distance(m) from building:<input type="text" id='Building_distance'></form></textarea>
+        <select id="Building_distance_expression">
+          <option value="LT">Less Than</option>
+          <option value="GT">Greater Than</option>
         </select></li>
 
       <li><form>Room number:<input type="text" id='Room_number'></form></textarea>
@@ -120,8 +126,6 @@
           <option value="begins_with">Begins With</option>
           <option value="ends_with">Ends With</option>
         </select></li>
-
-      <li><form>Location:<input type="text" id='Location'></form></li>
 
       <button type="submit" class="btn-primary" id="postRooms">Submit Rooms</button>
     </ul>

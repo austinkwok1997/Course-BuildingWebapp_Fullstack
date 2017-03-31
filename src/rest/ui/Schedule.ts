@@ -11,7 +11,9 @@ var Schedule = function (courseLista: any, roomList: any): any {
     var courseList = courseLista;
     let returnObject: any = {};
     var registeredSections = 0;
+    var divideby3 = false;
     while (true) {
+        var roomUsed = false;
         let currentRoom: any = getSmallestRoom(roomList);
         let roomSchedule: any = {
             "Capacity": currentRoom["rooms_seats"],
@@ -36,8 +38,11 @@ var Schedule = function (courseLista: any, roomList: any): any {
 
         var coursesThatNeedRooms: any = [];
         for (let course of courseList) {
+            if (!divideby3) {
+                course["numOfSections"] = Math.ceil(course["numOfSections"] / 3);
+            }
             if (checkIfCourseFits(course, currentRoom) && checkIfEnoughSpaceinRoom(course, currentRoom, slotCounter)) {
-
+                roomUsed = true;
                 var num_of_slots = course["numOfSections"];
                 for (var i = 0; i < num_of_slots; i++) {
                     roomSchedule[timeSlots[slotCounter]] = course;
@@ -46,13 +51,15 @@ var Schedule = function (courseLista: any, roomList: any): any {
                 }
                 registeredSections += num_of_slots;
 
-            }else{
+            } else {
                 coursesThatNeedRooms.push(course);
             }
         }
-        console.log
+        divideby3 = true;
         courseList = coursesThatNeedRooms;
-        returnObject[currentRoom["rooms_name"]] = roomSchedule;
+        if (roomUsed) {
+            returnObject[currentRoom["rooms_name"]] = roomSchedule;
+        }
         var roomIndex = roomList.indexOf(currentRoom);
         if (roomIndex > -1) {
             roomList.splice(roomIndex, 1);
@@ -61,23 +68,26 @@ var Schedule = function (courseLista: any, roomList: any): any {
         if (courseList.length == 0 || roomList.length == 0) {
             break;
         }
+
     }
     if (courseList.length > 0) {
         returnObject["Unscheduled Courses"] = courseList;
     }
     var unregisteredSections = getNumUnregSec(courseList);
-    returnObject["quality"] = unregisteredSections + "/" + (unregisteredSections+registeredSections);
+    returnObject["quality"] = unregisteredSections + "/" + (unregisteredSections + registeredSections);
     //console.log(returnObject);
     console.log(JSON.stringify(returnObject));
     return returnObject;
+
+
 };
-var getNumUnregSec = function(courseList:any): number{
-    if (courseList.length == 0){
+var getNumUnregSec = function (courseList: any): number {
+    if (courseList.length == 0) {
         return 0;
     }
     var sum = 0;
-    for (var course of courseList){
-        sum+= course["numOfSections"];
+    for (var course of courseList) {
+        sum += course["numOfSections"];
     }
     return sum;
 }
@@ -103,188 +113,190 @@ var getSmallestRoom = function (roomList: any): any {
 var tObjectPerfectfit = Schedule([{
     "courses_dept": "cpsc",
     "courses_id": 110,
-    "courses_Size": 218,
-    "numOfSections": 3
+    "maxSize": 218,
+    "numOfSections": 9
 }, {
     "courses_dept": "cpsc",
     "courses_id": 259,
-    "courses_Size": 216,
-    "numOfSections": 1
+    "maxSize": 216,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 312,
-    "courses_Size": 159,
-    "numOfSections": 1
+    "maxSize": 159,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 301,
-    "courses_Size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 121,
-    "courses_Size": 156,
-    "numOfSections": 2
+    "maxSize": 156,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 304,
-    "courses_Size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 310,
-    "courses_Size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 313,
-    "courses_Size": 153,
-    "numOfSections": 1
+    "maxSize": 153,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 210,
-    "courses_Size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 213,
-    "courses_Size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }], [{"rooms_name": "BIOL_2000", "rooms_seats": 228}]);
 console.log(JSON.stringify(tObjectPerfectfit));
 
 var tObject2rooms = Schedule([{
     "courses_dept": "cpsc",
     "courses_id": 110,
-    "courses_Section_size": 218,
-    "numOfSections": 3
+    "maxSize": 218,
+    "numOfSections": 9
 }, {
     "courses_dept": "cpsc",
     "courses_id": 259,
-    "courses_Section_size": 216,
-    "numOfSections": 1
+    "maxSize": 216,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 312,
-    "courses_Section_size": 159,
-    "numOfSections": 1
+    "maxSize": 159,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 301,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 121,
-    "courses_Section_size": 156,
-    "numOfSections": 2
+    "maxSize": 156,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 304,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 310,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 313,
-    "courses_Section_size": 153,
-    "numOfSections": 1
+    "maxSize": 153,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 210,
-    "courses_Section_size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 213,
-    "courses_Section_size": 148,
-    "numOfSections": 2
-},{
+    "maxSize": 148,
+    "numOfSections": 6
+}, {
     "courses_dept": "math",
     "courses_id": 110,
-    "courses_Section_size": 218,
-    "numOfSections": 3
+    "maxSize": 218,
+    "numOfSections": 9
 }, {
     "courses_dept": "math",
     "courses_id": 259,
-    "courses_Section_size": 216,
-    "numOfSections": 1
+    "maxSize": 216,
+    "numOfSections": 3
 }, {
     "courses_dept": "math",
     "courses_id": 312,
-    "courses_Section_size": 159,
-    "numOfSections": 1
+    "maxSize": 159,
+    "numOfSections": 3
 }], [{"rooms_name": "BIOL_2000", "rooms_seats": 228}, {"rooms_name": "SWING_121", "rooms_seats": 228}]);
 console.log(JSON.stringify(tObject2rooms));
 
 var tObjectTooManyObjectstoFit = Schedule([{
     "courses_dept": "cpsc",
     "courses_id": 110,
-    "courses_Section_size": 218,
-    "numOfSections": 3
+    "maxSize": 218,
+    "numOfSections": 9
 }, {
     "courses_dept": "cpsc",
     "courses_id": 259,
-    "courses_Section_size": 216,
-    "numOfSections": 1
+    "maxSize": 216,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 312,
-    "courses_Section_size": 159,
-    "numOfSections": 1
+    "maxSize": 159,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 301,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 121,
-    "courses_Section_size": 156,
-    "numOfSections": 2
+    "maxSize": 156,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 304,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 310,
-    "courses_Section_size": 156,
-    "numOfSections": 1
+    "maxSize": 156,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 313,
-    "courses_Section_size": 153,
-    "numOfSections": 1
+    "maxSize": 153,
+    "numOfSections": 3
 }, {
     "courses_dept": "cpsc",
     "courses_id": 210,
-    "courses_Section_size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }, {
     "courses_dept": "cpsc",
     "courses_id": 213,
-    "courses_Section_size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }, {
     "courses_dept": "math",
     "courses_id": 313,
-    "courses_Section_size": 153,
-    "numOfSections": 1
+    "maxSize": 153,
+    "numOfSections": 3
 }, {
     "courses_dept": "math",
     "courses_id": 210,
-    "courses_Section_size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }, {
     "courses_dept": "math",
     "courses_id": 213,
-    "courses_Section_size": 148,
-    "numOfSections": 2
+    "maxSize": 148,
+    "numOfSections": 6
 }], [{"rooms_name": "BIOL_2000", "rooms_seats": 228}]);
-console.log(JSON.stringify(tObjectTooManyObjectstoFit));
+console.log(JSON.stringify(tObjectTooManyObjectstoFit))
+
+;
